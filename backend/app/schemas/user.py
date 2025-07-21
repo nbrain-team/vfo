@@ -13,7 +13,7 @@ class Entity(EntityBase):
     users: List["User"] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # User Schemas
 class UserBase(BaseModel):
@@ -27,6 +27,6 @@ class User(UserBase):
     entities: List[Entity] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 Entity.update_forward_refs() 
