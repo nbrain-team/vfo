@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Layout from './components/Layout';
+import MainLayout from './components/MainLayout';
 import Home from './components/Home';
 import LegalIQ from './components/LegalIQ';
 import AgentIQ from './components/modules/AgentIQ';
@@ -24,7 +24,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/" element={<Layout />}>
+        <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} />
           <Route path="agent" element={<AgentIQ />} />
           <Route path="legal" element={<LegalIQ />} />

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 
 const modules = [
@@ -16,12 +16,19 @@ const modules = [
     { name: 'signalIQ', path: '/signal' },
 ];
 
-const Layout: React.FC = () => {
+const MainLayout: React.FC = () => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
     return (
-        <div className="flex h-screen bg-gray-50 font-sans">
-            <div className="w-64 bg-white border-r border-gray-200">
-                <div className="flex items-center justify-center h-16 border-b border-gray-200">
-                    <h1 className="text-xl font-bold text-gray-800">AGENTIQ VFO</h1>
+        <div className="flex h-screen">
+            <div
+                className={`flex-shrink-0 bg-white border-r border-gray-200 transition-all duration-300 ${isExpanded ? 'w-64' : 'w-20'}`}
+                onMouseEnter={() => setIsExpanded(true)}
+                onMouseLeave={() => setIsExpanded(false)}
+            >
+                <div className="flex items-center justify-center h-16 border-b">
+                    <h1 className={`text-xl font-bold text-gray-800 ${!isExpanded && 'hidden'}`}>AGENTIQ</h1>
+                    <h1 className={`text-xl font-bold text-gray-800 ${isExpanded && 'hidden'}`}>A</h1>
                 </div>
                 <nav className="mt-4">
                     {modules.map(module => (
@@ -29,23 +36,17 @@ const Layout: React.FC = () => {
                             key={module.name}
                             to={module.path}
                             className={({ isActive }) =>
-                                `flex items-center px-4 py-2 text-gray-600 transition-colors duration-200 transform rounded-md hover:bg-gray-200 hover:text-gray-700 ${
-                                    isActive ? 'bg-gray-200 text-gray-800' : ''
-                                }`
+                                `flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 ${isActive ? 'bg-gray-200' : ''}`
                             }
+                            title={module.name}
                         >
-                            <span className="mx-4 font-medium">{module.name}</span>
+                            <span className="text-lg">{module.name.charAt(0)}</span>
+                            <span className={`ml-4 ${!isExpanded && 'hidden'}`}>{module.name}</span>
                         </NavLink>
                     ))}
                 </nav>
             </div>
             <div className="flex-1 flex flex-col overflow-hidden">
-                <header className="flex items-center justify-between h-16 px-6 bg-white border-b border-gray-200">
-                    <div></div>
-                    <div>
-                        {/* User profile / logout button can go here */}
-                    </div>
-                </header>
                 <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
                     <Outlet />
                 </main>
@@ -54,4 +55,4 @@ const Layout: React.FC = () => {
     );
 };
 
-export default Layout; 
+export default MainLayout; 

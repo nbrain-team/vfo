@@ -1,17 +1,38 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+* {
+    box-sizing: border-box;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+:root {
+    --primary: #313d74;
+    --primary-light: #e8eaf6;
+    --bg: #f7fafd;
+    --sidebar-bg: #ffffff;
+    --sidebar-width-collapsed: 70px;
+    --sidebar-width-expanded: 240px;
+    --card-bg: #fff;
+    --shadow: 0 2px 16px rgba(0,0,0,0.06);
+    --border: #e5e7eb;
+    --radius: 14px;
+    --gray: #64748b;
+    --gray-light: #f1f5f9;
+    --accent: #313d74;
+    --text-primary: #222;
+    --text-secondary: #4b5563;
+    --header-bg: #ffffff;
+    --icon-color: #6b7280;
+    --icon-hover-color: var(--primary);
+    --input-bg: #fff;
+    --input-border: var(--border);
+}
+
+html, body, #root {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'Inter', system-ui, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
 }
