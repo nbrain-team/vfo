@@ -15,15 +15,14 @@
   "scripts": {
     "start": "vite",
     "dev": "vite",
-    "build": "npm run build:css && vite build",
-    "serve": "vite preview",
-    "build:css": "tailwindcss -i ./src/index.css -o ./src/tailwind.css"
+    "build": "vite build",
+    "serve": "vite preview"
   },
   "engines": {
     "node": "20.x"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.4.1"
+    "vite": "^5.4.1",
+    "@vitejs/plugin-react": "^4.3.1"
   }
 }
