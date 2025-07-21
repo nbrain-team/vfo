@@ -19,7 +19,7 @@ services:
     name: agentiq-vfo-frontend
     env: node
     rootDir: frontend
-    buildCommand: "npm install && npm run build"
+    buildCommand: "rm -rf node_modules package-lock.json && npm install && npm run build"
     startCommand: "npm run serve"
     envVars:
       - key: NODE_VERSION
