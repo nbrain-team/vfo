@@ -196,3 +196,82 @@ body {
 .form-link:hover {
     text-decoration: underline;
 }
+
+/* Dashboard & Page Styles */
+.page-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.page-intro {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    max-width: 80ch;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.dashboard-card {
+    background-color: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.dashboard-card.tall-card {
+    grid-row: span 2;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.activity-list li {
+    color: var(--text-secondary);
+}
+
+.metrics-grid {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.metric-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.metric-value {
+    font-size: 1.75rem;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.metric-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
