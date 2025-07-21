@@ -6,4 +6,5 @@ psycopg2-binary
 passlib[bcrypt]
 python-jose[cryptography]
 python-multipart
-openai 
+openai
+pydantic-settings 
