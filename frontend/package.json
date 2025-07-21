@@ -15,8 +15,9 @@
   "scripts": {
     "start": "vite",
     "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview --host 0.0.0.0"
+    "build": "npm run build:css && vite build",
+    "serve": "vite preview",
+    "build:css": "tailwindcss -i ./src/index.css -o ./src/tailwind.css"
   },
   "engines": {
     "node": "20.x"
