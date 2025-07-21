@@ -24,7 +24,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
-        <div className="flex">
+        <div className="main-layout">
             <div
                 className={`sidebar ${isExpanded ? 'expanded' : ''}`}
                 onMouseEnter={() => setIsExpanded(true)}
