@@ -21,39 +21,37 @@ const Register: React.FC = () => {
     };
 
     return (
-        <div style={{ backgroundColor: 'var(--bg)' }} className="flex items-center justify-center min-h-screen">
-            <div style={{ backgroundColor: 'var(--card-bg)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow)' }} className="w-full max-w-md p-8 space-y-6">
-                <h2 style={{ color: 'var(--text-primary)' }} className="text-2xl font-bold text-center">Create an Account</h2>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label style={{ color: 'var(--text-secondary)' }} className="block text-sm font-medium">Email</label>
+        <div className="auth-page">
+            <div className="auth-card">
+                <h2 className="auth-title">Create an Account</h2>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label className="form-label">Email</label>
                         <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', borderRadius: 'var(--radius)' }}
-                            className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            className="form-input"
                             required
                         />
                     </div>
-                    <div>
-                        <label style={{ color: 'var(--text-secondary)' }} className="block text-sm font-medium">Password</label>
+                    <div className="form-group">
+                        <label className="form-label">Password</label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--input-border)', borderRadius: 'var(--radius)' }}
-                            className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            className="form-input"
                             required
                         />
                     </div>
-                    <button type="submit" style={{ backgroundColor: 'var(--primary)', borderRadius: 'var(--radius)' }} className="w-full py-2 text-white rounded-md hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <button type="submit" className="form-button">
                         Sign Up
                     </button>
                 </form>
-                {message && <p className="mt-4 text-center text-green-500">{message}</p>}
-                <p style={{ color: 'var(--gray)' }} className="mt-4 text-center">
-                    Already have an account? <Link to="/login" style={{ color: 'var(--accent)' }} className="hover:underline">Sign in</Link>
+                {message && <p style={{ marginTop: '1rem', textAlign: 'center', color: 'green' }}>{message}</p>}
+                <p style={{ marginTop: '1rem', textAlign: 'center' }}>
+                    Already have an account? <Link to="/login" className="form-link">Sign in</Link>
                 </p>
             </div>
         </div>

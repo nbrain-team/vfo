@@ -20,36 +20,30 @@ const MainLayout: React.FC = () => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
-        <div className="flex h-screen">
+        <div className="flex">
             <div
-                className={`flex-shrink-0 bg-white border-r border-gray-200 transition-all duration-300 ${isExpanded ? 'w-64' : 'w-20'}`}
+                className={`sidebar ${isExpanded ? 'expanded' : ''}`}
                 onMouseEnter={() => setIsExpanded(true)}
                 onMouseLeave={() => setIsExpanded(false)}
             >
-                <div className="flex items-center justify-center h-16 border-b">
-                    <h1 className={`text-xl font-bold text-gray-800 ${!isExpanded && 'hidden'}`}>AGENTIQ</h1>
-                    <h1 className={`text-xl font-bold text-gray-800 ${isExpanded && 'hidden'}`}>A</h1>
+                <div className="sidebar-logo">
+                    <h1 className="sidebar-nav-label">{isExpanded ? 'AGENTIQ' : 'A'}</h1>
                 </div>
-                <nav className="mt-4">
+                <nav className="sidebar-nav-group">
                     {modules.map(module => (
                         <NavLink
                             key={module.name}
                             to={module.path}
-                            className={({ isActive }) =>
-                                `flex items-center px-4 py-2 text-gray-600 hover:bg-gray-200 ${isActive ? 'bg-gray-200' : ''}`
-                            }
+                            className="sidebar-nav-item"
                             title={module.name}
                         >
-                            <span className="text-lg">{module.name.charAt(0)}</span>
-                            <span className={`ml-4 ${!isExpanded && 'hidden'}`}>{module.name}</span>
+                            <span className="sidebar-nav-label">{module.name}</span>
                         </NavLink>
                     ))}
                 </nav>
             </div>
-            <div className="flex-1 flex flex-col overflow-hidden">
-                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
-                    <Outlet />
-                </main>
+            <div className={`content-area ${isExpanded ? 'expanded' : ''}`}>
+                <Outlet />
             </div>
         </div>
     );
