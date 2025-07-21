@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from app.db.db_init import init_db
 from app.api.api import router as api_router
 from app.api.legal import router as legal_router
+from app.api.agent import router as agent_router
 
 app = FastAPI(title="AGENTIQ VFO")
 
@@ -11,6 +12,7 @@ def on_startup():
 
 app.include_router(api_router, prefix="/api")
 app.include_router(legal_router, prefix="/api/legal", tags=["legal"])
+app.include_router(agent_router, prefix="/api/agent", tags=["agent"])
 
 @app.get("/")
 def read_root():

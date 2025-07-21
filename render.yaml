@@ -2,6 +2,7 @@ services:
   - type: web
     name: agentiq-vfo-backend
     env: python
+    rootDir: backend
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     envVars:
@@ -9,14 +10,17 @@ services:
         fromDatabase:
           name: agentiq-vfo-db
           property: connectionString
+      - key: OPENAI_API_KEY
+        sync: false
     buildFilter:
       paths:
       - backend/**
   - type: web
     name: agentiq-vfo-frontend
     env: node
+    rootDir: frontend
     buildCommand: "npm install && npm run build"
-    startCommand: "npm start"
+    startCommand: "npx serve -s build"
     buildFilter:
       paths:
       - frontend/**
