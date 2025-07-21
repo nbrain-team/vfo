@@ -15,7 +15,7 @@ const Login: React.FC = () => {
         params.append('password', password);
 
         try {
-            const response = await apiClient.post('token', params, {
+            const response = await apiClient.post('/token', params, {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 }
