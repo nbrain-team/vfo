@@ -21,14 +21,13 @@ interface MainLayoutProps {
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(true); // Changed to true - always expanded
 
     return (
         <div className="main-layout">
             <div
                 className={`sidebar ${isExpanded ? 'expanded' : ''}`}
-                onMouseEnter={() => setIsExpanded(true)}
-                onMouseLeave={() => setIsExpanded(false)}
+                // Removed onMouseEnter and onMouseLeave
             >
                 <div className="sidebar-logo">
                     <h1 className="sidebar-nav-label">{isExpanded ? 'AGENTIQ' : 'A'}</h1>

@@ -1,11 +1,19 @@
 import React from 'react';
+import ModuleTemplate from './ModuleTemplate';
 
 const PromptIQ: React.FC = () => {
     return (
-        <div>
-            <h1 className="text-2xl font-bold">promptIQ</h1>
-            <p>prompt chain builder, bulk prompt library</p>
-        </div>
+        <ModuleTemplate 
+            title="promptIQ" 
+            description="AI prompt engineering and workflow automation"
+        >
+            <div className="module-grid">
+                <div className="module-card">
+                    <h3 className="card-title">Prompt Library</h3>
+                    <p>AI prompt management features coming soon...</p>
+                </div>
+            </div>
+        </ModuleTemplate>
     );
 };
 

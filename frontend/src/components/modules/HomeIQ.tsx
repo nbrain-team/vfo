@@ -1,11 +1,19 @@
 import React from 'react';
+import ModuleTemplate from './ModuleTemplate';
 
 const HomeIQ: React.FC = () => {
     return (
-        <div>
-            <h1 className="text-2xl font-bold">homeIQ</h1>
-            <p>family ops: scheduling, lifestyle, governance docs</p>
-        </div>
+        <ModuleTemplate 
+            title="homeIQ" 
+            description="Property management and household operations"
+        >
+            <div className="module-grid">
+                <div className="module-card">
+                    <h3 className="card-title">Property Overview</h3>
+                    <p>Property management features coming soon...</p>
+                </div>
+            </div>
+        </ModuleTemplate>
     );
 };
 
