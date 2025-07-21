@@ -20,7 +20,7 @@ services:
     env: node
     rootDir: frontend
     buildCommand: "npm install && npm run build"
-    startCommand: "npx serve -s build"
+    startCommand: "npm run serve"
     envVars:
       - key: NODE_VERSION
         value: "20"
