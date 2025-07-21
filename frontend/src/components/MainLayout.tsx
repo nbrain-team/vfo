@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import React, { useState, ReactNode } from 'react';
+import { NavLink } from 'react-router-dom';
 
 const modules = [
     { name: 'agentIQ', path: '/agent' },
@@ -16,7 +16,11 @@ const modules = [
     { name: 'signalIQ', path: '/signal' },
 ];
 
-const MainLayout: React.FC = () => {
+interface MainLayoutProps {
+  children: ReactNode;
+}
+
+const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
@@ -43,7 +47,7 @@ const MainLayout: React.FC = () => {
                 </nav>
             </div>
             <div className={`content-area ${isExpanded ? 'expanded' : ''}`}>
-                <Outlet />
+                {children}
             </div>
         </div>
     );
