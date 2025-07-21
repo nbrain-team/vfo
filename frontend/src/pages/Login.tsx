@@ -15,9 +15,9 @@ const Login: React.FC = () => {
         params.append('password', password);
 
         try {
-            const response = await apiClient.post('/api/token', params);
+            const response = await apiClient.post('/token', params);
             localStorage.setItem('access_token', response.data.access_token);
-            navigate('/');
+            navigate('/platform');
         } catch (error) {
             setMessage('Invalid credentials. Please try again.');
             console.error(error);
