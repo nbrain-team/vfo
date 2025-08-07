@@ -2,6 +2,7 @@ import React, { useState, ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 
 const modules = [
+    { name: 'Dashboard', path: '/platform' },
     { name: 'agentIQ', path: '/agent' },
     { name: 'legalIQ', path: '/legal' },
     { name: 'riskIQ', path: '/risk' },
@@ -21,24 +22,22 @@ interface MainLayoutProps {
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-    const [isExpanded, setIsExpanded] = useState(true); // Changed to true - always expanded
+    const [isExpanded, setIsExpanded] = useState(true);
 
     return (
         <div className="main-layout">
-            <div
-                className={`sidebar ${isExpanded ? 'expanded' : ''}`}
-                // Removed onMouseEnter and onMouseLeave
-            >
+            <div className={`sidebar ${isExpanded ? 'expanded' : ''}`}>
                 <div className="sidebar-logo">
-                    <h1 className="sidebar-nav-label">{isExpanded ? 'AGENTIQ' : 'A'}</h1>
+                    <h1>LIFTed VFO</h1>
                 </div>
                 <nav className="sidebar-nav-group">
                     {modules.map(module => (
                         <NavLink
                             key={module.name}
                             to={module.path}
-                            className="sidebar-nav-item"
-                            title={module.name}
+                            className={({ isActive }) => 
+                                `sidebar-nav-item ${isActive ? 'active' : ''}`
+                            }
                         >
                             <span className="sidebar-nav-label">{module.name}</span>
                         </NavLink>
