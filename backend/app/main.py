@@ -4,6 +4,7 @@ from app.db.db_init import init_db
 from app.api.api import router as api_router
 from app.api.legal import router as legal_router
 from app.api.agent import router as agent_router
+from app.api.chat import router as chat_router
 
 app = FastAPI(title="LIFTed VFO API", version="1.0.0")
 
@@ -23,6 +24,7 @@ def on_startup():
 app.include_router(api_router, prefix="/api")
 app.include_router(legal_router, prefix="/api/legal", tags=["legal"])
 app.include_router(agent_router, prefix="/api/agent", tags=["agent"])
+app.include_router(chat_router, prefix="/api/chat", tags=["chat"])
 
 @app.get("/")
 def read_root():

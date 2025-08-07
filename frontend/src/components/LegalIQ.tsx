@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import apiClient from '../apiClient';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import DocumentChat from './DocumentChat';
 
 interface Document {
     id: number;
@@ -186,7 +187,7 @@ const LegalIQ: React.FC = () => {
 
             {/* Tabs */}
             <div style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
-                {['vault', 'extraction', 'compliance', 'analytics'].map(tab => (
+                {['vault', 'extraction', 'compliance', 'analytics', 'chat'].map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
@@ -197,6 +198,7 @@ const LegalIQ: React.FC = () => {
                         {tab === 'extraction' && '🤖 AI Extraction'}
                         {tab === 'compliance' && '✅ Compliance'}
                         {tab === 'analytics' && '📊 Analytics'}
+                        {tab === 'chat' && '💬 AI Chat'}
                     </button>
                 ))}
             </div>
@@ -596,6 +598,22 @@ const LegalIQ: React.FC = () => {
                                 </div>
                             ))}
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* AI Chat Tab */}
+            {activeTab === 'chat' && (
+                <div className="module-grid">
+                    <div className="module-card" style={{ gridColumn: 'span 2' }}>
+                        <h3 className="section-title">Intelligent Document Q&A</h3>
+                        <p style={{ color: 'var(--text-secondary)', marginBottom: '20px', fontSize: '14px' }}>
+                            Chat with your legal documents using GPT-4o. Ask questions about trust provisions, 
+                            compliance requirements, key dates, or any other information in your documents.
+                        </p>
+                        <DocumentChat 
+                            contextType="legal"
+                        />
                     </div>
                 </div>
             )}

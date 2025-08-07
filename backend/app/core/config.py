@@ -2,13 +2,28 @@ import os
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    DATABASE_URL: str
-    SECRET_KEY: str = "a_very_secret_key"
+    DATABASE_URL: str = "postgresql://user:password@db/vfo_db"
+    SECRET_KEY: str = "your-secret-key-here"
+    ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    OPENAI_API_KEY: str = "your_openai_api_key_here"
-
+    
+    # OpenAI Configuration
+    OPENAI_API_KEY: str = ""
+    OPENAI_MODEL: str = "gpt-4o"
+    OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
+    
+    # Pinecone Configuration
+    PINECONE_API_KEY: str = ""
+    PINECONE_ENVIRONMENT: str = ""
+    PINECONE_INDEX_NAME: str = "vfo-documents"
+    PINECONE_DIMENSION: int = 1536  # Dimension for text-embedding-3-small
+    
+    # Document Processing
+    CHUNK_SIZE: int = 1000
+    CHUNK_OVERLAP: int = 200
+    MAX_SEARCH_RESULTS: int = 5
+    
     class Config:
         env_file = ".env"
-        env_file_encoding = 'utf-8'
 
 settings = Settings() 
