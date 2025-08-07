@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from typing import List
-from app.db.database import SessionLocal
-from app.db.agent import create_agent, get_agents, get_agent
+from typing import List, Optional
+from app.db.database import get_db
+from app.db import agent as crud_agent
 from app.schemas.agent import Agent, AgentCreate
 from app.api.api import get_current_user
 from app.models.user import User as UserModel
@@ -13,13 +13,6 @@ from app.core.config import settings
 router = APIRouter()
 openai.api_key = settings.OPENAI_API_KEY
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 class ChatRequest(BaseModel):
     message: str
 
@@ -29,7 +22,7 @@ def handle_create_agent(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user)
 ):
-    return create_agent(db=db, agent=agent)
+    return crud_agent.create_agent(db=db, agent=agent)
 
 @router.get("/agents/", response_model=List[Agent])
 def handle_get_agents(
@@ -38,7 +31,7 @@ def handle_get_agents(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user)
 ):
-    return get_agents(db=db, skip=skip, limit=limit)
+    return crud_agent.get_agents(db=db, skip=skip, limit=limit)
 
 @router.post("/agents/{agent_id}/chat")
 async def chat_with_agent(
@@ -47,7 +40,7 @@ async def chat_with_agent(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user)
 ):
-    agent = get_agent(db=db, agent_id=agent_id)
+    agent = crud_agent.get_agent(db=db, agent_id=agent_id)
     if not agent:
         raise HTTPException(status_code=404, detail="Agent not found")
 

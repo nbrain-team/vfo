@@ -4,7 +4,7 @@ from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from app.db import crud
 from app.schemas.user import User, UserCreate, Entity, EntityCreate
-from app.db.database import SessionLocal
+from app.db.database import get_db
 from app.core.security import create_access_token, ALGORITHM, verify_password
 from app.core.config import settings
 from datetime import timedelta
@@ -16,13 +16,6 @@ router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
 # Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

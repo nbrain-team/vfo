@@ -1,35 +1,36 @@
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import List
-from app.db.database import SessionLocal
-from app.db.legal import create_document, get_documents_by_entity
+from app.db.database import get_db
+from app.db import legal as crud_legal
 from app.schemas.legal import Document, DocumentCreate
 from app.api.api import get_current_user
 from app.models.user import User as UserModel
 
 router = APIRouter()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 @router.post("/entities/{entity_id}/documents/", response_model=Document)
 def upload_document_for_entity(
     entity_id: int,
-    document: DocumentCreate = Depends(),
     file: UploadFile = File(...),
+    name: str = Form(...),
+    type: str = Form(...),
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
-    return create_document(db=db, document=document, entity_id=entity_id, file=file)
+    # Save file and create document record
+    doc_create = DocumentCreate(
+        name=name,
+        type=type,
+        entity_id=entity_id,
+        file_path=f"uploads/{file.filename}"
+    )
+    return crud_legal.create_document(db=db, document=doc_create)
 
 @router.get("/entities/{entity_id}/documents/", response_model=List[Document])
-def read_documents_for_entity(
+def get_entity_documents(
     entity_id: int,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
-    return get_documents_by_entity(db=db, entity_id=entity_id) 
+    return crud_legal.get_documents_by_entity(db=db, entity_id=entity_id) 
