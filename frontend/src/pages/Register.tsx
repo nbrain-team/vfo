@@ -18,7 +18,7 @@ const Register: React.FC = () => {
         }
 
         try {
-            await apiClient.post('/register', {
+            await apiClient.post('/users/', {
                 email,
                 password
             });
