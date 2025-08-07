@@ -1,20 +1,10 @@
 import React, { useState, ReactNode } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 const modules = [
-    { name: 'Dashboard', path: '/platform' },
-    { name: 'agentIQ', path: '/agent' },
-    { name: 'legalIQ', path: '/legal' },
-    { name: 'riskIQ', path: '/risk' },
-    { name: 'wealthIQ', path: '/wealth' },
-    { name: 'trustIQ', path: '/trust' },
-    { name: 'cryptoIQ', path: '/crypto' },
-    { name: 'taxIQ', path: '/tax' },
-    { name: 'assetIQ', path: '/asset' },
-    { name: 'healthIQ', path: '/health' },
-    { name: 'homeIQ', path: '/home' },
-    { name: 'promptIQ', path: '/prompt' },
-    { name: 'signalIQ', path: '/signal' },
+    { name: 'Dashboard', path: '/platform', icon: '📊' },
+    { name: 'agentIQ', path: '/agent', icon: '🤖' },
+    { name: 'legalIQ', path: '/legal', icon: '⚖️' },
 ];
 
 interface MainLayoutProps {
@@ -23,6 +13,13 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     const [isExpanded, setIsExpanded] = useState(true);
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('user_name');
+        navigate('/login');
+    };
 
     return (
         <div className="main-layout">
@@ -43,6 +40,29 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                         </NavLink>
                     ))}
                 </nav>
+                <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid var(--border)' }}>
+                    <NavLink
+                        to="/profile"
+                        className={({ isActive }) => 
+                            `sidebar-nav-item ${isActive ? 'active' : ''}`
+                        }
+                    >
+                        <span className="sidebar-nav-label">Profile</span>
+                    </NavLink>
+                    <button
+                        onClick={handleLogout}
+                        className="sidebar-nav-item"
+                        style={{ 
+                            width: '100%', 
+                            border: 'none', 
+                            background: 'transparent',
+                            textAlign: 'left',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <span className="sidebar-nav-label">Logout</span>
+                    </button>
+                </div>
             </div>
             <div className={`content-area ${isExpanded ? 'expanded' : ''}`}>
                 {children}

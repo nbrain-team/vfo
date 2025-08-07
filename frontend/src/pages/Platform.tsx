@@ -1,10 +1,22 @@
 import React from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 
 const Platform: React.FC = () => {
     const userName = localStorage.getItem('user_name') || 'there';
     const currentHour = new Date().getHours();
     const greeting = currentHour < 12 ? 'Good morning' : currentHour < 18 ? 'Good afternoon' : 'Good evening';
     
+    // Mock data for the chart
+    const chartData = [
+        { month: 'Jan', value: 245000000 },
+        { month: 'Feb', value: 248000000 },
+        { month: 'Mar', value: 252000000 },
+        { month: 'Apr', value: 255000000 },
+        { month: 'May', value: 259000000 },
+        { month: 'Jun', value: 262000000 },
+        { month: 'Jul', value: 266245267 },
+    ];
+
     return (
         <div className="page-container">
             <div className="page-header">
@@ -46,18 +58,34 @@ const Platform: React.FC = () => {
                                 <button className="time-button">MAX</button>
                             </div>
                         </div>
-                        <div style={{ 
-                            height: '300px', 
-                            background: 'linear-gradient(180deg, rgba(40,167,69,0.1) 0%, rgba(40,167,69,0) 100%)',
-                            borderRadius: '8px',
-                            display: 'flex',
-                            alignItems: 'flex-end',
-                            justifyContent: 'center',
-                            color: '#6a737d',
-                            fontSize: '14px'
-                        }}>
-                            Chart visualization will be added here
-                        </div>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <AreaChart data={chartData}>
+                                <defs>
+                                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#28a745" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#28a745" stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                <XAxis dataKey="month" stroke="#6a737d" />
+                                <YAxis 
+                                    stroke="#6a737d" 
+                                    tickFormatter={(value) => `$${(value / 1000000).toFixed(0)}M`}
+                                />
+                                <Tooltip 
+                                    formatter={(value: any) => `$${(value / 1000000).toFixed(2)}M`}
+                                    labelStyle={{ color: '#24292e' }}
+                                />
+                                <Area 
+                                    type="monotone" 
+                                    dataKey="value" 
+                                    stroke="#28a745" 
+                                    strokeWidth={2}
+                                    fillOpacity={1} 
+                                    fill="url(#colorValue)" 
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
                     </div>
 
                     <div className="accounts-section">

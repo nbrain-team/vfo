@@ -6,19 +6,10 @@ import Platform from './pages/Platform';
 import ProtectedRoute from './components/ProtectedRoute';
 import MainLayout from './components/MainLayout';
 
-// Import all module components
+// Import only the modules we're keeping
 import AgentIQ from './components/modules/AgentIQ';
 import LegalIQ from './components/LegalIQ';
-import RiskIQ from './components/modules/RiskIQ';
-import WealthIQ from './components/modules/WealthIQ';
-import TrustIQ from './components/modules/TrustIQ';
-import CryptoIQ from './components/modules/CryptoIQ';
-import TaxIQ from './components/modules/TaxIQ';
-import AssetIQ from './components/modules/AssetIQ';
-import HealthIQ from './components/modules/HealthIQ';
-import HomeIQ from './components/modules/HomeIQ';
-import PromptIQ from './components/modules/PromptIQ';
-import SignalIQ from './components/modules/SignalIQ';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -42,54 +33,9 @@ function App() {
               <LegalIQ />
             </MainLayout>
           } />
-          <Route path="/risk" element={
+          <Route path="/profile" element={
             <MainLayout>
-              <RiskIQ />
-            </MainLayout>
-          } />
-          <Route path="/wealth" element={
-            <MainLayout>
-              <WealthIQ />
-            </MainLayout>
-          } />
-          <Route path="/trust" element={
-            <MainLayout>
-              <TrustIQ />
-            </MainLayout>
-          } />
-          <Route path="/crypto" element={
-            <MainLayout>
-              <CryptoIQ />
-            </MainLayout>
-          } />
-          <Route path="/tax" element={
-            <MainLayout>
-              <TaxIQ />
-            </MainLayout>
-          } />
-          <Route path="/asset" element={
-            <MainLayout>
-              <AssetIQ />
-            </MainLayout>
-          } />
-          <Route path="/health" element={
-            <MainLayout>
-              <HealthIQ />
-            </MainLayout>
-          } />
-          <Route path="/home" element={
-            <MainLayout>
-              <HomeIQ />
-            </MainLayout>
-          } />
-          <Route path="/prompt" element={
-            <MainLayout>
-              <PromptIQ />
-            </MainLayout>
-          } />
-          <Route path="/signal" element={
-            <MainLayout>
-              <SignalIQ />
+              <Profile />
             </MainLayout>
           } />
         </Route>
