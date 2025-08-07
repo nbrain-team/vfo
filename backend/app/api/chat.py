@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from app.db.database import get_db
-from app.core.security import get_current_user
+from app.api.api import get_current_user
 from app.models.user import User
 from app.services.rag_chat import get_rag_chat_service
 from app.services.document_processor import get_document_processor
