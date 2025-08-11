@@ -10,11 +10,11 @@ import MainLayout from './components/MainLayout';
 import AgentIQ from './components/modules/AgentIQ';
 import LegalIQ from './components/LegalIQ';
 import ValuesIQ from './components/modules/ValuesIQ';
+import WealthIQ from './components/modules/WealthIQ';
+import InsuranceIQ from './components/modules/InsuranceIQ';
 import Profile from './pages/Profile';
 
-// Placeholder components for new modules (to be implemented)
-const InsuranceIQ = () => <div className="page-container"><h1>insuranceIQ - Coming Soon</h1></div>;
-const WealthIQ = () => <div className="page-container"><h1>wealthIQ - Coming Soon</h1></div>;
+// Placeholder components for modules still to be implemented
 const TaxIQ = () => <div className="page-container"><h1>taxIQ - Coming Soon</h1></div>;
 const CryptoIQ = () => <div className="page-container"><h1>cryptoIQ - Coming Soon</h1></div>;
 const HealthIQ = () => <div className="page-container"><h1>healthIQ - Coming Soon</h1></div>;
