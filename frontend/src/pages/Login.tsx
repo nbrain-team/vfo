@@ -21,11 +21,9 @@ const Login: React.FC = () => {
                 }
             });
             localStorage.setItem('access_token', response.data.access_token);
-            // Store user name if available
-            if (email) {
-                const userName = email.split('@')[0];
-                localStorage.setItem('user_name', userName);
-            }
+            // Store user name from response, fallback to email prefix
+            const userName = response.data.user_name || email.split('@')[0];
+            localStorage.setItem('user_name', userName);
             navigate('/platform');
         } catch (error) {
             setMessage('Invalid credentials. Please try again.');

@@ -5,6 +5,13 @@ const modules = [
     { name: 'Dashboard', path: '/platform', icon: '📊' },
     { name: 'agentIQ', path: '/agent', icon: '🤖' },
     { name: 'legalIQ', path: '/legal', icon: '⚖️' },
+    { name: 'insuranceIQ', path: '/insurance', icon: '🛡️' },
+    { name: 'wealthIQ', path: '/wealth', icon: '💰' },
+    { name: 'taxIQ', path: '/tax', icon: '📋' },
+    { name: 'cryptoIQ', path: '/crypto', icon: '₿' },
+    { name: 'valuesIQ', path: '/values', icon: '🎯' },
+    { name: 'healthIQ', path: '/health', icon: '🏥' },
+    { name: 'vCTO', path: '/vcto', icon: '🚀' },
 ];
 
 interface MainLayoutProps {

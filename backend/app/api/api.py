@@ -47,7 +47,12 @@ def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2Passw
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    # Include user's name in the response
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "user_name": user.name if hasattr(user, 'name') and user.name else user.email.split('@')[0]
+    }
 
 @router.get("/users/me", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_user)):
