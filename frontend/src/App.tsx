@@ -14,11 +14,10 @@ import WealthIQ from './components/modules/WealthIQ';
 import InsuranceIQ from './components/modules/InsuranceIQ';
 import TaxIQ from './components/modules/TaxIQ';
 import CryptoIQ from './components/modules/CryptoIQ';
+import HealthIQ from './components/modules/HealthIQ';
+import VCTO from './components/modules/VCTO';
 import Profile from './pages/Profile';
-
-// Placeholder components for modules still to be implemented
-const HealthIQ = () => <div className="page-container"><h1>healthIQ - Coming Soon</h1></div>;
-const VCTO = () => <div className="page-container"><h1>vCTO - Coming Soon</h1></div>;
+import Documentation from './pages/Documentation';
 
 function App() {
   return (
@@ -80,6 +79,11 @@ function App() {
           <Route path="/profile" element={
             <MainLayout>
               <Profile />
+            </MainLayout>
+          } />
+          <Route path="/docs" element={
+            <MainLayout>
+              <Documentation />
             </MainLayout>
           } />
         </Route>

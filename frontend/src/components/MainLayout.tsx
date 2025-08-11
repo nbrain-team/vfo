@@ -49,8 +49,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 </nav>
                 <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid var(--border)' }}>
                     <NavLink
+                        to="/docs"
+                        className={({ isActive }) =>
+                            `sidebar-nav-item ${isActive ? 'active' : ''}`
+                        }
+                    >
+                        <span className="sidebar-nav-label">Documentation</span>
+                    </NavLink>
+                    <NavLink
                         to="/profile"
-                        className={({ isActive }) => 
+                        className={({ isActive }) =>
                             `sidebar-nav-item ${isActive ? 'active' : ''}`
                         }
                     >
