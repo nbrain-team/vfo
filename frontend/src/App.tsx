@@ -12,11 +12,11 @@ import LegalIQ from './components/LegalIQ';
 import ValuesIQ from './components/modules/ValuesIQ';
 import WealthIQ from './components/modules/WealthIQ';
 import InsuranceIQ from './components/modules/InsuranceIQ';
+import TaxIQ from './components/modules/TaxIQ';
+import CryptoIQ from './components/modules/CryptoIQ';
 import Profile from './pages/Profile';
 
 // Placeholder components for modules still to be implemented
-const TaxIQ = () => <div className="page-container"><h1>taxIQ - Coming Soon</h1></div>;
-const CryptoIQ = () => <div className="page-container"><h1>cryptoIQ - Coming Soon</h1></div>;
 const HealthIQ = () => <div className="page-container"><h1>healthIQ - Coming Soon</h1></div>;
 const VCTO = () => <div className="page-container"><h1>vCTO - Coming Soon</h1></div>;
 
