@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Welcome from './pages/Welcome';
 import Platform from './pages/Platform';
 import ProtectedRoute from './components/ProtectedRoute';
 import MainLayout from './components/MainLayout';
@@ -26,6 +27,11 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route element={<ProtectedRoute />}>
+          <Route path="/welcome" element={
+            <MainLayout>
+              <Welcome />
+            </MainLayout>
+          } />
           <Route path="/platform" element={
             <MainLayout>
               <Platform />
@@ -87,7 +93,7 @@ function App() {
             </MainLayout>
           } />
         </Route>
-        <Route path="/" element={<Navigate to="/platform" />} />
+        <Route path="/" element={<Navigate to="/welcome" />} />
       </Routes>
     </Router>
   );

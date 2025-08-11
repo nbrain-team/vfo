@@ -31,7 +31,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     return (
         <div className="main-layout">
             <div className={`sidebar ${isExpanded ? 'expanded' : ''}`}>
-                <div className="sidebar-logo">
+                <div 
+                    className="sidebar-logo"
+                    onClick={() => navigate('/welcome')}
+                    style={{ cursor: 'pointer' }}
+                >
                     <h1>LIFTed VFO</h1>
                 </div>
                 <nav className="sidebar-nav-group">

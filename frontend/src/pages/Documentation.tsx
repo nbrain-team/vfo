@@ -692,31 +692,6 @@ const Documentation: React.FC = () => {
                     </div>
                 </section>
 
-                {/* Contact & Support */}
-                <section style={{ marginBottom: '40px' }}>
-                    <h2 style={{ fontSize: '28px', marginBottom: '16px', borderBottom: '2px solid var(--border)', paddingBottom: '8px' }}>
-                        Contact & Support
-                    </h2>
-
-                    <div style={{ padding: '24px', background: 'var(--bg)', borderRadius: '8px' }}>
-                        <div style={{ marginBottom: '16px' }}>
-                            <strong>Technical Support:</strong> support@liftedvfo.com
-                        </div>
-                        <div style={{ marginBottom: '16px' }}>
-                            <strong>Sales Inquiries:</strong> sales@liftedvfo.com
-                        </div>
-                        <div style={{ marginBottom: '16px' }}>
-                            <strong>Data Protection Officer:</strong> privacy@liftedvfo.com
-                        </div>
-                        <div style={{ marginBottom: '16px' }}>
-                            <strong>Phone:</strong> 858.883.7529
-                        </div>
-                        <div>
-                            <strong>Address:</strong> LIFTed VFO, San Diego, CA
-                        </div>
-                    </div>
-                </section>
-
                 {/* Version Information */}
                 <section style={{ marginBottom: '40px' }}>
                     <h2 style={{ fontSize: '28px', marginBottom: '16px', borderBottom: '2px solid var(--border)', paddingBottom: '8px' }}>

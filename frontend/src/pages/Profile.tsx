@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 
 const Profile: React.FC = () => {
-    const userName = localStorage.getItem('user_name') || 'User';
+    const storedUserName = localStorage.getItem('user_name') || 'User';
     const [activeTab, setActiveTab] = useState('personal');
+    
+    // Personal info state
+    const [userName, setUserName] = useState(storedUserName);
+    const [email, setEmail] = useState('user@example.com');
+    const [phone, setPhone] = useState('+1 (555) 123-4567');
+    const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+    
     const [privacyConsent, setPrivacyConsent] = useState({
         emotionalData: true,
         behavioralData: true,
@@ -10,6 +17,15 @@ const Profile: React.FC = () => {
         marketingData: false
     });
     const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+
+    const handleSavePersonalInfo = () => {
+        // Save to localStorage
+        localStorage.setItem('user_name', userName);
+        
+        // Show success message
+        setShowSaveSuccess(true);
+        setTimeout(() => setShowSaveSuccess(false), 3000);
+    };
 
     const privacyPolicyText = `LIFTed VFO – Privacy Policy and Consent for Emotional and Behavioral Data
 
@@ -87,6 +103,19 @@ privacy@liftedvfo.com
     const renderPersonalInfo = () => (
         <div className="chart-card">
             <h3 style={{ fontSize: '16px', marginBottom: '20px' }}>Personal Information</h3>
+            {showSaveSuccess && (
+                <div style={{
+                    padding: '12px',
+                    background: '#22c55e15',
+                    border: '1px solid #22c55e',
+                    borderRadius: '6px',
+                    marginBottom: '16px',
+                    color: '#22c55e',
+                    fontSize: '14px'
+                }}>
+                    ✓ Changes saved successfully!
+                </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div>
                     <label style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
@@ -94,7 +123,8 @@ privacy@liftedvfo.com
                     </label>
                     <input
                         type="text"
-                        defaultValue={userName}
+                        value={userName}
+                        onChange={(e) => setUserName(e.target.value)}
                         style={{
                             width: '100%',
                             padding: '8px 12px',
@@ -111,7 +141,8 @@ privacy@liftedvfo.com
                     </label>
                     <input
                         type="email"
-                        defaultValue="user@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                         style={{
                             width: '100%',
                             padding: '8px 12px',
@@ -128,7 +159,8 @@ privacy@liftedvfo.com
                     </label>
                     <input
                         type="tel"
-                        defaultValue="+1 (555) 123-4567"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
                         style={{
                             width: '100%',
                             padding: '8px 12px',
@@ -159,29 +191,39 @@ privacy@liftedvfo.com
                     />
                 </div>
             </div>
-            
+
             <div style={{ marginTop: '24px' }}>
-                <button style={{
-                    padding: '10px 20px',
-                    background: 'var(--primary)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    marginRight: '12px'
-                }}>
+                <button 
+                    onClick={handleSavePersonalInfo}
+                    style={{
+                        padding: '10px 20px',
+                        background: 'var(--primary)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        marginRight: '12px'
+                    }}
+                >
                     Save Changes
                 </button>
-                <button style={{
-                    padding: '10px 20px',
-                    background: 'transparent',
-                    color: 'var(--primary)',
-                    border: '1px solid var(--primary)',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '14px'
-                }}>
+                <button 
+                    onClick={() => {
+                        setUserName(storedUserName);
+                        setEmail('user@example.com');
+                        setPhone('+1 (555) 123-4567');
+                    }}
+                    style={{
+                        padding: '10px 20px',
+                        background: 'transparent',
+                        color: 'var(--primary)',
+                        border: '1px solid var(--primary)',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                    }}
+                >
                     Cancel
                 </button>
             </div>

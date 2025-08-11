@@ -24,7 +24,7 @@ const Login: React.FC = () => {
             // Store user name from response, fallback to email prefix
             const userName = response.data.user_name || email.split('@')[0];
             localStorage.setItem('user_name', userName);
-            navigate('/platform');
+            navigate('/welcome');
         } catch (error) {
             setMessage('Invalid credentials. Please try again.');
             console.error(error);
