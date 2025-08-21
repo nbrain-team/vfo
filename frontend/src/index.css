@@ -94,46 +94,45 @@ body {
 
 .sidebar-nav-group {
     flex: 1;
-    padding: 12px;
+    padding: 12px 0;
     overflow-y: auto;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
 }
 
 .sidebar-nav-item {
     display: flex;
     align-items: center;
-    justify-content: center;
-    padding: 10px 12px;
+    padding: 10px 20px;
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
     transition: all 0.15s ease;
     position: relative;
-    background-color: var(--gray-light);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
 }
 
 .sidebar-nav-item:hover {
     color: var(--text-primary);
-    background-color: var(--primary-light);
-    border-color: var(--primary);
+    background-color: var(--gray-light);
 }
 
 .sidebar-nav-item.active {
     color: var(--primary);
     background-color: var(--primary-light);
-    border-color: var(--primary);
 }
 
-.sidebar-nav-item.active::before { content: none; }
+.sidebar-nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: var(--primary);
+}
 
 .sidebar-nav-label {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 /* Content Area */

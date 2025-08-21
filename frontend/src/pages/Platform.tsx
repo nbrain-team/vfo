@@ -122,9 +122,10 @@ const Platform: React.FC = () => {
         <div className="page-container">
             <div className="page-header">
                 <h1 className="page-greeting">{greeting}, {userName}</h1>
+                
             </div>
 
-            {/* Removed Liberation Journey & legacy scores */}
+            
 
             {/* Admin KPIs */}
             <div className="summary-row" style={{ marginBottom: '24px' }}>
@@ -146,125 +147,97 @@ const Platform: React.FC = () => {
                 </div>
             </div>
 
-            <div className="dashboard-grid">
-                <div className="dashboard-left">
-                    {/* Website & Funnel Analytics */}
-                    <div className="chart-card">
-                        <h3 style={{ fontSize: '16px', marginBottom: '20px' }}>Website & Funnel Analytics</h3>
-                        <ResponsiveContainer width="100%" height={260}>
-                            <LineChart data={analytics}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                                <XAxis dataKey="month" stroke="var(--text-secondary)" />
-                                <YAxis stroke="var(--text-secondary)" />
-                                <Tooltip contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '8px' }} />
-                                <Line type="monotone" dataKey="traffic" stroke="var(--primary)" strokeWidth={2} name="Site Traffic" />
-                                <Line type="monotone" dataKey="booked" stroke="#C07C3D" strokeWidth={2} name="Booked Leads" />
-                                <Line type="monotone" dataKey="revenue" stroke="#DCA85E" strokeWidth={2} name="Closed Deals ($)" />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </div>
-
-                    {/* Global Timeline */}
-                    <div className="module-card" style={{ marginTop: '20px' }}>
-                        <h3 className="section-title">Global Timeline</h3>
-                        <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
-                            {timeline.map((e, idx) => (
-                                <li key={idx} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
-                                    <div style={{ fontSize: 13 }}>{e.text}</div>
-                                    <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{e.time ? new Date(e.time).toLocaleString() : ''}</div>
-                                </li>
-                            ))}
-                            {timeline.length === 0 && (
-                                <li style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No recent activity.</li>
-                            )}
-                        </ul>
-                    </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <div className="module-card">
+                    <h3 className="section-title">Executive Daily Brief</h3>
+                    <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
+                        <li style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>2 consults scheduled today</li>
+                        <li style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>1 engagement draft pending approval</li>
+                        <li style={{ padding: '8px 0' }}>Nurture “Lead → Paid Consult” active</li>
+                    </ul>
                 </div>
 
-                <div className="dashboard-right">
-                    {/* Advisor Daily Brief */}
-                    <div className="module-card">
-                        <h3 className="section-title">Advisor Daily Brief</h3>
-                        <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
-                            <li style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>2 consults scheduled today</li>
-                            <li style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>1 engagement draft pending approval</li>
-                            <li style={{ padding: '8px 0' }}>Nurture “Lead → Paid Consult” active</li>
-                        </ul>
-                    </div>
+                <div className="module-card">
+                    <h3 className="section-title">Next 24 Hours of Appointments</h3>
+                    <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
+                        {next24.map(ev => (
+                            <li key={ev.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                                <div style={{ fontSize: 13 }}><strong>{ev.name}</strong> — {ev.pkg}</div>
+                                <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{ev.slot} ({new Date(ev.appointmentAt || '').toLocaleString()})</div>
+                            </li>
+                        ))}
+                        {next24.length === 0 && (
+                            <li style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No upcoming appointments.</li>
+                        )}
+                    </ul>
+                </div>
 
-                    {/* Next 24 Hours */}
-                    <div className="module-card" style={{ marginTop: '20px' }}>
-                        <h3 className="section-title">Next 24 Hours</h3>
-                        <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
-                            {next24.map(ev => (
-                                <li key={ev.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
-                                    <div style={{ fontSize: 13 }}><strong>{ev.name}</strong> — {ev.pkg}</div>
-                                    <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{ev.slot} ({new Date(ev.appointmentAt || '').toLocaleString()})</div>
-                                </li>
-                            ))}
-                            {next24.length === 0 && (
-                                <li style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No upcoming appointments.</li>
-                            )}
-                        </ul>
-                    </div>
+                <div className="module-card">
+                    <h3 className="section-title">Important Tasks</h3>
+                    <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
+                        {tasks.map(t => (
+                            <li key={t.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                                <span>{t.label}</span>
+                                <span className="status-badge pending">{t.status}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
 
-                    {/* Top Opportunities */}
-                    <div className="module-card" style={{ marginTop: '20px' }}>
-                        <h3 className="section-title">Top Opportunities</h3>
-                        <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
-                            {topOpps.map(op => (
-                                <li key={op.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
-                                    <div style={{ fontSize: 13 }}><strong>{op.name}</strong> — {op.pkg}</div>
-                                    <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Stage: {op.stage}</div>
-                                </li>
-                            ))}
-                            {topOpps.length === 0 && (
-                                <li style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No current opportunities.</li>
-                            )}
-                        </ul>
-                    </div>
-                    {/* Alerts */}
-                    <div className="module-card">
-                        <h3 className="section-title">Alerts</h3>
-                        <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
-                            {alerts.map(a => (
-                                <li key={a.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
-                                    <strong>{a.type}:</strong> {a.text}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                <div className="module-card">
+                    <h3 className="section-title">Closing Soon</h3>
+                    <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
+                        {topOpps.map(op => (
+                            <li key={op.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                                <div style={{ fontSize: 13 }}><strong>{op.name}</strong> — {op.pkg}</div>
+                                <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Stage: {op.stage}</div>
+                            </li>
+                        ))}
+                        {topOpps.length === 0 && (
+                            <li style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No current opportunities.</li>
+                        )}
+                    </ul>
+                </div>
 
-                    {/* Tasks */}
-                    <div className="module-card" style={{ marginTop: '20px' }}>
-                        <h3 className="section-title">Tasks</h3>
-                        <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
-                            {tasks.map(t => (
-                                <li key={t.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
-                                    <span>{t.label}</span>
-                                    <span className="status-badge pending">{t.status}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                <div className="module-card" style={{ gridColumn: '1 / -1' }}>
+                    <h3 className="section-title">Website & Funnel Analytics</h3>
+                    <ResponsiveContainer width="100%" height={260}>
+                        <LineChart data={analytics}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                            <XAxis dataKey="month" stroke="var(--text-secondary)" />
+                            <YAxis stroke="var(--text-secondary)" />
+                            <Tooltip contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '8px' }} />
+                            <Line type="monotone" dataKey="traffic" stroke="var(--primary)" strokeWidth={2} name="Site Traffic" />
+                            <Line type="monotone" dataKey="booked" stroke="#C07C3D" strokeWidth={2} name="Booked Leads" />
+                            <Line type="monotone" dataKey="revenue" stroke="#DCA85E" strokeWidth={2} name="Closed Deals ($)" />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
 
-                    {/* Removed legacy right-side visual cards */}
+                <div className="module-card">
+                    <h3 className="section-title">Alerts</h3>
+                    <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
+                        {alerts.map(a => (
+                            <li key={a.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                                <strong>{a.type}:</strong> {a.text}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
 
-                    {/* Global Timeline */}
-                    <div className="module-card" style={{ marginTop: '20px' }}>
-                        <h3 className="section-title">Global Timeline</h3>
-                        <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
-                            {timeline.map((e, idx) => (
-                                <li key={idx} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
-                                    <div style={{ fontSize: 13 }}>{e.text}</div>
-                                    <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{e.time ? new Date(e.time).toLocaleString() : ''}</div>
-                                </li>
-                            ))}
-                            {timeline.length === 0 && (
-                                <li style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No recent activity.</li>
-                            )}
-                        </ul>
-                    </div>
+                <div className="module-card">
+                    <h3 className="section-title">Global Timeline</h3>
+                    <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
+                        {timeline.map((e, idx) => (
+                            <li key={idx} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                                <div style={{ fontSize: 13 }}>{e.text}</div>
+                                <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{e.time ? new Date(e.time).toLocaleString() : ''}</div>
+                            </li>
+                        ))}
+                        {timeline.length === 0 && (
+                            <li style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No recent activity.</li>
+                        )}
+                    </ul>
                 </div>
             </div>
         </div>
