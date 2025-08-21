@@ -1,6 +1,7 @@
 export type Booking = {
   id: string;
   createdAt: string;
+  appointmentAt?: string;
   name: string;
   email: string;
   guests: string[];
@@ -126,6 +127,7 @@ export function seedMockDataIfEmpty() {
     {
       id: 'seed-1',
       createdAt: fmt(now - 2 * 24 * 60 * 60 * 1000),
+      appointmentAt: fmt(now + 6 * 60 * 60 * 1000),
       name: 'Jane Smith',
       email: 'jane@example.com',
       guests: ['paul@example.com'],
@@ -147,6 +149,7 @@ export function seedMockDataIfEmpty() {
     {
       id: 'seed-2',
       createdAt: fmt(now - 5 * 24 * 60 * 60 * 1000),
+      appointmentAt: fmt(now + 20 * 60 * 60 * 1000),
       name: 'Michael Johnson',
       email: 'michael@example.com',
       guests: [],
@@ -170,6 +173,7 @@ export function seedMockDataIfEmpty() {
     {
       id: 'seed-3',
       createdAt: fmt(now - 9 * 24 * 60 * 60 * 1000),
+      appointmentAt: fmt(now + 50 * 60 * 60 * 1000),
       name: 'Ava Martinez',
       email: 'ava@example.com',
       guests: [],

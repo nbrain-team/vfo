@@ -95,6 +95,29 @@ const Platform: React.FC = () => {
         .sort((a, b) => Date.parse(b.time || '') - Date.parse(a.time || ''))
         .slice(0, 10);
 
+    // Next 24 hours appointments
+    const next24 = bookings.filter(b => {
+        const ts = Date.parse(b.appointmentAt || '');
+        return !isNaN(ts) && ts > now && ts < now + 24 * 60 * 60 * 1000;
+    }).sort((a, b) => Date.parse(a.appointmentAt || '') - Date.parse(b.appointmentAt || ''));
+
+    // Top Opportunities (simple heuristic: stage not Signed/Completed, sorted by createdAt)
+    const topOpps = bookings
+        .filter(b => b.stage !== 'Signed' && b.stage !== 'Completed')
+        .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt))
+        .slice(0, 5);
+
+    // Analytics graph (mock)
+    const analytics = [
+        { month: 'Jan', traffic: 1200, booked: 8, revenue: 1500 },
+        { month: 'Feb', traffic: 1400, booked: 10, revenue: 1875 },
+        { month: 'Mar', traffic: 1800, booked: 13, revenue: 2430 },
+        { month: 'Apr', traffic: 2100, booked: 15, revenue: 2810 },
+        { month: 'May', traffic: 2500, booked: 18, revenue: 3375 },
+        { month: 'Jun', traffic: 2700, booked: 20, revenue: 3750 },
+        { month: 'Jul', traffic: 3000, booked: 24, revenue: 4520 }
+    ];
+
     return (
         <div className="page-container">
             <div className="page-header">
@@ -252,6 +275,47 @@ const Platform: React.FC = () => {
                 </div>
 
                 <div className="dashboard-right">
+                    {/* Advisor Daily Brief */}
+                    <div className="module-card">
+                        <h3 className="section-title">Advisor Daily Brief</h3>
+                        <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
+                            <li style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>2 consults scheduled today</li>
+                            <li style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>1 engagement draft pending approval</li>
+                            <li style={{ padding: '8px 0' }}>Nurture “Lead → Paid Consult” active</li>
+                        </ul>
+                    </div>
+
+                    {/* Next 24 Hours */}
+                    <div className="module-card" style={{ marginTop: '20px' }}>
+                        <h3 className="section-title">Next 24 Hours</h3>
+                        <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
+                            {next24.map(ev => (
+                                <li key={ev.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                                    <div style={{ fontSize: 13 }}><strong>{ev.name}</strong> — {ev.pkg}</div>
+                                    <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{ev.slot} ({new Date(ev.appointmentAt || '').toLocaleString()})</div>
+                                </li>
+                            ))}
+                            {next24.length === 0 && (
+                                <li style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No upcoming appointments.</li>
+                            )}
+                        </ul>
+                    </div>
+
+                    {/* Top Opportunities */}
+                    <div className="module-card" style={{ marginTop: '20px' }}>
+                        <h3 className="section-title">Top Opportunities</h3>
+                        <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
+                            {topOpps.map(op => (
+                                <li key={op.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                                    <div style={{ fontSize: 13 }}><strong>{op.name}</strong> — {op.pkg}</div>
+                                    <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Stage: {op.stage}</div>
+                                </li>
+                            ))}
+                            {topOpps.length === 0 && (
+                                <li style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No current opportunities.</li>
+                            )}
+                        </ul>
+                    </div>
                     {/* Alerts */}
                     <div className="module-card">
                         <h3 className="section-title">Alerts</h3>
@@ -365,44 +429,20 @@ const Platform: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Quick Actions */}
+                    {/* Analytics */}
                     <div className="chart-card" style={{ marginTop: '20px' }}>
-                        <h3 style={{ fontSize: '16px', marginBottom: '16px' }}>Recommended Actions</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <button style={{
-                                padding: '12px',
-                                background: 'var(--primary)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                fontSize: '14px'
-                            }}>
-                                Complete Money Map Assessment
-                            </button>
-                            <button style={{
-                                padding: '12px',
-                                background: 'transparent',
-                                color: 'var(--primary)',
-                                border: '1px solid var(--primary)',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                fontSize: '14px'
-                            }}>
-                                Review Crypto Tax Strategy
-                            </button>
-                            <button style={{
-                                padding: '12px',
-                                background: 'transparent',
-                                color: 'var(--primary)',
-                                border: '1px solid var(--primary)',
-                                borderRadius: '8px',
-                                cursor: 'pointer',
-                                fontSize: '14px'
-                            }}>
-                                Update Cash Flow Forecast
-                            </button>
-                        </div>
+                        <h3 style={{ fontSize: '16px', marginBottom: '20px' }}>Website & Funnel Analytics</h3>
+                        <ResponsiveContainer width="100%" height={220}>
+                            <LineChart data={analytics}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                                <XAxis dataKey="month" stroke="var(--text-secondary)" />
+                                <YAxis stroke="var(--text-secondary)" />
+                                <Tooltip contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '8px' }} />
+                                <Line type="monotone" dataKey="traffic" stroke="var(--primary)" strokeWidth={2} name="Site Traffic" />
+                                <Line type="monotone" dataKey="booked" stroke="#C07C3D" strokeWidth={2} name="Booked Meetings" />
+                                <Line type="monotone" dataKey="revenue" stroke="#DCA85E" strokeWidth={2} name="Revenue ($)" />
+                            </LineChart>
+                        </ResponsiveContainer>
                     </div>
 
                     {/* Global Timeline */}
