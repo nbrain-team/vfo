@@ -4,6 +4,7 @@ import { getSiteConfig, saveSiteConfig } from '../../adminData';
 
 const SiteBuilderAdmin: React.FC = () => {
   const initial = getSiteConfig();
+  const [previewKey, setPreviewKey] = useState<number>(Date.now());
   const [videoUrl, setVideoUrl] = useState(initial.videoUrl || 'https://drive.google.com/file/d/1otkNyA5S8AaIv_QW0J2sjtIFCqpf9P5K/preview');
   const [logoPath, setLogoPath] = useState(initial.logoPath || '/wy-apt-logo.png');
   const [logoDataUrl, setLogoDataUrl] = useState(initial.logoDataUrl || '');
@@ -108,7 +109,23 @@ const SiteBuilderAdmin: React.FC = () => {
                 <span>Require payment before scheduling (placeholder)</span>
               </div>
             </div>
-            <button className="form-button" style={{ width: 'auto' }} onClick={() => saveSiteConfig({ videoUrl, logoPath, logoDataUrl, headline, subhead, ctaText, ctaHref, primaryColor, goldStart, goldEnd, images, paywallEnabled })}>Save</button>
+            <button className="form-button" style={{ width: 'auto' }} onClick={() => {
+              saveSiteConfig({ videoUrl, logoPath, logoDataUrl, headline, subhead, ctaText, ctaHref, primaryColor, goldStart, goldEnd, images, paywallEnabled });
+              setPreviewKey(Date.now());
+            }}>Save</button>
+          </div>
+        </div>
+
+        <div className="module-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 className="section-title">Live Preview</h3>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="button-outline" style={{ width: 'auto' }} onClick={() => setPreviewKey(Date.now())}>Refresh</button>
+              <a href="/wyoming-apt" target="_blank" rel="noreferrer" className="button-outline" style={{ textDecoration: 'none', width: 'auto' }}>Open in New Tab</a>
+            </div>
+          </div>
+          <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', background: 'var(--card-bg)' }}>
+            <iframe title="Public Site Preview" key={previewKey} src={`/wyoming-apt?ts=${previewKey}`} style={{ width: '100%', height: '720px', border: 'none' }} />
           </div>
         </div>
 
