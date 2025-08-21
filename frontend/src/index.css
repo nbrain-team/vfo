@@ -3,10 +3,10 @@
 }
 
 :root {
-    --primary: #0066ff;
-    --primary-light: #e6f0ff;
-    --primary-hover: #0052cc;
-    --bg: #f8f9fa;
+    --primary: #3C4630; /* Forest Green */
+    --primary-light: #E9EDE4; /* light forest */
+    --primary-hover: #2F3726; /* darker forest */
+    --bg: #F8F4EC; /* Light Sand */
     --sidebar-bg: #ffffff;
     --sidebar-width-collapsed: 60px;
     --sidebar-width-expanded: 220px;
@@ -24,9 +24,9 @@
     --success-light: #d4edda;
     --danger: #dc3545;
     --danger-light: #f8d7da;
-    --text-primary: #24292e;
-    --text-secondary: #586069;
-    --text-muted: #6a737d;
+    --text-primary: #1E1E1E; /* Charcoal */
+    --text-secondary: #5C5C5C; /* Slate Grey */
+    --text-muted: #7A7A7A;
     --header-bg: #ffffff;
     --icon-color: #6a737d;
     --icon-hover-color: var(--primary);
@@ -505,16 +505,16 @@ body {
     padding: 10px 16px;
     border: none;
     border-radius: var(--radius);
-    background: var(--primary);
-    color: white;
+    background: linear-gradient(135deg, #DCA85E, #C07C3D);
+    color: #FFFFFF;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.15s ease;
 }
 
 .form-button:hover {
-    background: var(--primary-hover);
+    filter: brightness(0.95);
 }
 
 .form-link {

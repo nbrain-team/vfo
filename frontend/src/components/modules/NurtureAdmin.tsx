@@ -17,6 +17,9 @@ const NurtureAdmin: React.FC = () => {
 
   return (
     <ModuleTemplate title="Nurture Sequences" description="Configure email/SMS sequences (mock toggles).">
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+        <button className="form-button" style={{ width: 'auto' }}>Create New Sequence</button>
+      </div>
       <div className="module-grid">
         {seqs.map(s => (
           <div key={s.id} className="module-card">
