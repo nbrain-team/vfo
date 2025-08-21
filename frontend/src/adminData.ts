@@ -116,4 +116,85 @@ export function updateNurtureSequence(id: string, patch: Partial<NurtureSequence
   saveNurtureSequences(seqs);
 }
 
+// Seed mock data for a complete admin experience
+export function seedMockDataIfEmpty() {
+  const existing = getBookings();
+  if (existing.length > 0) return;
+  const now = Date.now();
+  const fmt = (ms: number) => new Date(ms).toISOString();
+  const seed: Booking[] = [
+    {
+      id: 'seed-1',
+      createdAt: fmt(now - 2 * 24 * 60 * 60 * 1000),
+      name: 'Jane Smith',
+      email: 'jane@example.com',
+      guests: ['paul@example.com'],
+      pkg: 'consult-30',
+      slot: 'Wed 11:30 AM MT',
+      referralSource: 'Google / Search',
+      stateOfResidence: 'Colorado',
+      citizenship: 'yes',
+      maritalStatus: 'Married',
+      priority: ['Asset protection'],
+      assetTypes: ['Real estate', 'Investments (stocks, bonds, funds)'],
+      urgency: 'Within 1–2 weeks',
+      assetValueRange: '$1M – $5M',
+      phone: '+1 (555) 234-5678',
+      price: { amount: 375, currency: 'USD' },
+      stage: 'Booked',
+      docs: []
+    },
+    {
+      id: 'seed-2',
+      createdAt: fmt(now - 5 * 24 * 60 * 60 * 1000),
+      name: 'Michael Johnson',
+      email: 'michael@example.com',
+      guests: [],
+      pkg: 'wy-apt-assess',
+      slot: 'Thu 9:00 AM MT',
+      referralSource: 'Referral',
+      stateOfResidence: 'Wyoming',
+      citizenship: 'yes',
+      maritalStatus: 'Single',
+      priority: ['Tax efficiency', 'Legacy planning'],
+      assetTypes: ['Business interests', 'Cash or cash equivalents'],
+      urgency: 'Immediately',
+      assetValueRange: '$5M – $10M',
+      phone: '+1 (555) 345-6789',
+      price: { amount: 375, currency: 'USD' },
+      stage: 'Signed',
+      docs: [
+        { id: 'doc-1', title: 'Engagement Letter (Signed).pdf', type: 'pdf', createdAt: fmt(now - 3 * 24 * 60 * 60 * 1000), url: '#' }
+      ]
+    },
+    {
+      id: 'seed-3',
+      createdAt: fmt(now - 9 * 24 * 60 * 60 * 1000),
+      name: 'Ava Martinez',
+      email: 'ava@example.com',
+      guests: [],
+      pkg: 'consult-60',
+      slot: 'Fri 1:00 PM MT',
+      referralSource: 'YouTube',
+      stateOfResidence: 'California',
+      citizenship: 'other',
+      citizenshipOther: 'Green card holder',
+      maritalStatus: 'Divorced',
+      priority: ['Asset protection'],
+      assetTypes: ['Bitcoin and Cryptocurrency holdings', 'Intellectual Property'],
+      urgency: 'Exploring options',
+      assetValueRange: '$500k – $1M',
+      phone: '+1 (555) 987-6543',
+      price: { amount: 375, currency: 'USD' },
+      stage: 'New',
+      docs: []
+    }
+  ];
+  saveBookings(seed);
+  // Also ensure nurture defaults present
+  getNurtureSequences();
+  // Ensure site config has defaults
+  saveSiteConfig({ logoPath: '/wy-apt-logo.png', videoUrl: 'https://drive.google.com/file/d/1otkNyA5S8AaIv_QW0J2sjtIFCqpf9P5K/preview' });
+}
+
 
