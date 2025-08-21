@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar, PolarAngleAxis, BarChart, Bar, Cell } from 'recharts';
+import { getBookings } from '../adminData';
 
 // Liberation Journey Stages
 const JOURNEY_STAGES = ['Obscured', 'Awakening', 'Stabilizing', 'Liberating', 'Regenerative'];
@@ -61,6 +62,38 @@ const Platform: React.FC = () => {
             default: return '#94a3b8';
         }
     };
+
+    // Admin KPIs from mock bookings
+    const bookings = useMemo(() => getBookings(), []);
+    const kpiTotalLeads = bookings.length;
+    const kpiBooked = bookings.filter(b => b.stage === 'Booked').length;
+    const kpiSigned = bookings.filter(b => b.stage === 'Signed' || b.stage === 'Completed').length;
+    const now = Date.now();
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+    const kpiNewThisWeek = bookings.filter(b => {
+        const ts = Date.parse(b.createdAt || '');
+        return !isNaN(ts) && (now - ts) < sevenDaysMs;
+    }).length;
+
+    // Tasks (mock) + generated tasks
+    const tasks = [
+        { id: 't1', label: 'Review this week\'s bookings', status: 'Pending' },
+        { id: 't2', label: 'Approve engagement draft for latest lead', status: 'Pending' },
+        { id: 't3', label: 'Prepare onboarding packet', status: 'Queued' },
+        ...bookings.slice(0, 3).map(b => ({ id: b.id, label: `Prepare engagement letter for ${b.name}`, status: 'Pending' }))
+    ];
+
+    // Alerts (mock)
+    const alerts = [
+        { id: 'a1', type: 'Payment', text: 'Consult fee pending (placeholder)', severity: 'info' },
+        { id: 'a2', type: 'Signature', text: 'Engagement letter not sent for 2 new leads', severity: 'warn' }
+    ];
+
+    // Global Timeline (mock from bookings)
+    const timeline = bookings
+        .map(b => ({ time: b.createdAt, text: `New booking: ${b.name} — ${b.pkg}` }))
+        .sort((a, b) => Date.parse(b.time || '') - Date.parse(a.time || ''))
+        .slice(0, 10);
 
     return (
         <div className="page-container">
@@ -128,6 +161,26 @@ const Platform: React.FC = () => {
                         </div>
                         <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Modules Optimized</div>
                     </div>
+                </div>
+            </div>
+
+            {/* Admin KPIs */}
+            <div className="summary-row" style={{ marginBottom: '24px' }}>
+                <div className="summary-card">
+                    <div className="summary-label">Total Leads</div>
+                    <div className="summary-value">{kpiTotalLeads}</div>
+                </div>
+                <div className="summary-card">
+                    <div className="summary-label">Booked</div>
+                    <div className="summary-value">{kpiBooked}</div>
+                </div>
+                <div className="summary-card">
+                    <div className="summary-label">Signed</div>
+                    <div className="summary-value">{kpiSigned}</div>
+                </div>
+                <div className="summary-card">
+                    <div className="summary-label">New (7d)</div>
+                    <div className="summary-value">{kpiNewThisWeek}</div>
                 </div>
             </div>
 
@@ -199,6 +252,31 @@ const Platform: React.FC = () => {
                 </div>
 
                 <div className="dashboard-right">
+                    {/* Alerts */}
+                    <div className="module-card">
+                        <h3 className="section-title">Alerts</h3>
+                        <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
+                            {alerts.map(a => (
+                                <li key={a.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                                    <strong>{a.type}:</strong> {a.text}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Tasks */}
+                    <div className="module-card" style={{ marginTop: '20px' }}>
+                        <h3 className="section-title">Tasks</h3>
+                        <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
+                            {tasks.map(t => (
+                                <li key={t.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                                    <span>{t.label}</span>
+                                    <span className="status-badge pending">{t.status}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
                     {/* Money Dysmorphia Assessment */}
                     <div className="chart-card">
                         <h3 style={{ fontSize: '16px', marginBottom: '20px' }}>Money Dysmorphia Indicators</h3>
@@ -325,6 +403,22 @@ const Platform: React.FC = () => {
                                 Update Cash Flow Forecast
                             </button>
                         </div>
+                    </div>
+
+                    {/* Global Timeline */}
+                    <div className="module-card" style={{ marginTop: '20px' }}>
+                        <h3 className="section-title">Global Timeline</h3>
+                        <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
+                            {timeline.map((e, idx) => (
+                                <li key={idx} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                                    <div style={{ fontSize: 13 }}>{e.text}</div>
+                                    <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{e.time ? new Date(e.time).toLocaleString() : ''}</div>
+                                </li>
+                            ))}
+                            {timeline.length === 0 && (
+                                <li style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No recent activity.</li>
+                            )}
+                        </ul>
                     </div>
                 </div>
             </div>
