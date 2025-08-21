@@ -1,10 +1,18 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import ModuleTemplate from './ModuleTemplate';
-import { getBookings, updateBooking, Booking } from '../../adminData';
+import { getBookings, updateBooking, Booking, seedMockDataIfEmpty } from '../../adminData';
 
 const CRMAdmin: React.FC = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const bookings = useMemo(() => getBookings(), []);
+  const [bookingsState, setBookingsState] = useState(getBookings());
+  useEffect(() => {
+    if (bookingsState.length === 0) {
+      seedMockDataIfEmpty();
+      setBookingsState(getBookings());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const bookings = useMemo(() => bookingsState, [bookingsState]);
   const selected = bookings.find(b => b.id === selectedId);
 
   return (
@@ -34,6 +42,11 @@ const CRMAdmin: React.FC = () => {
                     <td><span className="status-badge active">{b.stage}</span></td>
                   </tr>
                 ))}
+                {bookings.length === 0 && (
+                  <tr>
+                    <td colSpan={4} style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No leads yet.</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
