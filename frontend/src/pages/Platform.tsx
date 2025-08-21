@@ -122,70 +122,9 @@ const Platform: React.FC = () => {
         <div className="page-container">
             <div className="page-header">
                 <h1 className="page-greeting">{greeting}, {userName}</h1>
-                <p style={{ color: 'var(--text-secondary)', marginTop: '8px' }}>
-                    Your Liberation Journey: <strong style={{ color: 'var(--primary)' }}>{journeyStage}</strong>
-                </p>
             </div>
 
-            {/* Liberation Journey Visual */}
-            <div style={{ 
-                background: 'var(--card-bg)', 
-                borderRadius: '12px', 
-                padding: '24px',
-                marginBottom: '24px',
-                boxShadow: 'var(--shadow)'
-            }}>
-                <h2 style={{ fontSize: '18px', marginBottom: '20px' }}>Your Financial Liberation Journey</h2>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-                    {journeyProgress.map((stage, index) => (
-                        <div key={stage.stage} style={{ flex: 1 }}>
-                            <div style={{ 
-                                height: '8px', 
-                                background: '#e5e7eb',
-                                borderRadius: '4px',
-                                overflow: 'hidden'
-                            }}>
-                                <div style={{
-                                    width: `${stage.completed}%`,
-                                    height: '100%',
-                                    background: stage.color,
-                                    transition: 'width 0.3s ease'
-                                }}/>
-                            </div>
-                            <p style={{ 
-                                fontSize: '11px', 
-                                marginTop: '8px',
-                                textAlign: 'center',
-                                color: stage.stage === journeyStage ? 'var(--primary)' : 'var(--text-secondary)'
-                            }}>
-                                {stage.stage}
-                            </p>
-                        </div>
-                    ))}
-                </div>
-                
-                {/* Key Metrics Row */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-                    <div style={{ textAlign: 'center', padding: '16px', background: 'var(--bg)', borderRadius: '8px' }}>
-                        <div style={{ fontSize: '32px', fontWeight: 'bold', color: 'var(--primary)' }}>
-                            {liberationScore}%
-                        </div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Liberation Score</div>
-                    </div>
-                    <div style={{ textAlign: 'center', padding: '16px', background: 'var(--bg)', borderRadius: '8px' }}>
-                        <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#22c55e' }}>
-                            {selfMasteryScore}%
-                        </div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Self-Mastery Score</div>
-                    </div>
-                    <div style={{ textAlign: 'center', padding: '16px', background: 'var(--bg)', borderRadius: '8px' }}>
-                        <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#f59e0b' }}>
-                            7/9
-                        </div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Modules Optimized</div>
-                    </div>
-                </div>
-            </div>
+            {/* Removed Liberation Journey & legacy scores */}
 
             {/* Admin KPIs */}
             <div className="summary-row" style={{ marginBottom: '24px' }}>
@@ -208,69 +147,37 @@ const Platform: React.FC = () => {
             </div>
 
             <div className="dashboard-grid">
-                {/* Module Scores */}
                 <div className="dashboard-left">
+                    {/* Website & Funnel Analytics */}
                     <div className="chart-card">
-                        <h3 style={{ fontSize: '16px', marginBottom: '20px' }}>Module Health Scores</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            {moduleScores.map(module => (
-                                <div key={module.name} style={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center',
-                                    padding: '12px',
-                                    background: 'var(--bg)',
-                                    borderRadius: '8px',
-                                    border: '1px solid var(--border)'
-                                }}>
-                                    <div style={{ 
-                                        width: '8px', 
-                                        height: '8px', 
-                                        borderRadius: '50%',
-                                        background: getStatusColor(module.status),
-                                        marginRight: '12px'
-                                    }}/>
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ fontWeight: '500' }}>{module.name}</div>
-                                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                                            {module.description}
-                                        </div>
-                                    </div>
-                                    <div style={{ 
-                                        fontSize: '18px', 
-                                        fontWeight: 'bold',
-                                        color: getStatusColor(module.status)
-                                    }}>
-                                        {module.score}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Liberation Trend Chart */}
-                    <div className="chart-card" style={{ marginTop: '20px' }}>
-                        <h3 style={{ fontSize: '16px', marginBottom: '20px' }}>Liberation Score Trend</h3>
-                        <ResponsiveContainer width="100%" height={200}>
-                            <LineChart data={liberationTrend}>
+                        <h3 style={{ fontSize: '16px', marginBottom: '20px' }}>Website & Funnel Analytics</h3>
+                        <ResponsiveContainer width="100%" height={260}>
+                            <LineChart data={analytics}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                                 <XAxis dataKey="month" stroke="var(--text-secondary)" />
                                 <YAxis stroke="var(--text-secondary)" />
-                                <Tooltip 
-                                    contentStyle={{ 
-                                        background: 'var(--card-bg)', 
-                                        border: '1px solid var(--border)',
-                                        borderRadius: '8px'
-                                    }}
-                                />
-                                <Line 
-                                    type="monotone" 
-                                    dataKey="score" 
-                                    stroke="var(--primary)" 
-                                    strokeWidth={2}
-                                    dot={{ fill: 'var(--primary)' }}
-                                />
+                                <Tooltip contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '8px' }} />
+                                <Line type="monotone" dataKey="traffic" stroke="var(--primary)" strokeWidth={2} name="Site Traffic" />
+                                <Line type="monotone" dataKey="booked" stroke="#C07C3D" strokeWidth={2} name="Booked Leads" />
+                                <Line type="monotone" dataKey="revenue" stroke="#DCA85E" strokeWidth={2} name="Closed Deals ($)" />
                             </LineChart>
                         </ResponsiveContainer>
+                    </div>
+
+                    {/* Global Timeline */}
+                    <div className="module-card" style={{ marginTop: '20px' }}>
+                        <h3 className="section-title">Global Timeline</h3>
+                        <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
+                            {timeline.map((e, idx) => (
+                                <li key={idx} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                                    <div style={{ fontSize: 13 }}>{e.text}</div>
+                                    <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{e.time ? new Date(e.time).toLocaleString() : ''}</div>
+                                </li>
+                            ))}
+                            {timeline.length === 0 && (
+                                <li style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No recent activity.</li>
+                            )}
+                        </ul>
                     </div>
                 </div>
 
@@ -341,109 +248,7 @@ const Platform: React.FC = () => {
                         </ul>
                     </div>
 
-                    {/* Money Dysmorphia Assessment */}
-                    <div className="chart-card">
-                        <h3 style={{ fontSize: '16px', marginBottom: '20px' }}>Money Dysmorphia Indicators</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            {Object.entries(dysmorphiaIndicators).map(([key, value]) => (
-                                <div key={key}>
-                                    <div style={{ 
-                                        display: 'flex', 
-                                        justifyContent: 'space-between',
-                                        marginBottom: '4px'
-                                    }}>
-                                        <span style={{ fontSize: '14px', textTransform: 'capitalize' }}>
-                                            {key.replace(/([A-Z])/g, ' $1').trim()}
-                                        </span>
-                                        <span style={{ 
-                                            fontSize: '14px', 
-                                            fontWeight: 'bold',
-                                            color: value > 50 ? '#ef4444' : value > 30 ? '#f59e0b' : '#22c55e'
-                                        }}>
-                                            {value}%
-                                        </span>
-                                    </div>
-                                    <div style={{ 
-                                        height: '6px', 
-                                        background: '#e5e7eb',
-                                        borderRadius: '3px',
-                                        overflow: 'hidden'
-                                    }}>
-                                        <div style={{
-                                            width: `${value}%`,
-                                            height: '100%',
-                                            background: value > 50 ? '#ef4444' : value > 30 ? '#f59e0b' : '#22c55e',
-                                            transition: 'width 0.3s ease'
-                                        }}/>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Values Alignment */}
-                    <div className="chart-card" style={{ marginTop: '20px' }}>
-                        <h3 style={{ fontSize: '16px', marginBottom: '20px' }}>Values Alignment</h3>
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{ 
-                                width: '120px', 
-                                height: '120px',
-                                margin: '0 auto 16px',
-                                position: 'relative'
-                            }}>
-                                <svg width="120" height="120">
-                                    <circle
-                                        cx="60"
-                                        cy="60"
-                                        r="50"
-                                        fill="none"
-                                        stroke="#e5e7eb"
-                                        strokeWidth="10"
-                                    />
-                                    <circle
-                                        cx="60"
-                                        cy="60"
-                                        r="50"
-                                        fill="none"
-                                        stroke="var(--primary)"
-                                        strokeWidth="10"
-                                        strokeDasharray={`${2 * Math.PI * 50 * 0.78} ${2 * Math.PI * 50}`}
-                                        strokeDashoffset="0"
-                                        transform="rotate(-90 60 60)"
-                                    />
-                                </svg>
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '50%',
-                                    left: '50%',
-                                    transform: 'translate(-50%, -50%)',
-                                    fontSize: '24px',
-                                    fontWeight: 'bold'
-                                }}>
-                                    78%
-                                </div>
-                            </div>
-                            <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
-                                Your financial decisions align well with your stated values
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Analytics */}
-                    <div className="chart-card" style={{ marginTop: '20px' }}>
-                        <h3 style={{ fontSize: '16px', marginBottom: '20px' }}>Website & Funnel Analytics</h3>
-                        <ResponsiveContainer width="100%" height={220}>
-                            <LineChart data={analytics}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                                <XAxis dataKey="month" stroke="var(--text-secondary)" />
-                                <YAxis stroke="var(--text-secondary)" />
-                                <Tooltip contentStyle={{ background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '8px' }} />
-                                <Line type="monotone" dataKey="traffic" stroke="var(--primary)" strokeWidth={2} name="Site Traffic" />
-                                <Line type="monotone" dataKey="booked" stroke="#C07C3D" strokeWidth={2} name="Booked Meetings" />
-                                <Line type="monotone" dataKey="revenue" stroke="#DCA85E" strokeWidth={2} name="Revenue ($)" />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </div>
+                    {/* Removed legacy right-side visual cards */}
 
                     {/* Global Timeline */}
                     <div className="module-card" style={{ marginTop: '20px' }}>
