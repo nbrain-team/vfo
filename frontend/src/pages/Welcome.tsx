@@ -5,42 +5,42 @@ const modules = [
     {
         name: 'Dashboard',
         path: '/platform',
-        icon: '📊',
+        icon: '📊︎',
         title: 'Liberation Journey Dashboard',
         description: 'Track your financial liberation journey with personalized metrics, behavioral insights, and progress visualization across all wealth dimensions.'
     },
     {
         name: 'agentIQ',
         path: '/agent',
-        icon: '🤖',
+        icon: '🤖︎',
         title: 'AI Agent Management',
         description: 'Deploy intelligent AI agents to automate complex financial tasks, analyze documents, and provide 24/7 intelligent assistance.'
     },
     {
         name: 'legalIQ',
         path: '/legal',
-        icon: '⚖️',
+        icon: '⚖︎',
         title: 'Document Intelligence',
         description: 'Secure document vault with AI-powered analysis, automated contract review, and intelligent extraction of key terms and risks.'
     },
     {
         name: 'insuranceIQ',
         path: '/insurance',
-        icon: '🛡️',
+        icon: '🛡︎',
         title: 'Risk Management',
         description: 'Comprehensive insurance coverage optimization with gap analysis, premium tracking, and automated policy management.'
     },
     {
         name: 'wealthIQ',
         path: '/wealth',
-        icon: '💰',
+        icon: '💰︎',
         title: 'Investment Portfolio',
         description: 'Real-time portfolio tracking, performance analytics, asset allocation optimization, and goal-based financial planning.'
     },
     {
         name: 'taxIQ',
         path: '/tax',
-        icon: '📋',
+        icon: '📋︎',
         title: 'Strategic Tax Planning',
         description: 'Intelligent tax optimization, real-time liability calculations, deduction maximization, and automated compliance tracking.'
     },
@@ -54,21 +54,21 @@ const modules = [
     {
         name: 'valuesIQ',
         path: '/values',
-        icon: '🎯',
+        icon: '🎯︎',
         title: 'Behavioral Intelligence',
         description: 'Align financial decisions with personal values through AI-powered insights, liberation journey mapping, and values tracking.'
     },
     {
         name: 'healthIQ',
         path: '/health',
-        icon: '🏥',
+        icon: '🏥︎',
         title: 'Healthcare Financial Planning',
         description: 'HSA optimization, healthcare coverage analysis, preventive care tracking, and tax-advantaged health savings strategies.'
     },
     {
         name: 'vCTO',
         path: '/vcto',
-        icon: '🚀',
+        icon: '🚀︎',
         title: 'Virtual Chief Technology Officer',
         description: 'Build custom AI agents, create automation workflows, monitor API usage, and orchestrate your entire digital wealth ecosystem.'
     }

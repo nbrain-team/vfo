@@ -347,12 +347,12 @@ const AgentIQ: React.FC = () => {
         >
             <div style={{ display: 'flex', gap: '10px', marginBottom: '24px', flexWrap: 'wrap' }}>
                 {([
-                    { key: 'overview', label: '🏠 Overview' },
-                    { key: 'services', label: '🧰 Services' },
-                    { key: 'consult', label: '📅 Consult' },
-                    { key: 'client-portal', label: '📂 Client Portal' },
-                    { key: 'testimonials', label: '⭐ Testimonials' },
-                    { key: 'contact', label: '☎️ Contact' }
+                    { key: 'overview', label: '◻︎ Overview' },
+                    { key: 'services', label: '◻︎ Services' },
+                    { key: 'consult', label: '◻︎ Consult' },
+                    { key: 'client-portal', label: '◻︎ Client Portal' },
+                    { key: 'testimonials', label: '◻︎ Testimonials' },
+                    { key: 'contact', label: '◻︎ Contact' }
                 ] as { key: TabKey; label: string }[]).map(tab => (
                     <button
                         key={tab.key}

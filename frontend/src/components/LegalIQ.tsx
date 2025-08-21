@@ -194,11 +194,11 @@ const LegalIQ: React.FC = () => {
                         className={`time-button ${activeTab === tab ? 'active' : ''}`}
                         style={{ padding: '10px 20px', textTransform: 'capitalize' }}
                     >
-                        {tab === 'vault' && '📁 Document Vault'}
-                        {tab === 'extraction' && '🤖 AI Extraction'}
-                        {tab === 'compliance' && '✅ Compliance'}
-                        {tab === 'analytics' && '📊 Analytics'}
-                        {tab === 'chat' && '💬 AI Chat'}
+                        {tab === 'vault' && '▣ Document Vault'}
+                        {tab === 'extraction' && '▣ AI Extraction'}
+                        {tab === 'compliance' && '▣ Compliance'}
+                        {tab === 'analytics' && '▣ Analytics'}
+                        {tab === 'chat' && '▣ AI Chat'}
                     </button>
                 ))}
             </div>
@@ -342,7 +342,7 @@ const LegalIQ: React.FC = () => {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
                                 <div>
                                     <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '10px' }}>
-                                        📋 Key Provisions
+                                        ▣ Key Provisions
                                     </h4>
                                     <ul style={{ listStyle: 'none', padding: 0 }}>
                                         {selectedDoc.keyProvisions?.map((provision, idx) => (

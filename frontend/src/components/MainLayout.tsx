@@ -2,22 +2,22 @@ import React, { useState, ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 
 const modules = [
-    { name: 'Dashboard', path: '/platform', icon: '📊' },
-    { name: 'Calendar', path: '/admin/calendar', icon: '🗓️' },
-    { name: 'CRM', path: '/admin/crm', icon: '📇' },
-    { name: 'Site Builder', path: '/admin/site', icon: '🌐' },
-    { name: 'Engagement Letters', path: '/admin/engagement', icon: '✍️' },
-    { name: 'Vault', path: '/admin/vault', icon: '🗄️' },
-    { name: 'Nurture', path: '/admin/nurture', icon: '📣' },
-    { name: 'agentIQ', path: '/agent', icon: '🤖' },
-    { name: 'legalIQ', path: '/legal', icon: '⚖️' },
-    { name: 'insuranceIQ', path: '/insurance', icon: '🛡️' },
-    { name: 'wealthIQ', path: '/wealth', icon: '💰' },
-    { name: 'taxIQ', path: '/tax', icon: '📋' },
+    { name: 'Dashboard', path: '/platform', icon: '📊︎' },
+    { name: 'Calendar', path: '/admin/calendar', icon: '🗓︎' },
+    { name: 'CRM', path: '/admin/crm', icon: '📇︎' },
+    { name: 'Site Builder', path: '/admin/site', icon: '🌐︎' },
+    { name: 'Engagement Letters', path: '/admin/engagement', icon: '✍︎' },
+    { name: 'Vault', path: '/admin/vault', icon: '🗄︎' },
+    { name: 'Nurture', path: '/admin/nurture', icon: '📣︎' },
+    { name: 'agentIQ', path: '/agent', icon: '🤖︎' },
+    { name: 'legalIQ', path: '/legal', icon: '⚖︎' },
+    { name: 'insuranceIQ', path: '/insurance', icon: '🛡︎' },
+    { name: 'wealthIQ', path: '/wealth', icon: '💰︎' },
+    { name: 'taxIQ', path: '/tax', icon: '📋︎' },
     { name: 'cryptoIQ', path: '/crypto', icon: '₿' },
-    { name: 'valuesIQ', path: '/values', icon: '🎯' },
-    { name: 'healthIQ', path: '/health', icon: '🏥' },
-    { name: 'vCTO', path: '/vcto', icon: '🚀' },
+    { name: 'valuesIQ', path: '/values', icon: '🎯︎' },
+    { name: 'healthIQ', path: '/health', icon: '🏥︎' },
+    { name: 'vCTO', path: '/vcto', icon: '🚀︎' },
 ];
 
 interface MainLayoutProps {
