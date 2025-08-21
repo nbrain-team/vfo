@@ -50,3 +50,8 @@ docker-compose.override.yml
 *.log
 logs
 /backend/app/db/uploads 
+# Ignore env files
+*.env
+VFO-backend.env
+frontend/.env
+backend/.env

@@ -1,294 +1,378 @@
 import React, { useState } from 'react';
 import ModuleTemplate from './ModuleTemplate';
-import DocumentChat from '../DocumentChat';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { useNavigate } from 'react-router-dom';
+
+type TabKey = 'overview' | 'services' | 'consult' | 'client-portal' | 'testimonials' | 'contact';
+
+interface ServiceItem {
+    id: string;
+    title: string;
+    subtitle: string;
+    bullets: string[];
+}
 
 const AgentIQ: React.FC = () => {
-    const [activeTab, setActiveTab] = useState('overview');
-    
-    // Mock data for agents
-    const agents = [
-        { id: 1, name: 'Legal Advisor', type: 'Legal', status: 'Active', queries: 156, accuracy: 94 },
-        { id: 2, name: 'Tax Strategist', type: 'Tax', status: 'Active', queries: 89, accuracy: 91 },
-        { id: 3, name: 'Investment Analyst', type: 'Financial', status: 'Active', queries: 234, accuracy: 96 },
-        { id: 4, name: 'Compliance Monitor', type: 'Compliance', status: 'Training', queries: 45, accuracy: 88 },
+    const navigate = useNavigate();
+    const [activeTab, setActiveTab] = useState<TabKey>('overview');
+    const [selectedService, setSelectedService] = useState<string | null>(null);
+    const [selectedAction, setSelectedAction] = useState<string | null>(null);
+    const [scheduled, setScheduled] = useState(false);
+    const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+
+    const services: ServiceItem[] = [
+        {
+            id: 'wy-apt',
+            title: 'Wyoming Asset Protection Trusts',
+            subtitle: 'Shield personal assets from lawsuits and creditor claims under Wyoming law.',
+            bullets: [
+                'Domestic Asset Protection Trusts (DAPT) with strong legal framework',
+                'Maintain access and control through structured provisions',
+                'Clear, enforceable documents without offshore complexity'
+            ]
+        },
+        {
+            id: 'pftc',
+            title: 'Private Family Trust Companies',
+            subtitle: 'Greater control, privacy, and continuity by serving as trustee for your trust.',
+            bullets: [
+                'Form a Wyoming Private Family Trust Company',
+                'Enhance privacy and centralize management of family assets',
+                'Built to meet state compliance standards'
+            ]
+        },
+        {
+            id: 'maintenance',
+            title: 'Ongoing Trust Support & Maintenance',
+            subtitle: 'Year-one guidance, distributions, minutes, and trustee documentation — plus annual maintenance.',
+            bullets: [
+                'Distribution processing with documentation',
+                'Meeting minutes and trustee records',
+                'Annual maintenance to keep operations smooth'
+            ]
+        }
     ];
 
-    const queryData = [
-        { day: 'Mon', queries: 45 },
-        { day: 'Tue', queries: 52 },
-        { day: 'Wed', queries: 48 },
-        { day: 'Thu', queries: 70 },
-        { day: 'Fri', queries: 61 },
-        { day: 'Sat', queries: 30 },
-        { day: 'Sun', queries: 25 },
+    const testimonials = [
+        {
+            name: 'Jim R',
+            quote: 'They were very thorough and most importantly helpful in assisting us getting accounts and assets transferred into our new trust. I HIGHLY recommend these people.'
+        },
+        {
+            name: 'Gordon Middleton',
+            quote: 'Liz was wonderful about explaining everything to us in terminology we could understand. We would highly recommend their firm.'
+        },
+        {
+            name: 'Maury Dobbie',
+            quote: 'They are wonderful to work with, knowledgeable, and helpful. We would highly recommend their firm.'
+        },
+        {
+            name: 'Betsy Cairo',
+            quote: 'On top of things. Thorough and friendly. Explained the process at each step. Highly recommend.'
+        }
     ];
 
-    const topicData = [
-        { name: 'Legal', value: 35, fill: '#0066ff' },
-        { name: 'Tax', value: 25, fill: '#28a745' },
-        { name: 'Investment', value: 30, fill: '#ffc107' },
-        { name: 'Compliance', value: 10, fill: '#dc3545' },
+    const consultSlots = [
+        'Tue 10:00 AM MT',
+        'Tue 2:00 PM MT',
+        'Wed 11:30 AM MT',
+        'Thu 9:00 AM MT',
+        'Fri 1:00 PM MT'
     ];
+
+    const clientPortalActions = [
+        {
+            id: 'contribution',
+            title: 'Contribution to Trust',
+            description: 'Start a contribution — we will generate the right forms for signatures and minutes.',
+            docs: [
+                'Questionnaire',
+                'Trustee Acceptance of Contribution',
+                'State Special Meeting Minutes and Resolutions',
+                'Affidavit of Settlor'
+            ]
+        },
+        {
+            id: 'distribution',
+            title: 'Distributions From Trust (DDC)',
+            description: 'Request a discretionary distribution with proper DDC documentation.',
+            docs: [
+                'DDC Minutes Appointing WAPA',
+                'DDC Acceptance of Appointment',
+                'Investment Committee Questionnaire',
+                'DDC Distribution Request Form',
+                'DDC Minutes Approving Distribution',
+                'State Distribution Meeting Minutes'
+            ]
+        },
+        {
+            id: 'investment',
+            title: 'Investment Decisions',
+            description: 'Create or update the Investment Committee and record decisions.',
+            docs: [
+                'Investment Committee Creation and Appointment',
+                'Investment Committee Questionnaire',
+                'Investment Committee Meeting Minutes'
+            ]
+        },
+        {
+            id: 'pftc-docs',
+            title: 'Wyoming Private Family Trust Documents',
+            description: 'Establish the PFTC with the required organizational documents.',
+            docs: [
+                'PTC Operating Agreement (single or two grantors)',
+                'PTC Organizational Minutes (single or multi-member)'
+            ]
+        }
+    ];
+
+    const renderOverview = () => (
+        <>
+            <div className="module-card">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <h2 style={{ margin: 0 }}>Meet Matt Meuli</h2>
+                    <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
+                        Get expert asset protection advice and strategies to help shield your wealth from anything and anyone.
+                    </p>
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '12px' }}>
+                        <button className="form-button" style={{ width: 'auto' }} onClick={() => setActiveTab('consult')}>Book an Appointment</button>
+                        <button className="button-outline" style={{ width: 'auto' }} onClick={() => setActiveTab('contact')}>Call: (307) 463-3600</button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="module-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+                {services.map(svc => (
+                    <div className="module-card" key={svc.id}>
+                        <h3 className="section-title" style={{ marginBottom: '6px' }}>{svc.title}</h3>
+                        <p style={{ color: 'var(--text-secondary)', margin: 0 }}>{svc.subtitle}</p>
+                        <ul style={{ marginTop: '12px', paddingLeft: '18px' }}>
+                            {svc.bullets.map((b, i) => (
+                                <li key={i} style={{ marginBottom: '6px' }}>{b}</li>
+                            ))}
+                        </ul>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button className="button-outline" style={{ width: 'auto' }} onClick={() => { setActiveTab('services'); setSelectedService(svc.id); }}>View Details</button>
+                            <button className="form-button" style={{ width: 'auto' }} onClick={() => setActiveTab('consult')}>Start Consult</button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="module-card">
+                <h3 className="section-title">How We Work</h3>
+                <div className="module-card-row" style={{ marginTop: '8px' }}>
+                    <div style={{ background: 'var(--gray-light)', padding: '16px', borderRadius: '8px' }}>
+                        <div style={{ fontWeight: 600, marginBottom: '6px' }}>Step 1: Schedule a Consultation</div>
+                        <div style={{ color: 'var(--text-secondary)' }}>Focused call to understand your goals and whether a Wyoming trust is the right fit.</div>
+                    </div>
+                    <div style={{ background: 'var(--gray-light)', padding: '16px', borderRadius: '8px' }}>
+                        <div style={{ fontWeight: 600, marginBottom: '6px' }}>Step 2: Custom Plan Design</div>
+                        <div style={{ color: 'var(--text-secondary)' }}>We draft your custom trust and, if needed, a private trust company — all fully compliant with Wyoming law.</div>
+                    </div>
+                    <div style={{ background: 'var(--gray-light)', padding: '16px', borderRadius: '8px' }}>
+                        <div style={{ fontWeight: 600, marginBottom: '6px' }}>Step 3: Implementation & Follow-Up</div>
+                        <div style={{ color: 'var(--text-secondary)' }}>We handle filings, deliver all legal docs, and support your first year with documentation, minutes, and distribution guidance.</div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+
+    const renderServices = () => (
+        <div className="module-grid">
+            <div className="module-card">
+                <h3 className="section-title">Our Core Services</h3>
+                <div className="module-card-row" style={{ marginTop: '12px' }}>
+                    {services.map(svc => (
+                        <div key={svc.id} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 16, background: 'var(--bg)' }}>
+                            <div style={{ fontWeight: 600, marginBottom: 6 }}>{svc.title}</div>
+                            <div style={{ color: 'var(--text-secondary)', marginBottom: 10 }}>{svc.subtitle}</div>
+                            <ul style={{ paddingLeft: 18 }}>
+                                {svc.bullets.map((b, i) => <li key={i} style={{ marginBottom: 6 }}>{b}</li>)}
+                            </ul>
+                            <button className="button-outline" style={{ width: 'auto', marginTop: 10 }} onClick={() => setSelectedService(svc.id)}>View Details</button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {selectedService && (
+                <div className="module-card">
+                    <h3 className="section-title">{services.find(s => s.id === selectedService)?.title}</h3>
+                    <p style={{ color: 'var(--text-secondary)', marginTop: 6 }}>{services.find(s => s.id === selectedService)?.subtitle}</p>
+                    <div style={{ marginTop: 12 }}>
+                        <div style={{ fontWeight: 600, marginBottom: 8 }}>What this includes</div>
+                        <ul style={{ paddingLeft: 18 }}>
+                            {services.find(s => s.id === selectedService)?.bullets.map((b, i) => (
+                                <li key={i} style={{ marginBottom: 6 }}>{b}</li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+                        <button className="form-button" style={{ width: 'auto' }} onClick={() => setActiveTab('consult')}>Proceed to Consult</button>
+                        <button className="button-outline" style={{ width: 'auto' }} onClick={() => setSelectedService(null)}>Close</button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+
+    const renderConsult = () => (
+        <div className="module-grid">
+            <div className="module-card">
+                <h3 className="section-title">Schedule a Consultation</h3>
+                <p style={{ color: 'var(--text-secondary)' }}>Pick a time below. This is a mock scheduler — no external integrations.</p>
+                <div className="module-card-row" style={{ marginTop: 12 }}>
+                    {consultSlots.map(slot => (
+                        <button
+                            key={slot}
+                            className={`time-button ${selectedSlot === slot ? 'active' : ''}`}
+                            style={{ padding: '10px 16px' }}
+                            onClick={() => setSelectedSlot(slot)}
+                        >
+                            {slot}
+                        </button>
+                    ))}
+                </div>
+                <div style={{ marginTop: 16, display: 'flex', gap: 10 }}>
+                    <button
+                        className="form-button"
+                        style={{ width: 'auto' }}
+                        disabled={!selectedSlot}
+                        onClick={() => setScheduled(true)}
+                    >
+                        Confirm Appointment
+                    </button>
+                    <button className="button-outline" style={{ width: 'auto' }} onClick={() => setSelectedSlot(null)}>Clear</button>
+                </div>
+                {scheduled && (
+                    <div style={{ marginTop: 16, background: 'var(--success-light)', color: 'var(--success)', padding: 12, borderRadius: 8 }}>
+                        Appointment confirmed for {selectedSlot}. A confirmation email would be sent here in production.
+                    </div>
+                )}
+            </div>
+
+            <div className="module-card">
+                <h3 className="section-title">Payment Placeholder</h3>
+                <p style={{ color: 'var(--text-secondary)' }}>
+                    If a consult fee is required, a secure payment block would appear here (Stripe/LawPay test mode). For now, this is a static placeholder.
+                </p>
+                <div style={{ display: 'flex', gap: 10 }}>
+                    <button className="button-outline" style={{ width: 'auto' }}>Pay Consult Fee (Placeholder)</button>
+                    <button className="button-outline" style={{ width: 'auto' }}>Apply Promo Code (Placeholder)</button>
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderClientPortal = () => (
+        <div className="module-grid">
+            <div className="module-card">
+                <h3 className="section-title">Client Actions</h3>
+                <div className="module-card-row" style={{ marginTop: 12 }}>
+                    {clientPortalActions.map(action => (
+                        <div key={action.id} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 16, background: 'var(--bg)' }}>
+                            <div style={{ fontWeight: 600, marginBottom: 6 }}>{action.title}</div>
+                            <div style={{ color: 'var(--text-secondary)', marginBottom: 10 }}>{action.description}</div>
+                            <button className="button-outline" style={{ width: 'auto' }} onClick={() => setSelectedAction(action.id)}>Start</button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {selectedAction && (
+                <div className="module-card">
+                    <h3 className="section-title">{clientPortalActions.find(a => a.id === selectedAction)?.title}</h3>
+                    <p style={{ color: 'var(--text-secondary)' }}>Static questionnaire preview and generated documents list:</p>
+                    <ul style={{ paddingLeft: 18 }}>
+                        {clientPortalActions.find(a => a.id === selectedAction)?.docs.map((d, i) => (
+                            <li key={i} style={{ marginBottom: 6 }}>{d}</li>
+                        ))}
+                    </ul>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                        <button className="form-button" style={{ width: 'auto' }}>Open Questionnaire (Static)</button>
+                        <button className="button-outline" style={{ width: 'auto' }} onClick={() => setSelectedAction(null)}>Close</button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+
+    const renderTestimonials = () => (
+        <div className="module-card">
+            <h3 className="section-title">What Our Clients Say</h3>
+            <div className="module-card-row" style={{ marginTop: 12 }}>
+                {testimonials.map((t, i) => (
+                    <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 16, background: 'var(--bg)' }}>
+                        <div style={{ fontWeight: 600, marginBottom: 6 }}>{t.name}</div>
+                        <div style={{ color: 'var(--text-secondary)' }}>“{t.quote}”</div>
+                    </div>
+                ))}
+            </div>
+            <div style={{ marginTop: 16, color: 'var(--text-secondary)' }}>45+ five-star reviews</div>
+        </div>
+    );
+
+    const renderContact = () => (
+        <div className="module-grid">
+            <div className="module-card">
+                <h3 className="section-title">Contact Us</h3>
+                <div style={{ display: 'grid', gap: 12 }}>
+                    <div><strong>Phone:</strong> (307) 463-3600</div>
+                    <div><strong>Email:</strong> hello@wyomingassetprotectiontrust.com</div>
+                    <div><strong>Address:</strong> 1621 Central Avenue #8866, Cheyenne, WY 82001</div>
+                </div>
+                <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+                    <button className="form-button" style={{ width: 'auto' }} onClick={() => setActiveTab('consult')}>Book an Appointment</button>
+                    <button className="button-outline" style={{ width: 'auto' }} onClick={() => navigate('/wyoming-apt')}>Visit Public Page (Mock)</button>
+                </div>
+            </div>
+
+            <div className="module-card">
+                <h3 className="section-title">Why Work With Matt?</h3>
+                <ul style={{ paddingLeft: 18 }}>
+                    <li>Bulletproof legal protection using Wyoming’s strongest-in-the-nation trust laws</li>
+                    <li>Custom strategies — never cookie-cutter solutions</li>
+                    <li>30+ years of experience in risk mitigation and trust formation</li>
+                    <li>A calm, clear approach to complex legal issues</li>
+                </ul>
+            </div>
+        </div>
+    );
 
     return (
         <ModuleTemplate 
-            title="agentIQ" 
-            description="AI-powered intelligent agents for automated document analysis and insights"
+            title="Wyoming Asset Protection Trust (Mock)"
+            description="Static, no-API mock experience replacing AgentIQ for the Wyoming APT workflow"
         >
-            {/* Tabs */}
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '24px' }}>
-                {['overview', 'agents', 'chat', 'analytics'].map(tab => (
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '24px', flexWrap: 'wrap' }}>
+                {([
+                    { key: 'overview', label: '🏠 Overview' },
+                    { key: 'services', label: '🧰 Services' },
+                    { key: 'consult', label: '📅 Consult' },
+                    { key: 'client-portal', label: '📂 Client Portal' },
+                    { key: 'testimonials', label: '⭐ Testimonials' },
+                    { key: 'contact', label: '☎️ Contact' }
+                ] as { key: TabKey; label: string }[]).map(tab => (
                     <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`time-button ${activeTab === tab ? 'active' : ''}`}
-                        style={{ padding: '10px 20px', textTransform: 'capitalize' }}
+                        key={tab.key}
+                        onClick={() => setActiveTab(tab.key)}
+                        className={`time-button ${activeTab === tab.key ? 'active' : ''}`}
+                        style={{ padding: '10px 20px' }}
                     >
-                        {tab === 'overview' && '📊 Overview'}
-                        {tab === 'agents' && '🤖 Agents'}
-                        {tab === 'chat' && '💬 Chat'}
-                        {tab === 'analytics' && '📈 Analytics'}
+                        {tab.label}
                     </button>
                 ))}
             </div>
 
-            {/* Overview Tab */}
-            {activeTab === 'overview' && (
-                <>
-                    <div className="summary-row">
-                        <div className="summary-card">
-                            <div className="summary-label">Active Agents</div>
-                            <div className="summary-value">4</div>
-                            <div className="summary-change positive">All operational</div>
-                        </div>
-                        <div className="summary-card">
-                            <div className="summary-label">Total Queries</div>
-                            <div className="summary-value">524</div>
-                            <div className="summary-change positive">+23% this week</div>
-                        </div>
-                        <div className="summary-card">
-                            <div className="summary-label">Avg Response Time</div>
-                            <div className="summary-value">1.2s</div>
-                            <div className="summary-change positive">-15% improved</div>
-                        </div>
-                        <div className="summary-card">
-                            <div className="summary-label">Accuracy Rate</div>
-                            <div className="summary-value">92.3%</div>
-                            <div className="summary-change">Above target</div>
-                        </div>
-                    </div>
-
-                    <div className="module-grid">
-                        <div className="module-card">
-                            <h3 className="section-title">Weekly Query Volume</h3>
-                            <ResponsiveContainer width="100%" height={300}>
-                                <BarChart data={queryData}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="day" />
-                                    <YAxis />
-                                    <Tooltip />
-                                    <Bar dataKey="queries" fill="#0066ff" />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-
-                        <div className="module-card">
-                            <h3 className="section-title">Query Distribution by Topic</h3>
-                            <ResponsiveContainer width="100%" height={300}>
-                                <PieChart>
-                                    <Pie
-                                        data={topicData}
-                                        cx="50%"
-                                        cy="50%"
-                                        labelLine={false}
-                                        label={(entry: any) => `${entry.name}: ${entry.value}%`}
-                                        outerRadius={80}
-                                        fill="#8884d8"
-                                        dataKey="value"
-                                    >
-                                        {topicData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-                </>
-            )}
-
-            {/* Agents Tab */}
-            {activeTab === 'agents' && (
-                <div className="module-card">
-                    <h3 className="section-title">AI Agent Management</h3>
-                    <div className="table-container" style={{ marginTop: '20px' }}>
-                        <table className="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Agent Name</th>
-                                    <th>Type</th>
-                                    <th>Status</th>
-                                    <th>Queries Handled</th>
-                                    <th>Accuracy</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {agents.map(agent => (
-                                    <tr key={agent.id}>
-                                        <td style={{ fontWeight: '500' }}>{agent.name}</td>
-                                        <td>{agent.type}</td>
-                                        <td>
-                                            <span className={`status-badge ${agent.status === 'Active' ? 'active' : 'pending'}`}>
-                                                {agent.status}
-                                            </span>
-                                        </td>
-                                        <td>{agent.queries}</td>
-                                        <td>
-                                            <span className={`performance ${agent.accuracy >= 90 ? 'positive' : ''}`}>
-                                                {agent.accuracy}%
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <button
-                                                style={{
-                                                    padding: '4px 8px',
-                                                    fontSize: '12px',
-                                                    backgroundColor: 'var(--primary)',
-                                                    color: 'white',
-                                                    border: 'none',
-                                                    borderRadius: 'var(--radius)',
-                                                    cursor: 'pointer',
-                                                    marginRight: '8px'
-                                                }}
-                                            >
-                                                Configure
-                                            </button>
-                                            <button
-                                                style={{
-                                                    padding: '4px 8px',
-                                                    fontSize: '12px',
-                                                    backgroundColor: 'var(--gray-light)',
-                                                    color: 'var(--text-primary)',
-                                                    border: '1px solid var(--border)',
-                                                    borderRadius: 'var(--radius)',
-                                                    cursor: 'pointer'
-                                                }}
-                                            >
-                                                View Logs
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div style={{ marginTop: '30px' }}>
-                        <button className="form-button" style={{ width: 'auto', padding: '10px 20px' }}>
-                            + Create New Agent
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* Chat Tab */}
-            {activeTab === 'chat' && (
-                <div className="module-card" style={{ padding: '20px' }}>
-                    <h3 className="section-title">AI Assistant Chat</h3>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: '20px', fontSize: '14px' }}>
-                        Chat with your AI agents to get insights across all your data and documents. 
-                        Our agents use GPT-4o to provide intelligent, context-aware responses.
-                    </p>
-                    <DocumentChat 
-                        contextType="general"
-                    />
-                </div>
-            )}
-
-            {/* Analytics Tab */}
-            {activeTab === 'analytics' && (
-                <div className="module-grid">
-                    <div className="module-card">
-                        <h3 className="section-title">Agent Performance Metrics</h3>
-                        <div style={{ marginTop: '20px' }}>
-                            {agents.map(agent => (
-                                <div key={agent.id} style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    padding: '12px',
-                                    borderBottom: '1px solid var(--border-light)'
-                                }}>
-                                    <div>
-                                        <div style={{ fontWeight: '500', fontSize: '14px' }}>{agent.name}</div>
-                                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                                            {agent.type} Agent
-                                        </div>
-                                    </div>
-                                    <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: '18px', fontWeight: '600', color: 'var(--primary)' }}>
-                                            {agent.accuracy}%
-                                        </div>
-                                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                                            Accuracy
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="module-card">
-                        <h3 className="section-title">Recent Agent Activity</h3>
-                        <ul style={{ listStyle: 'none', padding: 0, marginTop: '20px' }}>
-                            <li style={{ 
-                                padding: '10px',
-                                borderBottom: '1px solid var(--border-light)',
-                                fontSize: '13px'
-                            }}>
-                                <strong>Legal Advisor:</strong> Analyzed trust document for compliance issues
-                                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                                    2 minutes ago
-                                </div>
-                            </li>
-                            <li style={{ 
-                                padding: '10px',
-                                borderBottom: '1px solid var(--border-light)',
-                                fontSize: '13px'
-                            }}>
-                                <strong>Tax Strategist:</strong> Generated Q3 tax optimization report
-                                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                                    15 minutes ago
-                                </div>
-                            </li>
-                            <li style={{ 
-                                padding: '10px',
-                                borderBottom: '1px solid var(--border-light)',
-                                fontSize: '13px'
-                            }}>
-                                <strong>Investment Analyst:</strong> Updated portfolio risk assessment
-                                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                                    1 hour ago
-                                </div>
-                            </li>
-                            <li style={{ 
-                                padding: '10px',
-                                fontSize: '13px'
-                            }}>
-                                <strong>Compliance Monitor:</strong> Flagged upcoming filing deadline
-                                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                                    3 hours ago
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            )}
+            {activeTab === 'overview' && renderOverview()}
+            {activeTab === 'services' && renderServices()}
+            {activeTab === 'consult' && renderConsult()}
+            {activeTab === 'client-portal' && renderClientPortal()}
+            {activeTab === 'testimonials' && renderTestimonials()}
+            {activeTab === 'contact' && renderContact()}
         </ModuleTemplate>
     );
 };
 
-export default AgentIQ; 
+export default AgentIQ;

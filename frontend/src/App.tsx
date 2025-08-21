@@ -17,8 +17,18 @@ import TaxIQ from './components/modules/TaxIQ';
 import CryptoIQ from './components/modules/CryptoIQ';
 import HealthIQ from './components/modules/HealthIQ';
 import VCTO from './components/modules/VCTO';
+import CalendarAdmin from './components/modules/CalendarAdmin';
+import CRMAdmin from './components/modules/CRMAdmin';
+import SiteBuilderAdmin from './components/modules/SiteBuilderAdmin';
+import EngagementAdmin from './components/modules/EngagementAdmin';
+import VaultAdmin from './components/modules/VaultAdmin';
+import NurtureAdmin from './components/modules/NurtureAdmin';
 import Profile from './pages/Profile';
 import Documentation from './pages/Documentation';
+import MockWyomingAPT from './pages/MockWyomingAPT';
+import PublicBookCall from './pages/PublicBookCall';
+import PublicConfirm from './pages/PublicConfirm';
+import PublicSelectTime from './pages/PublicSelectTime';
 
 function App() {
   return (
@@ -26,6 +36,11 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        {/* Public-facing page outside of the admin/sidebar layout */}
+        <Route path="/wyoming-apt" element={<MockWyomingAPT />} />
+        <Route path="/wyoming-apt/select" element={<PublicSelectTime />} />
+        <Route path="/wyoming-apt/book" element={<PublicBookCall />} />
+        <Route path="/wyoming-apt/confirmed" element={<PublicConfirm />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/welcome" element={
             <MainLayout>
@@ -35,6 +50,36 @@ function App() {
           <Route path="/platform" element={
             <MainLayout>
               <Platform />
+            </MainLayout>
+          } />
+          <Route path="/admin/calendar" element={
+            <MainLayout>
+              <CalendarAdmin />
+            </MainLayout>
+          } />
+          <Route path="/admin/crm" element={
+            <MainLayout>
+              <CRMAdmin />
+            </MainLayout>
+          } />
+          <Route path="/admin/site" element={
+            <MainLayout>
+              <SiteBuilderAdmin />
+            </MainLayout>
+          } />
+          <Route path="/admin/engagement" element={
+            <MainLayout>
+              <EngagementAdmin />
+            </MainLayout>
+          } />
+          <Route path="/admin/vault" element={
+            <MainLayout>
+              <VaultAdmin />
+            </MainLayout>
+          } />
+          <Route path="/admin/nurture" element={
+            <MainLayout>
+              <NurtureAdmin />
             </MainLayout>
           } />
           <Route path="/agent" element={

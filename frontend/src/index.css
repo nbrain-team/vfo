@@ -526,6 +526,24 @@ body {
     text-decoration: underline;
 }
 
+/* Outline Button (reusable) */
+.button-outline {
+    width: 100%;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.button-outline:hover {
+    background: var(--primary-light);
+}
+
 /* Dashboard Grid */
 .dashboard-grid {
     display: grid;

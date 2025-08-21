@@ -65,6 +65,19 @@ const Login: React.FC = () => {
                         Sign In
                     </button>
                 </form>
+                <div style={{ marginTop: '12px' }}>
+                    <button
+                        type="button"
+                        className="button-outline"
+                        onClick={() => {
+                            localStorage.setItem('access_token', 'mock_access_token');
+                            localStorage.setItem('user_name', 'wyoming-client');
+                            navigate('/agent');
+                        }}
+                    >
+                        Use Mock Mode (No Backend)
+                    </button>
+                </div>
                 {message && (
                     <p style={{ 
                         marginTop: '16px', 

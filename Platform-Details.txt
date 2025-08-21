@@ -1,0 +1,23 @@
+Platform Environment Settings and Instructions.
+
+Use these items to help be more proactive when providing commands or instructions and use it to create real tests by combing this and the env settings located in your root folder. 
+
+##Github##
+https://github.com/nbrain-team/vfo
+
+##Render Service and DB URL's##
+
+-Frontend=https://agentiq-vfo-frontend.onrender.com
+-Backend=https://agentiq-vfo-backend.onrender.com
+-Database= 
+--External=postgresql://user:nqCMbeu513sYzoGUD6ZzKR4oGA0bVAik@dpg-d2ahck9r0fns73ckjl1g-a.oregon-postgres.render.com/vfo_db_j4kd
+--Internal=postgresql://user:nqCMbeu513sYzoGUD6ZzKR4oGA0bVAik@dpg-d2ahck9r0fns73ckjl1g-a/vfo_db_j4kd
+Username: user
+Password: nqCMbeu513sYzoGUD6ZzKR4oGA0bVAik
+
+##Render Backend Settings##
+-Name=Cazar Main
+-Branch=main
+-Root Directory=backend
+-Build Command=pip install -r requirements.txt
+-Start Command=uvicorn app.main:app --host 0.0.0.0 --port $PORT
