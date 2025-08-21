@@ -15,16 +15,24 @@ Terms: This letter outlines the scope of the initial consultation...\n`;
 const replaceFields = (t: string, vars: Record<string, string>) =>
   t.replace(/{{(\w+)}}/g, (_, k) => vars[k] || '');
 
+const DOC_TEMPLATES: { id: string; name: string; template: string }[] = [
+  { id: 'engagement', name: 'Engagement Letter', template },
+  { id: 'nda', name: 'Mutual NDA', template: `Mutual NDA\n\nParty A: {{name}}\nEmail: {{email}}\nTerms: Placeholder NDA terms...` },
+  { id: 'retainer', name: 'Legal Services Retainer', template: `Retainer Agreement\n\nClient: {{name}}\nEmail: {{email}}\nScope: Asset Protection Trust\nFee: TBD (placeholder)` }
+];
+
 const EngagementAdmin: React.FC = () => {
   const bookings = useMemo(() => getBookings(), []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [docType, setDocType] = useState<string>('engagement');
   const [content, setContent] = useState('');
   const [generated, setGenerated] = useState(false);
 
   const generate = () => {
     const b = bookings.find(x => x.id === selectedId);
     if (!b) return;
-    const text = replaceFields(template, {
+    const chosen = DOC_TEMPLATES.find(d => d.id === docType) || DOC_TEMPLATES[0];
+    const text = replaceFields(chosen.template, {
       name: b.name,
       email: b.email
     });
@@ -39,7 +47,7 @@ const EngagementAdmin: React.FC = () => {
   };
 
   return (
-    <ModuleTemplate title="Engagement Letters" description="Draft and send engagement letters (mock).">
+    <ModuleTemplate title="Documents" description="Draft and send documents (mock).">
       <div className="module-grid">
         <div className="module-card">
           <h3 className="section-title">Select Lead</h3>
@@ -49,6 +57,17 @@ const EngagementAdmin: React.FC = () => {
               <option key={b.id} value={b.id}>{b.name} — {b.email}</option>
             ))}
           </select>
+          <div style={{ marginTop: 12 }}>
+            <label className="form-label">Document Template</label>
+            <select className="form-input" value={docType} onChange={(e) => setDocType(e.target.value)}>
+              {DOC_TEMPLATES.map(t => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
+            <div style={{ marginTop: 8 }}>
+              <a href="#" className="form-link">Edit Documents</a>
+            </div>
+          </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
             <button className="form-button" style={{ width: 'auto' }} onClick={generate} disabled={!selectedId}>Generate Draft</button>
             <button className="button-outline" style={{ width: 'auto' }} onClick={markSent} disabled={!generated}>Approve & Send (Mock)</button>

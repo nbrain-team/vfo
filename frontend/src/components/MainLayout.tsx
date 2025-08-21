@@ -6,7 +6,7 @@ const modules = [
     { name: 'Calendar', path: '/admin/calendar', icon: '🗓︎' },
     { name: 'CRM', path: '/admin/crm', icon: '📇︎' },
     { name: 'Site Builder', path: '/admin/site', icon: '🌐︎' },
-    { name: 'Engagement Letters', path: '/admin/engagement', icon: '✍︎' },
+    { name: 'Documents', path: '/admin/engagement', icon: '✍︎' },
     { name: 'Vault', path: '/admin/vault', icon: '🗄︎' },
     { name: 'Nurture', path: '/admin/nurture', icon: '📣︎' },
     { name: 'advisorIQ', path: '/agent', icon: '🤖︎' },
