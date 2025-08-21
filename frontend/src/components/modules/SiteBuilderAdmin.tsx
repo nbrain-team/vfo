@@ -6,6 +6,15 @@ const SiteBuilderAdmin: React.FC = () => {
   const initial = getSiteConfig();
   const [videoUrl, setVideoUrl] = useState(initial.videoUrl || 'https://drive.google.com/file/d/1otkNyA5S8AaIv_QW0J2sjtIFCqpf9P5K/preview');
   const [logoPath, setLogoPath] = useState(initial.logoPath || '/wy-apt-logo.png');
+  const [logoDataUrl, setLogoDataUrl] = useState(initial.logoDataUrl || '');
+  const [headline, setHeadline] = useState(initial.headline || 'Wyoming Asset Protection Trusts');
+  const [subhead, setSubhead] = useState(initial.subhead || 'Shield your wealth with proven structures under Wyoming law.');
+  const [ctaText, setCtaText] = useState(initial.ctaText || 'Book a Call');
+  const [ctaHref, setCtaHref] = useState(initial.ctaHref || '/wyoming-apt/select');
+  const [primaryColor, setPrimaryColor] = useState(initial.primaryColor || '#3C4630');
+  const [goldStart, setGoldStart] = useState(initial.goldStart || '#DCA85E');
+  const [goldEnd, setGoldEnd] = useState(initial.goldEnd || '#C07C3D');
+  const [images, setImages] = useState<string[]>(initial.images || []);
   const [paywallEnabled, setPaywallEnabled] = useState(!!initial.paywallEnabled);
 
   return (
@@ -22,8 +31,75 @@ const SiteBuilderAdmin: React.FC = () => {
               <input className="form-input" value={logoPath} onChange={(e) => setLogoPath(e.target.value)} />
             </div>
             <div>
+              <label className="form-label">Upload Logo (mock)</label>
+              <input type="file" accept="image/*" className="form-input" onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => setLogoDataUrl(String(reader.result || ''));
+                reader.readAsDataURL(file);
+              }} />
+              {logoDataUrl && (
+                <div style={{ marginTop: 8 }}>
+                  <img src={logoDataUrl} alt="Logo preview" style={{ height: 40 }} />
+                </div>
+              )}
+            </div>
+            <div>
               <label className="form-label">Hero Video URL</label>
               <input className="form-input" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+              <div>
+                <label className="form-label">Primary Color</label>
+                <input className="form-input" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} />
+              </div>
+              <div>
+                <label className="form-label">Gradient Start</label>
+                <input className="form-input" value={goldStart} onChange={(e) => setGoldStart(e.target.value)} />
+              </div>
+              <div>
+                <label className="form-label">Gradient End</label>
+                <input className="form-input" value={goldEnd} onChange={(e) => setGoldEnd(e.target.value)} />
+              </div>
+            </div>
+            <div>
+              <label className="form-label">Headline</label>
+              <input className="form-input" value={headline} onChange={(e) => setHeadline(e.target.value)} />
+            </div>
+            <div>
+              <label className="form-label">Subhead</label>
+              <input className="form-input" value={subhead} onChange={(e) => setSubhead(e.target.value)} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 8 }}>
+              <div>
+                <label className="form-label">CTA Text</label>
+                <input className="form-input" value={ctaText} onChange={(e) => setCtaText(e.target.value)} />
+              </div>
+              <div>
+                <label className="form-label">CTA Href</label>
+                <input className="form-input" value={ctaHref} onChange={(e) => setCtaHref(e.target.value)} />
+              </div>
+            </div>
+            <div>
+              <label className="form-label">Gallery Images (mock upload)</label>
+              <input type="file" accept="image/*" multiple className="form-input" onChange={(e) => {
+                const files = Array.from(e.target.files || []);
+                if (files.length === 0) return;
+                const readers = files.map(f => new Promise<string>((resolve) => {
+                  const fr = new FileReader();
+                  fr.onload = () => resolve(String(fr.result || ''));
+                  fr.readAsDataURL(f);
+                }));
+                Promise.all(readers).then(urls => setImages(prev => [...prev, ...urls]));
+              }} />
+              {images.length > 0 && (
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+                  {images.map((src, i) => (
+                    <img key={i} src={src} alt={`img-${i}`} style={{ height: 60, borderRadius: 6, border: '1px solid var(--border)' }} />
+                  ))}
+                </div>
+              )}
             </div>
             <div>
               <label className="form-label">Consult Paywall</label>
@@ -32,7 +108,7 @@ const SiteBuilderAdmin: React.FC = () => {
                 <span>Require payment before scheduling (placeholder)</span>
               </div>
             </div>
-            <button className="form-button" style={{ width: 'auto' }} onClick={() => saveSiteConfig({ videoUrl, logoPath, paywallEnabled })}>Save</button>
+            <button className="form-button" style={{ width: 'auto' }} onClick={() => saveSiteConfig({ videoUrl, logoPath, logoDataUrl, headline, subhead, ctaText, ctaHref, primaryColor, goldStart, goldEnd, images, paywallEnabled })}>Save</button>
           </div>
         </div>
 

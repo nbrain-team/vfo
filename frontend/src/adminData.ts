@@ -63,6 +63,12 @@ export type SiteConfig = {
   goldStart?: string;
   goldEnd?: string;
   logoPath?: string;
+  logoDataUrl?: string;
+  headline?: string;
+  subhead?: string;
+  ctaText?: string;
+  ctaHref?: string;
+  images?: string[];
   paywallEnabled?: boolean;
 };
 
