@@ -31,6 +31,8 @@ import PublicBookCall from './pages/PublicBookCall';
 import PublicConfirm from './pages/PublicConfirm';
 import PublicSelectTime from './pages/PublicSelectTime';
 import AuditAdmin from './components/modules/AuditAdmin';
+import FormbuilderAdmin from './components/modules/FormbuilderAdmin';
+import DocumentLibraryAdmin from './components/modules/DocumentLibraryAdmin';
 
 function App() {
   return (
@@ -67,6 +69,16 @@ function App() {
           <Route path="/admin/site" element={
             <MainLayout>
               <SiteBuilderAdmin />
+            </MainLayout>
+          } />
+          <Route path="/admin/formbuilder" element={
+            <MainLayout>
+              <FormbuilderAdmin />
+            </MainLayout>
+          } />
+          <Route path="/admin/documents" element={
+            <MainLayout>
+              <DocumentLibraryAdmin />
             </MainLayout>
           } />
           <Route path="/admin/engagement" element={

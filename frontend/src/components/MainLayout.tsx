@@ -1,7 +1,14 @@
 import React, { useState, ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 
-const modules = [
+interface Module {
+    name: string;
+    path: string;
+    icon: string;
+    isSection?: boolean;
+}
+
+const modules: Module[] = [
     { name: 'Dashboard', path: '/platform', icon: '📊︎' },
     { name: 'Calendar', path: '/admin/calendar', icon: '🗓︎' },
     { name: 'Sitebuilder', path: '/admin/site', icon: '🌐︎' },
