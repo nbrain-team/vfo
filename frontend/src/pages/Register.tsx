@@ -22,6 +22,8 @@ const Register: React.FC = () => {
                 email,
                 password
             });
+            // Default new users to Client role
+            localStorage.setItem('role', 'Client');
             setMessage('Registration successful! Redirecting to login...');
             setTimeout(() => navigate('/login'), 2000);
         } catch (error: any) {

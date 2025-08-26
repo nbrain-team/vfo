@@ -180,12 +180,14 @@ def public_lead_submit(payload: PublicLead, db: Session = Depends(get_db)):
     db.flush()
 
     # Store intake details JSON
+    # Persist intake data as JSON string
     data = payload.model_dump()
+    from json import dumps as json_dumps
     intake = IntakeModel(
         matter_id=matter.id,
         name="Public Booking Intake",
         status="submitted",
-        data_json=str(data),
+        data_json=json_dumps(data),
     )
     db.add(intake)
     db.commit()

@@ -24,6 +24,9 @@ const Login: React.FC = () => {
             // Store user name from response, fallback to email prefix
             const userName = response.data.user_name || email.split('@')[0];
             localStorage.setItem('user_name', userName);
+            // Simple role default: 'Mike' -> Admin, else Client
+            const role = userName.toLowerCase() === 'mike' ? 'Admin' : 'Client';
+            localStorage.setItem('role', role);
             navigate('/welcome');
         } catch (error) {
             setMessage('Invalid credentials. Please try again.');
@@ -72,6 +75,7 @@ const Login: React.FC = () => {
                         onClick={() => {
                             localStorage.setItem('access_token', 'mock_access_token');
                             localStorage.setItem('user_name', 'wyoming-client');
+                            localStorage.setItem('role', 'Client');
                             navigate('/agent');
                         }}
                     >
