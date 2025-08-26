@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import ModuleTemplate from './ModuleTemplate';
 import { getBookings, updateBooking, Booking, seedMockDataIfEmpty, addBooking, saveBookings, seedFundingItemsIfMissing, enrollMaintenance, logAutomation, evaluateAutomations, getEmailTemplates, addOutboxEmail } from '../../adminData';
+import apiClient from '../../apiClient';
 
 const CRMAdmin: React.FC = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -36,7 +37,30 @@ const CRMAdmin: React.FC = () => {
     setNewName(''); setNewEmail(''); setNewPkg(''); setNewSlot(''); setNewPhone(''); setNewStage('New');
   };
 
-  const handleAdd = () => {
+  const syncLeadToBackend = async (b: Booking) => {
+    try {
+      const contactRes = await apiClient.post('/contacts/', {
+        name: b.name,
+        email: b.email,
+        phone: b.phone || undefined,
+      });
+      const contactId = contactRes.data?.id;
+      if (contactId) {
+        const matterTitle = b.pkg ? `Lead: ${b.pkg}` : 'Lead';
+        await apiClient.post('/matters/', {
+          title: matterTitle,
+          pipeline: 'CRM',
+          stage: b.stage,
+          contact_id: contactId,
+        });
+      }
+    } catch (e) {
+      // Non-fatal in demo mode; backend may not be reachable in mock mode
+      console.warn('CRM sync failed or skipped:', e);
+    }
+  };
+
+  const handleAdd = async () => {
     if (!newName || !newEmail) return;
     const nowIso = new Date().toISOString();
     const b: Booking = {
@@ -57,6 +81,8 @@ const CRMAdmin: React.FC = () => {
     setBookingsState(getBookings());
     setShowAdd(false);
     resetAdd();
+    // fire-and-forget backend persistence
+    syncLeadToBackend(b);
   };
 
   const parseCsv = (text: string): Booking[] => {
@@ -103,6 +129,8 @@ const CRMAdmin: React.FC = () => {
     setBookingsState(getBookings());
     setShowImport(false);
     setImportText('');
+    // sync to backend
+    rows.forEach(r => syncLeadToBackend(r));
   };
 
   const handleImportFile = (file: File) => {
@@ -115,6 +143,8 @@ const CRMAdmin: React.FC = () => {
       saveBookings(next);
       setBookingsState(getBookings());
       setShowImport(false);
+      // sync to backend
+      rows.forEach(r => syncLeadToBackend(r));
     };
     reader.readAsText(file);
   };
