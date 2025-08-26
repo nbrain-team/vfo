@@ -9,6 +9,8 @@ const modules = [
     { name: 'Documents', path: '/admin/engagement', icon: '✍︎' },
     { name: 'Vault', path: '/admin/vault', icon: '🗄︎' },
     { name: 'Nurture', path: '/admin/nurture', icon: '📣︎' },
+    { name: 'Pipelines', path: '/admin/pipelines', icon: '🧩' },
+    { name: 'Audit', path: '/admin/audit', icon: '🧾' },
     { name: 'advisorIQ', path: '/agent', icon: '🤖︎' },
     { name: 'legalIQ', path: '/legal', icon: '⚖︎' },
     { name: 'insuranceIQ', path: '/insurance', icon: '🛡︎' },
@@ -34,6 +36,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         navigate('/login');
     };
 
+    const role = (localStorage.getItem('role') || 'Admin') as 'Admin'|'Staff'|'Client';
+
     return (
         <div className="main-layout">
             <div className={`sidebar ${isExpanded ? 'expanded' : ''}`}>
@@ -45,7 +49,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     <h1>LIFTed VFO</h1>
                 </div>
                 <nav className="sidebar-nav-group">
-                    {modules.map(module => (
+                    {modules.filter(m => {
+                        const isAdminRoute = m.path.startsWith('/admin/');
+                        if (role === 'Client' && isAdminRoute) return false;
+                        if (role === 'Staff' && (m.name === 'Pipelines' || m.name === 'Audit')) return false;
+                        return true;
+                    }).map(module => (
                         <NavLink
                             key={module.name}
                             to={module.path}

@@ -2,6 +2,8 @@ from app.db.database import Base, engine
 from app.models.user import User, Entity
 from app.models.legal import Document, DocumentChunk
 from app.models.agent import Agent
+from app.models.crm import Contact, Matter
+from app.models.intake import Intake, FieldMapping
 from sqlalchemy import text
 
 def init_db():

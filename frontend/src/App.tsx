@@ -23,12 +23,14 @@ import SiteBuilderAdmin from './components/modules/SiteBuilderAdmin';
 import EngagementAdmin from './components/modules/EngagementAdmin';
 import VaultAdmin from './components/modules/VaultAdmin';
 import NurtureAdmin from './components/modules/NurtureAdmin';
+import PipelinesAdmin from './components/modules/PipelinesAdmin';
 import Profile from './pages/Profile';
 import Documentation from './pages/Documentation';
 import MockWyomingAPT from './pages/MockWyomingAPT';
 import PublicBookCall from './pages/PublicBookCall';
 import PublicConfirm from './pages/PublicConfirm';
 import PublicSelectTime from './pages/PublicSelectTime';
+import AuditAdmin from './components/modules/AuditAdmin';
 
 function App() {
   return (
@@ -80,6 +82,16 @@ function App() {
           <Route path="/admin/nurture" element={
             <MainLayout>
               <NurtureAdmin />
+            </MainLayout>
+          } />
+          <Route path="/admin/pipelines" element={
+            <MainLayout>
+              <PipelinesAdmin />
+            </MainLayout>
+          } />
+          <Route path="/admin/audit" element={
+            <MainLayout>
+              <AuditAdmin />
             </MainLayout>
           } />
           <Route path="/agent" element={

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import '../public.css';
 import { useLocation, Link } from 'react-router-dom';
 import { addBooking } from '../adminData';
+import apiClient from '../apiClient';
 
 const PublicConfirm: React.FC = () => {
   const location = useLocation() as any;
@@ -53,6 +54,28 @@ const PublicConfirm: React.FC = () => {
         price,
         stage: 'Booked'
       });
+      // Also send to backend to persist to CRM if available
+      apiClient.post('/public/lead', {
+        name,
+        email,
+        guests,
+        pkg,
+        slot,
+        referralSource,
+        referralOther,
+        stateOfResidence,
+        citizenship,
+        citizenshipOther,
+        maritalStatus,
+        priority,
+        priorityOther,
+        assetTypes,
+        assetTypesOther,
+        urgency,
+        assetValueRange,
+        phone,
+        price
+      }).catch(() => { /* silent fail for demo */ });
     }
   }, [name, email, slot]);
 

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import ModuleTemplate from './ModuleTemplate';
-import { getBookings, updateBooking } from '../../adminData';
+import { getBookings, updateBooking, getProductCatalog, saveProductCatalog, ProductCatalog, addDocVersion } from '../../adminData';
 
 const template = `
 Engagement Letter\n\n
@@ -27,6 +27,8 @@ const EngagementAdmin: React.FC = () => {
   const [docType, setDocType] = useState<string>('engagement');
   const [content, setContent] = useState('');
   const [generated, setGenerated] = useState(false);
+  const [catalog, setCatalog] = useState<ProductCatalog>(getProductCatalog());
+  const [showCatalog, setShowCatalog] = useState(false);
 
   const generate = () => {
     const b = bookings.find(x => x.id === selectedId);
@@ -38,6 +40,7 @@ const EngagementAdmin: React.FC = () => {
     });
     setContent(text);
     setGenerated(true);
+    addDocVersion({ id: `v-${Date.now()}`, bookingId: b.id, name: 'Engagement Letter v1', content: text, status: 'Draft', createdAt: new Date().toISOString() });
   };
 
   const markSent = () => {
@@ -71,6 +74,7 @@ const EngagementAdmin: React.FC = () => {
           <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
             <button className="form-button" style={{ width: 'auto' }} onClick={generate} disabled={!selectedId}>Generate Draft</button>
             <button className="button-outline" style={{ width: 'auto' }} onClick={markSent} disabled={!generated}>Approve & Send (Mock)</button>
+            <button className="button-outline" style={{ width: 'auto' }} onClick={() => setShowCatalog(true)}>Product Catalog</button>
           </div>
         </div>
 
@@ -79,6 +83,60 @@ const EngagementAdmin: React.FC = () => {
           <textarea className="form-input" style={{ minHeight: 240 }} value={content} onChange={(e) => setContent(e.target.value)} placeholder="Draft will appear here" />
         </div>
       </div>
+
+      {showCatalog && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+          <div className="module-card" style={{ width: 760, maxWidth: '95%' }}>
+            <h3 className="section-title">Product Catalog & Add-ons</h3>
+            <div style={{ display: 'grid', gap: 12, marginTop: 8 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label className="form-label">Base Label</label>
+                  <input className="form-input" value={catalog.base_label} onChange={(e) => setCatalog({ ...catalog, base_label: e.target.value })} />
+                </div>
+                <div>
+                  <label className="form-label">Base Price</label>
+                  <input className="form-input" type="number" value={catalog.base_price} onChange={(e) => setCatalog({ ...catalog, base_price: Number(e.target.value) })} />
+                </div>
+              </div>
+              <div>
+                <h4 className="section-title" style={{ fontSize: 14 }}>Add-ons</h4>
+                <div style={{ display: 'grid', gap: 8, marginTop: 8 }}>
+                  {catalog.add_ons.map((a, idx) => (
+                    <div key={a.key} className="button-outline" style={{ padding: '8px 12px', display: 'grid', gridTemplateColumns: '24px 1fr 120px 80px', alignItems: 'center', gap: 8 }}>
+                      <input type="checkbox" checked={a.enabled} onChange={(e) => {
+                        const next = [...catalog.add_ons];
+                        next[idx] = { ...a, enabled: e.target.checked };
+                        setCatalog({ ...catalog, add_ons: next });
+                      }} />
+                      <div>{a.label}</div>
+                      <input className="form-input" type="number" value={a.price} onChange={(e) => {
+                        const next = [...catalog.add_ons];
+                        next[idx] = { ...a, price: Number(e.target.value) };
+                        setCatalog({ ...catalog, add_ons: next });
+                      }} />
+                      <button className="button-outline" style={{ width: 'auto' }} onClick={() => {
+                        const next = catalog.add_ons.filter(x => x.key !== a.key);
+                        setCatalog({ ...catalog, add_ons: next });
+                      }}>Remove</button>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginTop: 8 }}>
+                  <button className="button-outline" style={{ width: 'auto' }} onClick={() => {
+                    const key = `addon-${Date.now()}`;
+                    setCatalog({ ...catalog, add_ons: [...catalog.add_ons, { key, label: 'New Add-on', price: 0, enabled: false }] });
+                  }}>Add Add-on</button>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <button className="button-outline" style={{ width: 'auto' }} onClick={() => setShowCatalog(false)}>Close</button>
+                <button className="form-button" style={{ width: 'auto' }} onClick={() => { saveProductCatalog(catalog); setShowCatalog(false); }}>Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </ModuleTemplate>
   );
 };
