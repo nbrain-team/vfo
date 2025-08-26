@@ -151,14 +151,17 @@ const CRMAdmin: React.FC = () => {
 
   return (
     <ModuleTemplate
-      title="CRM & Leads"
+      title="CRM"
       description="View and manage intake, stages, and notes (mock)."
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
         <div />
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button className="form-button" style={{ width: 'auto' }} onClick={() => setShowAdd(true)}>Add Contact</button>
+          <button className="form-button" style={{ width: 'auto' }} onClick={() => alert('Add Lead Form functionality coming soon')}>Add Lead Form</button>
+          <button className="form-button" style={{ width: 'auto' }} onClick={() => alert('Add Service Type functionality coming soon')}>Add Service Type</button>
+          <button className="form-button" style={{ width: 'auto' }} onClick={() => alert('Add Sequence functionality coming soon')}>Add Sequence</button>
           <button className="button-outline" style={{ width: 'auto' }} onClick={() => setShowImport(true)}>Import CSV</button>
-          <button className="form-button" style={{ width: 'auto' }} onClick={() => setShowAdd(true)}>Add Lead</button>
         </div>
       </div>
 

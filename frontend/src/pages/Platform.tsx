@@ -143,14 +143,14 @@ const Platform: React.FC = () => {
                     <div className="summary-value">{kpiSigned}</div>
                 </div>
                 <div className="summary-card">
-                    <div className="summary-label">New (7d)</div>
+                    <div className="summary-label">Matters In Process</div>
                     <div className="summary-value">{kpiNewThisWeek}</div>
                 </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div className="module-card">
-                    <h3 className="section-title">Executive Daily Brief</h3>
+                    <h3 className="section-title">Advisor Daily Brief</h3>
                     <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
                         <li style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>2 consults scheduled today</li>
                         <li style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>1 engagement draft pending approval</li>
@@ -186,18 +186,39 @@ const Platform: React.FC = () => {
                 </div>
 
                 <div className="module-card">
-                    <h3 className="section-title">Closing Soon</h3>
-                    <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
-                        {topOpps.map(op => (
-                            <li key={op.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
-                                <div style={{ fontSize: 13 }}><strong>{op.name}</strong> — {op.pkg}</div>
-                                <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Stage: {op.stage}</div>
-                            </li>
-                        ))}
-                        {topOpps.length === 0 && (
-                            <li style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No current opportunities.</li>
-                        )}
-                    </ul>
+                    <h3 className="section-title">Pipeline</h3>
+                    <div style={{ marginTop: 12 }}>
+                        <div style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: 13 }}>Leads</span>
+                                <span className="status-badge" style={{ background: 'var(--primary)' }}>{bookings.filter(b => b.stage === 'New').length}</span>
+                            </div>
+                        </div>
+                        <div style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: 13 }}>Consults</span>
+                                <span className="status-badge" style={{ background: '#C07C3D' }}>{bookings.filter(b => b.stage === 'Booked').length}</span>
+                            </div>
+                        </div>
+                        <div style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: 13 }}>Engagements</span>
+                                <span className="status-badge" style={{ background: '#DCA85E' }}>{bookings.filter(b => b.stage === 'Signed').length}</span>
+                            </div>
+                        </div>
+                        <div style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: 13 }}>Service</span>
+                                <span className="status-badge" style={{ background: '#22c55e' }}>{bookings.filter(b => b.stage === 'Onboarding').length}</span>
+                            </div>
+                        </div>
+                        <div style={{ padding: '8px 0' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: 13 }}>Fulfilled</span>
+                                <span className="status-badge" style={{ background: '#44ffff' }}>{bookings.filter(b => b.stage === 'Completed').length}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="module-card" style={{ gridColumn: '1 / -1' }}>
@@ -216,29 +237,60 @@ const Platform: React.FC = () => {
                 </div>
 
                 <div className="module-card">
-                    <h3 className="section-title">Alerts</h3>
-                    <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
-                        {alerts.map(a => (
-                            <li key={a.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
-                                <strong>{a.type}:</strong> {a.text}
-                            </li>
-                        ))}
-                    </ul>
+                    <h3 className="section-title">KPIs</h3>
+                    <div style={{ marginTop: 12 }}>
+                        <div style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: 13 }}>Conversion Rate</span>
+                                <span style={{ fontSize: 14, fontWeight: 'bold', color: '#22c55e' }}>
+                                    {kpiBooked > 0 ? Math.round((kpiSigned / kpiBooked) * 100) : 0}%
+                                </span>
+                            </div>
+                        </div>
+                        <div style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: 13 }}>Active Matters</span>
+                                <span style={{ fontSize: 14, fontWeight: 'bold' }}>{kpiSigned}</span>
+                            </div>
+                        </div>
+                        <div style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: 13 }}>Weekly Growth</span>
+                                <span style={{ fontSize: 14, fontWeight: 'bold', color: '#f59e0b' }}>+{kpiNewThisWeek}</span>
+                            </div>
+                        </div>
+                        <div style={{ padding: '8px 0' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: 13 }}>Client Satisfaction</span>
+                                <span style={{ fontSize: 14, fontWeight: 'bold', color: '#22c55e' }}>98%</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="module-card">
-                    <h3 className="section-title">Global Timeline</h3>
-                    <ul style={{ listStyle: 'none', padding: 0, marginTop: 12 }}>
-                        {timeline.map((e, idx) => (
-                            <li key={idx} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
-                                <div style={{ fontSize: 13 }}>{e.text}</div>
-                                <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{e.time ? new Date(e.time).toLocaleString() : ''}</div>
-                            </li>
-                        ))}
-                        {timeline.length === 0 && (
-                            <li style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No recent activity.</li>
-                        )}
-                    </ul>
+                    <h3 className="section-title">Current Site Preview</h3>
+                    <div style={{ marginTop: 12, position: 'relative', cursor: 'pointer' }} onClick={() => window.location.href = '/admin/sitebuilder'}>
+                        <div style={{ 
+                            width: '100%', 
+                            height: '200px', 
+                            background: 'linear-gradient(135deg, #0B3617 0%, #0F5223 100%)', 
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            overflow: 'hidden',
+                            border: '1px solid var(--border)'
+                        }}>
+                            <div style={{ textAlign: 'center', color: 'white' }}>
+                                <h2 style={{ fontSize: '18px', marginBottom: '8px' }}>Your Professional Site</h2>
+                                <p style={{ fontSize: '12px', opacity: 0.8 }}>Click to edit in Site Builder</p>
+                            </div>
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '8px', textAlign: 'center' }}>
+                            Live preview of your current website
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

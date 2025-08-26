@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import ModuleTemplate from './ModuleTemplate';
 import { useNavigate } from 'react-router-dom';
 
-type TabKey = 'overview' | 'services' | 'consult' | 'client-portal' | 'testimonials' | 'contact';
+type TabKey = 'overview' | 'blog' | 'services' | 'consult' | 'client-portal' | 'testimonials' | 'contact';
 
 interface ServiceItem {
     id: string;
@@ -124,6 +124,47 @@ const AgentIQ: React.FC = () => {
             ]
         }
     ];
+
+    const renderBlog = () => (
+        <div className="module-card">
+            <h2 className="section-title">My Blog</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
+                Create SEO-optimized articles and blog posts for your site
+            </p>
+            
+            <div style={{ marginBottom: '24px' }}>
+                <button className="form-button" style={{ width: 'auto' }}>
+                    + Create New Blog Post
+                </button>
+            </div>
+
+            <div style={{ display: 'grid', gap: '16px' }}>
+                <div className="module-card" style={{ background: 'var(--gray-light)' }}>
+                    <h3 style={{ fontSize: '18px', marginBottom: '8px' }}>Understanding Asset Protection Trusts</h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '12px' }}>
+                        A comprehensive guide to how asset protection trusts work and their benefits...
+                    </p>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="button-outline" style={{ width: 'auto' }}>Edit</button>
+                        <button className="button-outline" style={{ width: 'auto' }}>View</button>
+                        <button className="button-outline" style={{ width: 'auto' }}>Delete</button>
+                    </div>
+                </div>
+                
+                <div className="module-card" style={{ background: 'var(--gray-light)' }}>
+                    <h3 style={{ fontSize: '18px', marginBottom: '8px' }}>Wyoming vs Other States: A Comparison</h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '12px' }}>
+                        Why Wyoming offers the strongest asset protection laws in the United States...
+                    </p>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="button-outline" style={{ width: 'auto' }}>Edit</button>
+                        <button className="button-outline" style={{ width: 'auto' }}>View</button>
+                        <button className="button-outline" style={{ width: 'auto' }}>Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 
     const renderOverview = () => (
         <>
@@ -347,7 +388,8 @@ const AgentIQ: React.FC = () => {
         >
             <div style={{ display: 'flex', gap: '10px', marginBottom: '24px', flexWrap: 'wrap' }}>
                 {([
-                    { key: 'overview', label: '◻︎ Overview' },
+                    { key: 'overview', label: '◻︎ My Web Content' },
+                    { key: 'blog', label: '◻︎ My Blog' },
                     { key: 'services', label: '◻︎ Services' },
                     { key: 'consult', label: '◻︎ Consult' },
                     { key: 'client-portal', label: '◻︎ Client Portal' },
@@ -366,6 +408,7 @@ const AgentIQ: React.FC = () => {
             </div>
 
             {activeTab === 'overview' && renderOverview()}
+            {activeTab === 'blog' && renderBlog()}
             {activeTab === 'services' && renderServices()}
             {activeTab === 'consult' && renderConsult()}
             {activeTab === 'client-portal' && renderClientPortal()}

@@ -4,19 +4,18 @@ import { NavLink, useNavigate } from 'react-router-dom';
 const modules = [
     { name: 'Dashboard', path: '/platform', icon: '📊︎' },
     { name: 'Calendar', path: '/admin/calendar', icon: '🗓︎' },
+    { name: 'Sitebuilder', path: '/admin/site', icon: '🌐︎' },
+    { name: 'Formbuilder', path: '/admin/formbuilder', icon: '📝' },
+    { name: 'Document Library', path: '/admin/documents', icon: '📚' },
+    { name: 'Vault', path: '/admin/vault', icon: '🔒' },
+    { name: 'Workflows', path: '/admin/nurture', icon: '⚡' },
     { name: 'CRM', path: '/admin/crm', icon: '📇︎' },
-    { name: 'Site Builder', path: '/admin/site', icon: '🌐︎' },
-    { name: 'Documents', path: '/admin/engagement', icon: '✍︎' },
-    { name: 'Vault', path: '/admin/vault', icon: '🗄︎' },
-    { name: 'Nurture', path: '/admin/nurture', icon: '📣︎' },
-    { name: 'Pipelines', path: '/admin/pipelines', icon: '🧩' },
-    { name: 'Audit', path: '/admin/audit', icon: '🧾' },
+    { name: 'Audit Trail', path: '/admin/audit', icon: '🧾' },
+    { name: 'Modules', path: '#', icon: '📦', isSection: true },
     { name: 'advisorIQ', path: '/agent', icon: '🤖︎' },
     { name: 'legalIQ', path: '/legal', icon: '⚖︎' },
     { name: 'insuranceIQ', path: '/insurance', icon: '🛡︎' },
     { name: 'financialIQ', path: '/wealth', icon: '💰︎' },
-    { name: 'taxIQ', path: '/tax', icon: '📋︎' },
-    { name: 'cryptoIQ', path: '/crypto', icon: '₿' },
     { name: 'valuesIQ', path: '/values', icon: '🎯︎' },
     { name: 'healthIQ', path: '/health', icon: '🏥︎' },
     { name: 'vCTO', path: '/vcto', icon: '🚀︎' },
@@ -52,19 +51,29 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     {modules.filter(m => {
                         const isAdminRoute = m.path.startsWith('/admin/');
                         if (role === 'Client' && isAdminRoute) return false;
-                        if (role === 'Staff' && (m.name === 'Pipelines' || m.name === 'Audit')) return false;
+                        if (role === 'Staff' && m.name === 'Audit Trail') return false;
+                        if (role !== 'Admin' && m.name === 'vCTO') return false; // vCTO only for God mode
                         return true;
-                    }).map(module => (
-                        <NavLink
-                            key={module.name}
-                            to={module.path}
-                            className={({ isActive }) => 
-                                `sidebar-nav-item ${isActive ? 'active' : ''}`
-                            }
-                        >
-                            <span className="sidebar-nav-label">{module.name}</span>
-                        </NavLink>
-                    ))}
+                    }).map(module => {
+                        if (module.isSection) {
+                            return (
+                                <div key={module.name} className="sidebar-section-header">
+                                    {module.name}
+                                </div>
+                            );
+                        }
+                        return (
+                            <NavLink
+                                key={module.name}
+                                to={module.path}
+                                className={({ isActive }) => 
+                                    `sidebar-nav-item ${isActive ? 'active' : ''}`
+                                }
+                            >
+                                <span className="sidebar-nav-label">{module.name}</span>
+                            </NavLink>
+                        );
+                    })}
                 </nav>
                 <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid var(--border)' }}>
                     <a

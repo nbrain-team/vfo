@@ -96,7 +96,7 @@ const NurtureAdmin: React.FC = () => {
   };
 
   return (
-    <ModuleTemplate title="Nurture Sequences" description="Configure email/SMS sequences (mock toggles).">
+    <ModuleTemplate title="Workflows" description="Configure email/SMS sequences (mock toggles).">
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="button-outline" style={{ width: 'auto' }} onClick={() => setShowRules(true)}>Automations</button>
@@ -158,7 +158,10 @@ const NurtureAdmin: React.FC = () => {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <h4 className="section-title" style={{ fontSize: 14 }}>Steps</h4>
-                  <button className="button-outline" style={{ width: 'auto' }} onClick={addDraftStep}>Add Step</button>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="button-outline" style={{ width: 'auto' }} onClick={addDraftStep}>Add Step</button>
+                    <button className="button-outline" style={{ width: 'auto' }} onClick={() => alert('Add rule functionality coming soon - will map to automations')}>Add Rule</button>
+                  </div>
                 </div>
                 <div style={{ display: 'grid', gap: 8, marginTop: 8 }}>
                   {draftSteps.map((st, idx) => (
@@ -166,6 +169,11 @@ const NurtureAdmin: React.FC = () => {
                       <select className="form-input" value={st.type} onChange={(e) => updateDraftStep(idx, { type: e.target.value as NurtureStep['type'] })}>
                         <option value="email">Email</option>
                         <option value="sms">SMS</option>
+                        <option value="form_send">Form send</option>
+                        <option value="esign_request">eSign request</option>
+                        <option value="alert_advisor">Alert Advisor</option>
+                        <option value="document_send">Document send</option>
+                        <option value="manual_review">Manual Review/Edit</option>
                       </select>
                       <input className="form-input" value={st.label} onChange={(e) => updateDraftStep(idx, { label: e.target.value })} />
                       <button className="button-outline" style={{ width: 'auto' }} onClick={() => removeDraftStep(idx)}>Remove</button>
