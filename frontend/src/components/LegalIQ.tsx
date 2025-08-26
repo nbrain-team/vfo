@@ -1,22 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import apiClient from '../apiClient';
+import UploadDocument from './UploadDocument';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import DocumentChat from './DocumentChat';
 
-interface Document {
-    id: number;
-    name: string;
-    type: string;
-    entity: string;
-    uploadDate: string;
-    status: string;
-    tags: string[];
-    keyProvisions?: string[];
-    trustees?: string[];
-    successors?: string[];
-    triggerConditions?: string[];
-    expiryDate?: string;
-}
+interface Entity { id: number; name: string; }
+interface Document { id: number; name: string; document_type?: string; upload_date?: string; }
 
 interface ComplianceItem {
     id: number;
@@ -29,130 +18,86 @@ interface ComplianceItem {
 
 const LegalIQ: React.FC = () => {
     const [activeTab, setActiveTab] = useState('vault');
+    const [entities, setEntities] = useState<Entity[]>([]);
+    const [selectedEntityId, setSelectedEntityId] = useState<number | null>(null);
     const [documents, setDocuments] = useState<Document[]>([]);
     const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
     const [complianceItems, setComplianceItems] = useState<ComplianceItem[]>([]);
     const [showUpload, setShowUpload] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
+    const [insights, setInsights] = useState<string>('');
+    const [insightsLoading, setInsightsLoading] = useState<boolean>(false);
 
-    // Mock data for demonstration
+    const generateInsights = async () => {
+        if (!selectedEntityId) return;
+        setInsightsLoading(true);
+        try {
+            const res = await apiClient.get(`/chat/document-insights/${selectedEntityId}` , {
+                params: { document_type: selectedDoc?.document_type }
+            });
+            setInsights(res.data?.insights || '');
+        } catch (e) {
+            console.error(e);
+            setInsights('');
+        } finally {
+            setInsightsLoading(false);
+        }
+    };
+
+    // Load entities for user and seed if empty
     useEffect(() => {
-        // Mock documents
-        const mockDocs: Document[] = [
-            {
-                id: 1,
-                name: 'Family Trust Agreement 2024',
-                type: 'Trust',
-                entity: 'Smith Family Trust',
-                uploadDate: '2024-03-15',
-                status: 'Active',
-                tags: ['Trust', 'Estate Planning', 'Current'],
-                keyProvisions: ['Revocable trust', 'Successor trustee provision', 'Distribution at age 25'],
-                trustees: ['John Smith', 'Jane Smith'],
-                successors: ['Robert Smith', 'Emily Smith'],
-                triggerConditions: ['Death of grantor', 'Incapacity of grantor'],
-                expiryDate: '2054-03-15'
-            },
-            {
-                id: 2,
-                name: 'Last Will and Testament - John Smith',
-                type: 'Will',
-                entity: 'John Smith',
-                uploadDate: '2024-02-20',
-                status: 'Active',
-                tags: ['Will', 'Estate Planning', 'Current'],
-                keyProvisions: ['Equal distribution to children', 'Charitable bequest of 10%'],
-                trustees: ['Jane Smith'],
-                successors: ['First National Bank Trust Department']
-            },
-            {
-                id: 3,
-                name: 'Power of Attorney - Healthcare',
-                type: 'POA',
-                entity: 'John Smith',
-                uploadDate: '2024-01-10',
-                status: 'Active',
-                tags: ['POA', 'Healthcare', 'Current'],
-                keyProvisions: ['Healthcare decisions', 'End-of-life care'],
-                trustees: ['Jane Smith', 'Dr. Michael Brown']
-            },
-            {
-                id: 4,
-                name: 'LLC Operating Agreement - Smith Ventures',
-                type: 'Corporate',
-                entity: 'Smith Ventures LLC',
-                uploadDate: '2023-11-05',
-                status: 'Active',
-                tags: ['Corporate', 'LLC', 'Business'],
-                keyProvisions: ['Member-managed', 'Profit distribution quarterly', 'Buy-sell provisions']
-            },
-            {
-                id: 5,
-                name: 'Investment Policy Statement',
-                type: 'Policy',
-                entity: 'Smith Family Office',
-                uploadDate: '2024-04-01',
-                status: 'Under Review',
-                tags: ['Investment', 'Policy', 'Governance'],
-                keyProvisions: ['60/40 equity/bond allocation', 'ESG investment criteria', 'Quarterly rebalancing']
+        const init = async () => {
+            try {
+                const ents = await apiClient.get('/entities/');
+                let list = ents.data || [];
+                if (list.length === 0) {
+                    await apiClient.post('/chat/seed-mock');
+                    const ents2 = await apiClient.get('/entities/');
+                    list = ents2.data || [];
+                }
+                setEntities(list);
+                if (list.length > 0) setSelectedEntityId(list[0].id);
+            } catch (e) {
+                console.error(e);
             }
-        ];
-        setDocuments(mockDocs);
+        };
+        init();
+    }, []);
 
-        // Mock compliance items
-        const mockCompliance: ComplianceItem[] = [
-            {
-                id: 1,
-                category: 'Estate Planning',
-                item: 'Annual Trust Review',
-                status: 'Complete',
-                dueDate: '2024-12-31',
-                description: 'Review and update trust documents'
-            },
-            {
-                id: 2,
-                category: 'Corporate',
-                item: 'LLC Annual Report Filing',
-                status: 'Pending',
-                dueDate: '2024-11-15',
-                description: 'File annual report with state'
-            },
-            {
-                id: 3,
-                category: 'Tax',
-                item: 'Gift Tax Return Preparation',
-                status: 'Pending',
-                dueDate: '2025-04-15',
-                description: 'Prepare Form 709 for annual gifts'
-            },
-            {
-                id: 4,
-                category: 'Estate Planning',
-                item: 'Beneficiary Designation Review',
-                status: 'Overdue',
-                dueDate: '2024-09-30',
-                description: 'Review and update beneficiary designations on all accounts'
-            },
-            {
-                id: 5,
-                category: 'Regulatory',
-                item: 'KYC/AML Documentation Update',
-                status: 'Complete',
-                dueDate: '2024-08-01',
-                description: 'Update know-your-customer documentation'
+    // Load documents for selected entity
+    useEffect(() => {
+        const loadDocs = async () => {
+            try {
+                if (!selectedEntityId) return;
+                const res = await apiClient.get(`/legal/entities/${selectedEntityId}/documents/`);
+                setDocuments(res.data || []);
+            } catch (e) {
+                console.error(e);
             }
+        };
+        loadDocs();
+    }, [selectedEntityId]);
+
+    // Mock compliance items remain for UI
+    useEffect(() => {
+        const mockCompliance: ComplianceItem[] = [
+            { id: 1, category: 'Estate Planning', item: 'Annual Trust Review', status: 'Complete', dueDate: '2024-12-31', description: 'Review and update trust documents' },
+            { id: 2, category: 'Corporate', item: 'LLC Annual Report Filing', status: 'Pending', dueDate: '2024-11-15', description: 'File annual report with state' },
+            { id: 3, category: 'Tax', item: 'Gift Tax Return Preparation', status: 'Pending', dueDate: '2025-04-15', description: 'Prepare Form 709 for annual gifts' },
+            { id: 4, category: 'Estate Planning', item: 'Beneficiary Designation Review', status: 'Overdue', dueDate: '2024-09-30', description: 'Review and update beneficiary designations on all accounts' },
+            { id: 5, category: 'Regulatory', item: 'KYC/AML Documentation Update', status: 'Complete', dueDate: '2024-08-01', description: 'Update know-your-customer documentation' }
         ];
         setComplianceItems(mockCompliance);
     }, []);
 
     // Document type distribution for pie chart
     const docTypeData = documents.reduce((acc, doc) => {
-        const existing = acc.find(item => item.name === doc.type);
+        const existing = acc.find(item => item.name === (doc.document_type || 'Unknown'));
         if (existing) {
             existing.value++;
         } else {
-            acc.push({ name: doc.type, value: 1 });
+            acc.push({ name: (doc.document_type || 'Unknown'), value: 1 });
         }
         return acc;
     }, [] as { name: string; value: number }[]);
@@ -168,13 +113,11 @@ const LegalIQ: React.FC = () => {
 
     const filteredDocs = documents.filter(doc => {
         const matchesSearch = doc.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            doc.entity.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesTags = selectedTags.length === 0 || 
-                           selectedTags.some(tag => doc.tags.includes(tag));
-        return matchesSearch && matchesTags;
+                              (doc.document_type || '').toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesSearch;
     });
 
-    const allTags = Array.from(new Set(documents.flatMap(doc => doc.tags)));
+    const allTags: string[] = [];
 
     return (
         <div className="page-container">
@@ -205,6 +148,7 @@ const LegalIQ: React.FC = () => {
 
             {/* Document Vault Tab */}
             {activeTab === 'vault' && (
+                <>
                 <div className="module-grid">
                     <div className="module-card">
                         <div className="section-header">
@@ -228,14 +172,14 @@ const LegalIQ: React.FC = () => {
                                 className="form-input"
                                 style={{ flex: 1 }}
                             />
-                            <select 
-                                className="form-input" 
+                            <select
+                                className="form-input"
                                 style={{ width: 'auto' }}
-                                onChange={(e) => setSelectedTags(e.target.value ? [e.target.value] : [])}
+                                value={selectedEntityId || ''}
+                                onChange={(e) => setSelectedEntityId(Number(e.target.value))}
                             >
-                                <option value="">All Tags</option>
-                                {allTags.map(tag => (
-                                    <option key={tag} value={tag}>{tag}</option>
+                                {entities.map(ent => (
+                                    <option key={ent.id} value={ent.id}>{ent.name}</option>
                                 ))}
                             </select>
                         </div>
@@ -247,10 +191,7 @@ const LegalIQ: React.FC = () => {
                                     <tr>
                                         <th>Document Name</th>
                                         <th>Type</th>
-                                        <th>Entity</th>
                                         <th>Upload Date</th>
-                                        <th>Status</th>
-                                        <th>Tags</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -258,31 +199,8 @@ const LegalIQ: React.FC = () => {
                                     {filteredDocs.map(doc => (
                                         <tr key={doc.id}>
                                             <td style={{ fontWeight: '500' }}>{doc.name}</td>
-                                            <td>{doc.type}</td>
-                                            <td>{doc.entity}</td>
-                                            <td>{doc.uploadDate}</td>
-                                            <td>
-                                                <span className={`status-badge ${doc.status === 'Active' ? 'active' : 'pending'}`}>
-                                                    {doc.status}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                                                    {doc.tags.slice(0, 2).map(tag => (
-                                                        <span 
-                                                            key={tag}
-                                                            style={{
-                                                                fontSize: '11px',
-                                                                padding: '2px 6px',
-                                                                backgroundColor: 'var(--gray-light)',
-                                                                borderRadius: '3px'
-                                                            }}
-                                                        >
-                                                            {tag}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </td>
+                                            <td>{doc.document_type || '-'}</td>
+                                            <td>{doc.upload_date ? new Date(doc.upload_date).toLocaleDateString() : '-'}</td>
                                             <td>
                                                 <button
                                                     onClick={() => setSelectedDoc(doc)}
@@ -330,123 +248,48 @@ const LegalIQ: React.FC = () => {
                         </ResponsiveContainer>
                     </div>
                 </div>
+                {showUpload && selectedEntityId && (
+                    <div className="module-card" style={{ marginTop: '16px' }}>
+                        <UploadDocument entityId={selectedEntityId} onUpload={() => {
+                            setShowUpload(false);
+                            // Refresh docs after upload
+                            apiClient.get(`/legal/entities/${selectedEntityId}/documents/`).then(res => setDocuments(res.data || [])).catch(console.error);
+                        }} />
+                    </div>
+                )}
+                </>
             )}
 
             {/* AI Extraction Tab */}
             {activeTab === 'extraction' && (
                 <div className="module-grid">
-                    {selectedDoc ? (
-                        <div className="module-card">
-                            <h3 className="section-title">AI-Extracted Information: {selectedDoc.name}</h3>
-                            
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
-                                <div>
-                                    <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '10px' }}>
-                                        ▣ Key Provisions
-                                    </h4>
-                                    <ul style={{ listStyle: 'none', padding: 0 }}>
-                                        {selectedDoc.keyProvisions?.map((provision, idx) => (
-                                            <li key={idx} style={{ 
-                                                padding: '8px', 
-                                                backgroundColor: 'var(--gray-light)', 
-                                                marginBottom: '8px',
-                                                borderRadius: 'var(--radius)',
-                                                fontSize: '13px'
-                                            }}>
-                                                • {provision}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-
-                                <div>
-                                    <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '10px' }}>
-                                        👥 Trustees & Fiduciaries
-                                    </h4>
-                                    <ul style={{ listStyle: 'none', padding: 0 }}>
-                                        {selectedDoc.trustees?.map((trustee, idx) => (
-                                            <li key={idx} style={{ 
-                                                padding: '8px', 
-                                                backgroundColor: 'var(--primary-light)', 
-                                                marginBottom: '8px',
-                                                borderRadius: 'var(--radius)',
-                                                fontSize: '13px'
-                                            }}>
-                                                {trustee}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-
-                                <div>
-                                    <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '10px' }}>
-                                        🔄 Successor Details
-                                    </h4>
-                                    <ul style={{ listStyle: 'none', padding: 0 }}>
-                                        {selectedDoc.successors?.map((successor, idx) => (
-                                            <li key={idx} style={{ 
-                                                padding: '8px', 
-                                                backgroundColor: 'var(--success-light)', 
-                                                marginBottom: '8px',
-                                                borderRadius: 'var(--radius)',
-                                                fontSize: '13px'
-                                            }}>
-                                                {successor}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-
-                                <div>
-                                    <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '10px' }}>
-                                        ⚡ Trigger Conditions
-                                    </h4>
-                                    <ul style={{ listStyle: 'none', padding: 0 }}>
-                                        {selectedDoc.triggerConditions?.map((condition, idx) => (
-                                            <li key={idx} style={{ 
-                                                padding: '8px', 
-                                                backgroundColor: '#fff3cd', 
-                                                marginBottom: '8px',
-                                                borderRadius: 'var(--radius)',
-                                                fontSize: '13px'
-                                            }}>
-                                                • {condition}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
-
+                    <div className="module-card">
+                        <h3 className="section-title">AI Insights {selectedDoc ? `for ${selectedDoc.name}` : ''}</h3>
+                        <p style={{ color: 'var(--text-secondary)', marginTop: '8px' }}>
+                            Generate AI insights {selectedDoc?.document_type ? `for ${selectedDoc.document_type} documents` : 'across selected entity'}.
+                        </p>
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+                            <button
+                                onClick={generateInsights}
+                                className="form-button"
+                                style={{ width: 'auto', padding: '8px 20px' }}
+                            >
+                                {insightsLoading ? 'Generating...' : 'Generate Insights'}
+                            </button>
                             <button
                                 onClick={() => setSelectedDoc(null)}
                                 className="form-button"
-                                style={{ marginTop: '20px', width: 'auto', padding: '8px 20px' }}
+                                style={{ width: 'auto', padding: '8px 20px', backgroundColor: 'var(--gray-light)', color: 'var(--text-primary)' }}
                             >
-                                Back to Documents
+                                Clear Selection
                             </button>
                         </div>
-                    ) : (
-                        <div className="module-card">
-                            <h3 className="section-title">Select a Document for AI Analysis</h3>
-                            <p style={{ color: 'var(--text-secondary)', marginTop: '20px' }}>
-                                Choose a document from the vault to view AI-extracted information including:
-                            </p>
-                            <ul style={{ marginTop: '20px', color: 'var(--text-secondary)' }}>
-                                <li>Key clauses and provisions</li>
-                                <li>Trustee and fiduciary roles</li>
-                                <li>Successor beneficiary details</li>
-                                <li>Trigger conditions and contingencies</li>
-                                <li>Important dates and deadlines</li>
-                            </ul>
-                            <button
-                                onClick={() => setActiveTab('vault')}
-                                className="form-button"
-                                style={{ marginTop: '20px', width: 'auto', padding: '8px 20px' }}
-                            >
-                                Go to Document Vault
-                            </button>
-                        </div>
-                    )}
+                        {insights && (
+                            <div style={{ marginTop: '16px', whiteSpace: 'pre-wrap', fontSize: '14px', color: 'var(--text-primary)' }}>
+                                {insights}
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
 
@@ -520,7 +363,7 @@ const LegalIQ: React.FC = () => {
                         <div className="summary-card">
                             <div className="summary-label">Total Documents</div>
                             <div className="summary-value">{documents.length}</div>
-                            <div className="summary-change">Across {new Set(documents.map(d => d.entity)).size} entities</div>
+                            <div className="summary-change">Across {entities.length} entities</div>
                         </div>
                         <div className="summary-card">
                             <div className="summary-label">Compliance Score</div>
@@ -612,6 +455,8 @@ const LegalIQ: React.FC = () => {
                             compliance requirements, key dates, or any other information in your documents.
                         </p>
                         <DocumentChat 
+                            entityId={selectedEntityId ? String(selectedEntityId) : undefined}
+                            documentType={selectedDoc?.document_type}
                             contextType="legal"
                         />
                     </div>

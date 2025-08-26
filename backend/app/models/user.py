@@ -24,6 +24,10 @@ class Entity(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True, nullable=False)
+    practice_area = Column(String, nullable=True)
+    contact_email = Column(String, nullable=True)
+    contact_phone = Column(String, nullable=True)
+    external_id = Column(String, nullable=True)
     
     users = relationship("User",
                          secondary=user_entity_association,

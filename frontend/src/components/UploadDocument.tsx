@@ -31,12 +31,25 @@ const UploadDocument: React.FC<UploadDocumentProps> = ({ entityId, onUpload }) =
         formData.append('file', file);
 
         try {
+            // Save file + metadata in DB
             await apiClient.post(`/legal/entities/${entityId}/documents/`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            setMessage('Document uploaded successfully!');
+
+            // Also index into vector store for chat (Pinecone or Postgres fallback)
+            const indexForm = new FormData();
+            indexForm.append('file', file);
+            indexForm.append('entity_id', String(entityId));
+            indexForm.append('document_type', documentType);
+            await apiClient.post(`/chat/upload-and-index`, indexForm, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            setMessage('Document uploaded and indexed successfully!');
             setName('');
             setDocumentType('');
             setFile(null);

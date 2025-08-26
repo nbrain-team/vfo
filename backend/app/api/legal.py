@@ -14,18 +14,19 @@ def upload_document_for_entity(
     entity_id: int,
     file: UploadFile = File(...),
     name: str = Form(...),
-    type: str = Form(...),
+    document_type: str = Form(None),
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user: UserModel = Depends(get_current_user)
 ):
-    # Save file and create document record
-    doc_create = DocumentCreate(
-        name=name,
-        type=type,
-        entity_id=entity_id,
-        file_path=f"uploads/{file.filename}"
-    )
-    return crud_legal.create_document(db=db, document=doc_create)
+    """Upload a document for a given entity and persist metadata in DB."""
+    try:
+        doc_create = DocumentCreate(
+            name=name,
+            document_type=document_type,
+        )
+        return crud_legal.create_document(db=db, document=doc_create, entity_id=entity_id, file=file)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/entities/{entity_id}/documents/", response_model=List[Document])
 def get_entity_documents(

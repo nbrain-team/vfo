@@ -3,11 +3,14 @@ from app.models.legal import Document
 from app.schemas.legal import DocumentCreate
 import shutil
 from fastapi import UploadFile
+import os
 
-UPLOAD_DIR = "backend/app/db/uploads"
+BASE_DIR = os.path.dirname(__file__)
+UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 
 def create_document(db: Session, document: DocumentCreate, entity_id: int, file: UploadFile):
-    file_path = f"{UPLOAD_DIR}/{file.filename}"
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
         

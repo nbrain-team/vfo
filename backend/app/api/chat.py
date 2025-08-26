@@ -3,12 +3,14 @@ from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.api.api import get_current_user
-from app.models.user import User
+from app.models.user import User, Entity
 from app.services.rag_chat import get_rag_chat_service
 from app.services.document_processor import get_document_processor
 from app.services.vector_db import get_vector_db
 from pydantic import BaseModel
 import logging
+from app.models.legal import Document
+from app.services import seed_data
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -219,3 +221,86 @@ async def search_documents(
     except Exception as e:
         logger.error(f"Error searching documents: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e)) 
+
+
+@router.post("/seed-mock")
+async def seed_mock_documents_for_current_user(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Seed mock legal documents and entities for the current user.
+    - Creates entities if missing and associates them to the user
+    - Inserts minimal Document rows for visibility in the vault
+    - Indexes document content into the vector store (Pinecone or Postgres fallback)
+    """
+    try:
+        vector_db = get_vector_db()
+        processor = get_document_processor()
+
+        # Helper to get or create an Entity by a readable name derived from seed entity_id
+        def get_or_create_entity(seed_entity_id: str) -> Entity:
+            readable_name = seed_entity_id.replace('_', ' ').title()
+            entity = db.query(Entity).filter(Entity.name == readable_name).first()
+            if not entity:
+                entity = Entity(name=readable_name)
+                db.add(entity)
+                db.commit()
+                db.refresh(entity)
+            # Associate to current user if not already associated
+            if entity not in current_user.entities:
+                current_user.entities.append(entity)
+                db.add(current_user)
+                db.commit()
+            return entity
+
+        created = 0
+        for doc_data in seed_data.MOCK_DOCUMENTS:
+            entity = get_or_create_entity(doc_data['entity_id'])
+
+            # Create a minimal Document row for the vault
+            doc_name = doc_data['file_name'].rsplit('.', 1)[0].replace('_', ' ')
+            existing_doc = (
+                db.query(Document)
+                .filter(Document.name == doc_name, Document.entity_id == entity.id)
+                .first()
+            )
+            if not existing_doc:
+                db_doc = Document(
+                    name=doc_name,
+                    file_path=f"seeded/{doc_data['file_name']}",
+                    document_type=doc_data.get('document_type'),
+                    entity_id=entity.id,
+                )
+                db.add(db_doc)
+                db.commit()
+                db.refresh(db_doc)
+
+            # Index content into vector database
+            processed = processor.process_document(
+                file_content=doc_data['content'].encode('utf-8'),
+                file_name=doc_data['file_name'],
+                file_type='txt',
+                metadata={
+                    'entity_id': str(entity.id),
+                    'document_type': doc_data.get('document_type'),
+                    'user_id': str(current_user.id)
+                }
+            )
+            ok = vector_db.upsert_document_chunks(
+                chunks=processed['chunks'],
+                metadata={
+                    'document_id': f"{entity.id}_{doc_data['file_name']}",
+                    'entity_id': str(entity.id),
+                    'document_type': doc_data.get('document_type'),
+                    'user_id': str(current_user.id),
+                    'file_name': doc_data['file_name']
+                }
+            )
+            if ok:
+                created += 1
+
+        return {"status": "success", "seeded_documents": created}
+    except Exception as e:
+        logger.error(f"Error seeding mock documents: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
