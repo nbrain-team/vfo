@@ -19,6 +19,8 @@ interface FormTemplate {
 }
 
 const FormbuilderAdmin: React.FC = () => {
+    const [showPreview, setShowPreview] = useState(false);
+    const [previewForm, setPreviewForm] = useState<FormTemplate | null>(null);
     const [forms, setForms] = useState<FormTemplate[]>([
         {
             id: 'form-1',
@@ -293,6 +295,11 @@ const FormbuilderAdmin: React.FC = () => {
         }
     };
 
+    const handlePreview = (form: FormTemplate) => {
+        setPreviewForm(form);
+        setShowPreview(true);
+    };
+
     return (
         <ModuleTemplate
             title="Formbuilder"
@@ -329,7 +336,7 @@ const FormbuilderAdmin: React.FC = () => {
                             <button 
                                 className="button-outline" 
                                 style={{ width: 'auto' }}
-                                onClick={() => alert('Preview functionality coming soon')}
+                                onClick={() => handlePreview(form)}
                             >
                                 Preview
                             </button>
@@ -458,6 +465,137 @@ const FormbuilderAdmin: React.FC = () => {
                             >
                                 {editingForm ? 'Save Changes' : 'Create Form'}
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Preview Modal */}
+            {showPreview && previewForm && (
+                <div className="modal-overlay" onClick={() => setShowPreview(false)}>
+                    <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h3 className="section-title">Form Preview</h3>
+                            <button 
+                                className="button-outline" 
+                                onClick={() => setShowPreview(false)}
+                                style={{ width: 'auto', fontSize: '20px', padding: '4px 12px' }}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        
+                        <div style={{ 
+                            border: '1px solid var(--border-light)', 
+                            borderRadius: '8px', 
+                            padding: '24px',
+                            backgroundColor: 'var(--background-primary)'
+                        }}>
+                            <h2 style={{ fontSize: '24px', marginBottom: '8px' }}>{previewForm.name}</h2>
+                            {previewForm.description && (
+                                <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>
+                                    {previewForm.description}
+                                </p>
+                            )}
+                            
+                            <form onSubmit={(e) => e.preventDefault()}>
+                                {previewForm.fields.map((field, idx) => (
+                                    <div key={field.id} style={{ marginBottom: '20px' }}>
+                                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+                                            {field.label}
+                                            {field.required && <span style={{ color: 'var(--danger)' }}> *</span>}
+                                        </label>
+                                        
+                                        {field.type === 'text' && (
+                                            <input 
+                                                type="text" 
+                                                className="form-input" 
+                                                placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+                                                disabled
+                                            />
+                                        )}
+                                        
+                                        {field.type === 'email' && (
+                                            <input 
+                                                type="email" 
+                                                className="form-input" 
+                                                placeholder={field.placeholder || 'email@example.com'}
+                                                disabled
+                                            />
+                                        )}
+                                        
+                                        {field.type === 'phone' && (
+                                            <input 
+                                                type="tel" 
+                                                className="form-input" 
+                                                placeholder={field.placeholder || '(555) 123-4567'}
+                                                disabled
+                                            />
+                                        )}
+                                        
+                                        {field.type === 'date' && (
+                                            <input 
+                                                type="date" 
+                                                className="form-input"
+                                                disabled
+                                            />
+                                        )}
+                                        
+                                        {field.type === 'textarea' && (
+                                            <textarea 
+                                                className="form-input" 
+                                                rows={4}
+                                                placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
+                                                disabled
+                                            />
+                                        )}
+                                        
+                                        {field.type === 'select' && (
+                                            <select className="form-input" disabled>
+                                                <option value="">Select an option</option>
+                                                {field.options?.map((opt, optIdx) => (
+                                                    <option key={optIdx} value={opt}>{opt}</option>
+                                                ))}
+                                            </select>
+                                        )}
+                                        
+                                        {field.type === 'checkbox' && (
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <input type="checkbox" id={`preview-${field.id}`} disabled />
+                                                <label htmlFor={`preview-${field.id}`} style={{ marginBottom: 0 }}>
+                                                    {field.placeholder || 'Check to confirm'}
+                                                </label>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                                
+                                <div style={{ 
+                                    marginTop: '32px', 
+                                    paddingTop: '24px', 
+                                    borderTop: '1px solid var(--border-light)',
+                                    display: 'flex',
+                                    justifyContent: 'flex-end',
+                                    gap: '12px'
+                                }}>
+                                    <button 
+                                        type="button"
+                                        className="button-outline" 
+                                        style={{ width: 'auto' }}
+                                        onClick={() => setShowPreview(false)}
+                                    >
+                                        Close Preview
+                                    </button>
+                                    <button 
+                                        type="submit"
+                                        className="form-button" 
+                                        style={{ width: 'auto' }}
+                                        disabled
+                                    >
+                                        Submit Form
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
