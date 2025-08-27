@@ -33,6 +33,7 @@ import PublicSelectTime from './pages/PublicSelectTime';
 import AuditAdmin from './components/modules/AuditAdmin';
 import FormbuilderAdmin from './components/modules/FormbuilderAdmin';
 import DocumentLibraryAdmin from './components/modules/DocumentLibraryAdmin';
+import CalendarCallback from './pages/CalendarCallback';
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/calendar-callback" element={<CalendarCallback />} />
         {/* Public-facing page outside of the admin/sidebar layout */}
         <Route path="/wyoming-apt" element={<MockWyomingAPT />} />
         <Route path="/wyoming-apt/select" element={<PublicSelectTime />} />
