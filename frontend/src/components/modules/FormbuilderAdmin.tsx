@@ -471,6 +471,7 @@ const FormbuilderAdmin: React.FC = () => {
             )}
 
             {/* Preview Modal */}
+            {console.log('Modal render check:', { showPreview, hasPreviewForm: !!previewForm })}
             {showPreview && previewForm && (
                 <div className="modal-overlay" onClick={() => setShowPreview(false)}>
                     <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
