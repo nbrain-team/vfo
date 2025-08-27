@@ -30,6 +30,44 @@ const FormbuilderAdmin: React.FC = () => {
                 { id: 'f3', type: 'phone', label: 'Phone Number', required: false }
             ],
             createdAt: new Date().toISOString()
+        },
+        {
+            id: 'form-trustee-acceptance',
+            name: 'Trustee Acceptance of Contribution to Trust',
+            description: 'Form for documenting contributions to trust, holding company or subsidiary',
+            fields: [
+                { id: 'tf1', type: 'text', label: 'Name of Contributing Party', required: true },
+                { id: 'tf2', type: 'textarea', label: 'Description of Property', required: true },
+                { id: 'tf3', type: 'date', label: 'On what date will the contribution be made?', required: true },
+                { id: 'tf4', type: 'text', label: 'What is the dollar amount of the contribution?', required: true },
+                { id: 'tf5', type: 'select', label: 'Please select the type of contribution', required: true, options: ['Cash', 'Assets'] },
+                { id: 'tf6', type: 'text', label: 'What is the name of the company that the contribution is being made to?', required: false },
+                { id: 'tf7', type: 'text', label: 'What state was the company formed in?', required: false },
+                { id: 'tf8', type: 'select', label: 'Please choose the company type', required: false, options: ['LLC', 'Corporation'] },
+                { id: 'tf9', type: 'text', label: 'What is the name of the holding company?', required: false },
+                { id: 'tf10', type: 'text', label: 'What state was the holding company formed in?', required: false }
+            ],
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 'form-investment-minutes',
+            name: 'Investment Committee Meeting Minutes',
+            description: 'Questionnaire for creating formal record of Investment Advisor Committee meetings',
+            fields: [
+                { id: 'im1', type: 'date', label: 'What is the date of this meeting of the Investment Advisor Committee?', required: true },
+                { id: 'im2', type: 'text', label: 'Who are the currently serving members of the Investment Advisor Committee? (First name, Last name)', required: true },
+                { id: 'im3', type: 'select', label: 'Are there any other members?', required: true, options: ['Yes', 'No'] },
+                { id: 'im4', type: 'checkbox', label: 'How did the Investment Advisor Committee Meet?', required: true, options: ['In person', 'Phone Call', 'Video Conference'] },
+                { id: 'im5', type: 'select', label: 'Did the Investment Advisor Committee take any actions since the last meeting?', required: true, options: ['Yes', 'No'] },
+                { id: 'im6', type: 'textarea', label: 'If Yes, Please describe each activity', required: false },
+                { id: 'im7', type: 'select', label: 'Were any funds or assets transferred between Trust entities?', required: true, options: ['Yes', 'No'] },
+                { id: 'im8', type: 'textarea', label: 'If Yes, Please describe each transfer', required: false },
+                { id: 'im9', type: 'select', label: 'Are there any future contemplated activities?', required: true, options: ['Yes', 'No'] },
+                { id: 'im10', type: 'textarea', label: 'If Yes, Please describe the future activities', required: false },
+                { id: 'im11', type: 'select', label: 'Are there any other activities to memorialize?', required: true, options: ['Yes', 'No'] },
+                { id: 'im12', type: 'textarea', label: 'If Yes, Please describe the other activities', required: false }
+            ],
+            createdAt: new Date().toISOString()
         }
     ]);
     
