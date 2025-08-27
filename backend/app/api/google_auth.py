@@ -16,6 +16,10 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 
+# Log the configuration status
+print(f"Google Client ID configured: {bool(GOOGLE_CLIENT_ID)}")
+print(f"Google Client ID: {GOOGLE_CLIENT_ID[:20]}..." if GOOGLE_CLIENT_ID else "Google Client ID: None")
+
 @router.post("/google")
 async def google_auth(credential_data: dict, db: Session = Depends(get_db)):
     """Authenticate user with Google OAuth2"""
@@ -25,6 +29,10 @@ async def google_auth(credential_data: dict, db: Session = Depends(get_db)):
         if not credential:
             raise HTTPException(status_code=400, detail="No credential provided")
         
+        # Check if Google Client ID is configured
+        if not GOOGLE_CLIENT_ID:
+            raise HTTPException(status_code=500, detail="Google Client ID not configured on server")
+        
         # Verify the token with Google
         try:
             idinfo = id_token.verify_oauth2_token(
@@ -33,6 +41,7 @@ async def google_auth(credential_data: dict, db: Session = Depends(get_db)):
                 GOOGLE_CLIENT_ID
             )
         except ValueError as e:
+            print(f"Token verification error: {str(e)}")
             raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
         
         # Extract user information
