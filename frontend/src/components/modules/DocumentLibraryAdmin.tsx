@@ -20,36 +20,6 @@ const DocumentLibraryAdmin: React.FC = () => {
     const [editFormData, setEditFormData] = useState({ title: '', description: '', placeholders: [''] });
     
     const [documents, setDocuments] = useState<Document[]>([
-        {
-            id: 'doc-1',
-            title: 'Standard Engagement Letter',
-            description: 'Template for new client engagements',
-            type: 'engagement_letter',
-            requiresSignature: true,
-            createdAt: '2024-01-15',
-            lastModified: '2024-01-15',
-            fileSize: '245 KB'
-        },
-        {
-            id: 'doc-2',
-            title: 'Client Intake Form',
-            description: 'Initial client information gathering form',
-            type: 'intake_form',
-            requiresSignature: false,
-            createdAt: '2024-01-10',
-            lastModified: '2024-01-20',
-            fileSize: '128 KB'
-        },
-        {
-            id: 'doc-3',
-            title: 'Privacy Policy Disclosure',
-            description: 'Standard privacy policy for clients',
-            type: 'disclosure',
-            requiresSignature: false,
-            createdAt: '2024-01-05',
-            lastModified: '2024-01-05',
-            fileSize: '89 KB'
-        },
         // Wyoming Trust Document Templates
         {
             id: 'doc-4',
