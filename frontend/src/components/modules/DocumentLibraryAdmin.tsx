@@ -15,6 +15,10 @@ interface Document {
 }
 
 const DocumentLibraryAdmin: React.FC = () => {
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editingDocument, setEditingDocument] = useState<Document | null>(null);
+    const [editFormData, setEditFormData] = useState({ title: '', description: '', placeholders: [''] });
+    
     const [documents, setDocuments] = useState<Document[]>([
         {
             id: 'doc-1',
@@ -94,6 +98,311 @@ const DocumentLibraryAdmin: React.FC = () => {
             fileSize: '44.3 KB',
             isTemplate: true,
             placeholders: ['{{company_name}}', '{{grantor_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}', '{{address}}']
+        },
+        // Contributions to Trust Documents
+        {
+            id: 'doc-8',
+            title: 'Contribution Questionnaire',
+            description: 'Document for handling contributions and transfers to trust structures',
+            type: 'intake_form',
+            requiresSignature: false,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '32 KB',
+            isTemplate: true,
+            placeholders: ['{{client_name}}', '{{date}}', '{{email}}', '{{phone}}']
+        },
+        {
+            id: 'doc-9',
+            title: 'Trustee Acceptance of Contribution to Trust',
+            description: 'Document for handling contributions and transfers to trust structures',
+            type: 'trust_document',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '28 KB',
+            isTemplate: true,
+            placeholders: ['{{grantor_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}']
+        },
+        {
+            id: 'doc-10',
+            title: 'Any State Special Meeting Minutes and Resolutions',
+            description: 'Document for handling contributions and transfers to trust structures',
+            type: 'meeting_minutes',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '35 KB',
+            isTemplate: true,
+            placeholders: ['{{company_name}}', '{{meeting_date}}', '{{attendees}}', '{{resolutions}}']
+        },
+        {
+            id: 'doc-11',
+            title: 'Any State Contribution Meeting Minutes and Resolutions',
+            description: 'Document for handling contributions and transfers to trust structures',
+            type: 'meeting_minutes',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '33 KB',
+            isTemplate: true,
+            placeholders: ['{{company_name}}', '{{meeting_date}}', '{{attendees}}', '{{resolutions}}']
+        },
+        {
+            id: 'doc-12',
+            title: 'Affidavit of Settlor',
+            description: 'Document for handling contributions and transfers to trust structures',
+            type: 'trust_document',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '22 KB',
+            isTemplate: true,
+            placeholders: ['{{grantor_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}']
+        },
+        // Distributions From Trust Documents
+        {
+            id: 'doc-13',
+            title: 'DDC Minutes Appointing WAPA',
+            description: 'Document for managing distributions from trust to beneficiaries',
+            type: 'meeting_minutes',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '30 KB',
+            isTemplate: true,
+            placeholders: ['{{company_name}}', '{{meeting_date}}', '{{attendees}}', '{{resolutions}}']
+        },
+        {
+            id: 'doc-14',
+            title: 'DDC Acceptance of Appointment',
+            description: 'Document for managing distributions from trust to beneficiaries',
+            type: 'trust_document',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '25 KB',
+            isTemplate: true,
+            placeholders: ['{{grantor_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}']
+        },
+        {
+            id: 'doc-15',
+            title: 'DDC Distribution Request Form',
+            description: 'Document for managing distributions from trust to beneficiaries',
+            type: 'intake_form',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '28 KB',
+            isTemplate: true,
+            placeholders: ['{{client_name}}', '{{date}}', '{{email}}', '{{phone}}']
+        },
+        {
+            id: 'doc-16',
+            title: 'DDC Minutes Approving Distribution',
+            description: 'Document for managing distributions from trust to beneficiaries',
+            type: 'meeting_minutes',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '32 KB',
+            isTemplate: true,
+            placeholders: ['{{company_name}}', '{{meeting_date}}', '{{attendees}}', '{{resolutions}}']
+        },
+        {
+            id: 'doc-17',
+            title: 'Any State Distribution Meeting Minutes and Resolutions',
+            description: 'Document for managing distributions from trust to beneficiaries',
+            type: 'meeting_minutes',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '34 KB',
+            isTemplate: true,
+            placeholders: ['{{company_name}}', '{{meeting_date}}', '{{attendees}}', '{{resolutions}}']
+        },
+        // General Documents
+        {
+            id: 'doc-18',
+            title: 'Engagement Agreement - WAPA',
+            description: 'General legal document for trust administration',
+            type: 'engagement_letter',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '45 KB',
+            isTemplate: true,
+            placeholders: ['{{client_name}}', '{{service_type}}', '{{effective_date}}', '{{fee_structure}}']
+        },
+        // Investment Decisions Documents
+        {
+            id: 'doc-19',
+            title: 'Investment Committee Creation and Appointment',
+            description: 'Document for investment committee decisions and governance',
+            type: 'trust_document',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '38 KB',
+            isTemplate: true,
+            placeholders: ['{{grantor_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}']
+        },
+        {
+            id: 'doc-20',
+            title: 'Investment Committee Questionnaire Template',
+            description: 'Document for investment committee decisions and governance',
+            type: 'intake_form',
+            requiresSignature: false,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '42 KB',
+            isTemplate: true,
+            placeholders: ['{{client_name}}', '{{date}}', '{{email}}', '{{phone}}']
+        },
+        {
+            id: 'doc-21',
+            title: 'Investment Committee Meeting Minutes',
+            description: 'Document for investment committee decisions and governance',
+            type: 'meeting_minutes',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '36 KB',
+            isTemplate: true,
+            placeholders: ['{{company_name}}', '{{meeting_date}}', '{{attendees}}', '{{resolutions}}']
+        },
+        // Non Charitable Specific Purpose Trust Documents
+        {
+            id: 'doc-22',
+            title: 'NCSPT Trust Agreement - One Trustee',
+            description: 'NCSPT document for specific purpose trust structures',
+            type: 'trust_document',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '52 KB',
+            isTemplate: true,
+            placeholders: ['{{grantor_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}']
+        },
+        {
+            id: 'doc-23',
+            title: 'NCSPT Trust Agreement - Two Trustees',
+            description: 'NCSPT document for specific purpose trust structures',
+            type: 'trust_document',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '55 KB',
+            isTemplate: true,
+            placeholders: ['{{grantor_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}']
+        },
+        {
+            id: 'doc-24',
+            title: 'NCSPT Certification of Trust - One Trustee',
+            description: 'NCSPT document for specific purpose trust structures',
+            type: 'trust_document',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '28 KB',
+            isTemplate: true,
+            placeholders: ['{{grantor_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}']
+        },
+        {
+            id: 'doc-25',
+            title: 'NCSPT Certification of Trust - Two Trustees',
+            description: 'NCSPT document for specific purpose trust structures',
+            type: 'trust_document',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '30 KB',
+            isTemplate: true,
+            placeholders: ['{{grantor_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}']
+        },
+        // Core Trust Documents
+        {
+            id: 'doc-26',
+            title: 'Grantor Trust - One Grantor',
+            description: 'Core trust agreement and certification document',
+            type: 'trust_document',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '48 KB',
+            isTemplate: true,
+            placeholders: ['{{grantor_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}']
+        },
+        {
+            id: 'doc-27',
+            title: 'Grantor Trust - Two Grantors',
+            description: 'Core trust agreement and certification document',
+            type: 'trust_document',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '50 KB',
+            isTemplate: true,
+            placeholders: ['{{grantor_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}']
+        },
+        {
+            id: 'doc-28',
+            title: 'Non-Grantor Trust - One Grantor',
+            description: 'Core trust agreement and certification document',
+            type: 'trust_document',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '46 KB',
+            isTemplate: true,
+            placeholders: ['{{grantor_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}']
+        },
+        {
+            id: 'doc-29',
+            title: 'Non-Grantor Trust - Two Grantors',
+            description: 'Core trust agreement and certification document',
+            type: 'trust_document',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '48 KB',
+            isTemplate: true,
+            placeholders: ['{{grantor_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}']
+        },
+        {
+            id: 'doc-30',
+            title: 'Certification of Trusts - One Grantor',
+            description: 'Core trust agreement and certification document',
+            type: 'trust_document',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '25 KB',
+            isTemplate: true,
+            placeholders: ['{{grantor_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}']
+        },
+        {
+            id: 'doc-31',
+            title: 'Certification of Trusts - Two Grantors',
+            description: 'Core trust agreement and certification document',
+            type: 'trust_document',
+            requiresSignature: true,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '27 KB',
+            isTemplate: true,
+            placeholders: ['{{grantor_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}']
+        },
+        {
+            id: 'doc-32',
+            title: 'Links to Questionnaires for Clients',
+            description: 'Reference document with links to all client questionnaires',
+            type: 'other',
+            requiresSignature: false,
+            createdAt: '2024-01-21',
+            lastModified: '2024-01-21',
+            fileSize: '15 KB',
+            isTemplate: false
         }
     ]);
 
@@ -147,6 +456,54 @@ const DocumentLibraryAdmin: React.FC = () => {
     const handlePreview = (doc: Document) => {
         setPreviewDocument(doc);
         setShowPreviewModal(true);
+    };
+
+    const handleEdit = (doc: Document) => {
+        setEditingDocument(doc);
+        setEditFormData({
+            title: doc.title,
+            description: doc.description,
+            placeholders: doc.placeholders || ['']
+        });
+        setShowEditModal(true);
+    };
+
+    const handleSaveEdit = () => {
+        if (editingDocument) {
+            const updatedDoc = {
+                ...editingDocument,
+                title: editFormData.title,
+                description: editFormData.description,
+                placeholders: editFormData.placeholders.filter(p => p.trim() !== ''),
+                lastModified: new Date().toISOString().split('T')[0]
+            };
+            setDocuments(documents.map(d => d.id === editingDocument.id ? updatedDoc : d));
+            setShowEditModal(false);
+            setEditingDocument(null);
+        }
+    };
+
+    const addPlaceholder = () => {
+        setEditFormData({
+            ...editFormData,
+            placeholders: [...editFormData.placeholders, '']
+        });
+    };
+
+    const updatePlaceholder = (index: number, value: string) => {
+        const newPlaceholders = [...editFormData.placeholders];
+        newPlaceholders[index] = value;
+        setEditFormData({
+            ...editFormData,
+            placeholders: newPlaceholders
+        });
+    };
+
+    const removePlaceholder = (index: number) => {
+        setEditFormData({
+            ...editFormData,
+            placeholders: editFormData.placeholders.filter((_, i) => i !== index)
+        });
     };
 
     const getTypeColor = (type: Document['type']) => {
@@ -269,7 +626,7 @@ const DocumentLibraryAdmin: React.FC = () => {
                                         <button 
                                             className="button-outline" 
                                             style={{ width: 'auto', padding: '4px 12px' }}
-                                            onClick={() => alert('Edit functionality coming soon')}
+                                            onClick={() => handleEdit(doc)}
                                         >
                                             Edit
                                         </button>
@@ -481,6 +838,101 @@ const DocumentLibraryAdmin: React.FC = () => {
                                         </button>
                                     )}
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Modal */}
+            {showEditModal && editingDocument && (
+                <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+                    <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h3 className="section-title">Edit Document Template</h3>
+                            <button 
+                                className="button-outline" 
+                                onClick={() => setShowEditModal(false)}
+                                style={{ width: 'auto', fontSize: '20px', padding: '4px 12px' }}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        
+                        <div>
+                            <div style={{ marginBottom: '20px' }}>
+                                <label className="form-label">Document Title</label>
+                                <input 
+                                    type="text" 
+                                    className="form-input" 
+                                    value={editFormData.title}
+                                    onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                                />
+                            </div>
+
+                            <div style={{ marginBottom: '20px' }}>
+                                <label className="form-label">Description</label>
+                                <textarea 
+                                    className="form-input" 
+                                    rows={3}
+                                    value={editFormData.description}
+                                    onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                                />
+                            </div>
+
+                            {editingDocument.isTemplate && (
+                                <div style={{ marginBottom: '20px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                        <label className="form-label" style={{ marginBottom: 0 }}>Template Placeholders</label>
+                                        <button 
+                                            className="button-outline" 
+                                            style={{ width: 'auto', padding: '4px 12px' }}
+                                            onClick={addPlaceholder}
+                                        >
+                                            + Add Placeholder
+                                        </button>
+                                    </div>
+                                    
+                                    {editFormData.placeholders.map((placeholder, index) => (
+                                        <div key={index} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                                            <input 
+                                                type="text" 
+                                                className="form-input" 
+                                                placeholder="e.g., {{client_name}}"
+                                                value={placeholder}
+                                                onChange={(e) => updatePlaceholder(index, e.target.value)}
+                                            />
+                                            <button 
+                                                className="button-outline" 
+                                                style={{ width: 'auto', padding: '8px 12px', color: 'var(--danger)' }}
+                                                onClick={() => removePlaceholder(index)}
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    ))}
+                                    
+                                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '8px' }}>
+                                        Use double curly braces for placeholders, e.g., {{literal}}{{client_name}}{{literal}}
+                                    </p>
+                                </div>
+                            )}
+
+                            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px' }}>
+                                <button 
+                                    className="button-outline" 
+                                    style={{ width: 'auto' }}
+                                    onClick={() => setShowEditModal(false)}
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    className="form-button" 
+                                    style={{ width: 'auto' }}
+                                    onClick={handleSaveEdit}
+                                >
+                                    Save Changes
+                                </button>
                             </div>
                         </div>
                     </div>
