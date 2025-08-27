@@ -49,11 +49,14 @@ async def google_auth(credential_data: dict, db: Session = Depends(get_db)):
         
         if not user:
             # Create new user
+            # For now, assign Admin role to all Google users
+            # In production, you'd want to manage this differently
             user = User(
                 email=email,
                 name=name or email.split('@')[0],
                 google_id=google_user_id,
                 picture_url=picture,
+                role="Admin",  # Default to Admin for full access
                 is_active=True,
                 created_at=datetime.utcnow()
             )

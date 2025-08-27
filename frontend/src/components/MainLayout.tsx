@@ -55,13 +55,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     <h1>LIFTed VFO</h1>
                 </div>
                 <nav className="sidebar-nav-group">
-                    {modules.filter(m => {
-                        const isAdminRoute = m.path.startsWith('/admin/');
-                        if (role === 'Client' && isAdminRoute) return false;
-                        if (role === 'Staff' && m.name === 'Audit Trail') return false;
-                        if (role !== 'Admin' && m.name === 'vCTO') return false; // vCTO only for God mode
-                        return true;
-                    }).map(module => {
+                    {modules.map(module => {
                         if (module.isSection) {
                             return (
                                 <div key={module.name} className="sidebar-section-header">
