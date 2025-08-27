@@ -68,6 +68,150 @@ const FormbuilderAdmin: React.FC = () => {
                 { id: 'im12', type: 'textarea', label: 'If Yes, Please describe the other activities', required: false }
             ],
             createdAt: new Date().toISOString()
+        },
+        {
+            id: 'form-asset-protection-trust',
+            name: 'Asset Protection Trust Questionnaire',
+            description: 'Comprehensive questionnaire for establishing an Asset Protection Trust',
+            fields: [
+                { id: 'apt1', type: 'text', label: 'Full Legal Name', required: true },
+                { id: 'apt2', type: 'date', label: 'Date of Birth', required: true },
+                { id: 'apt3', type: 'text', label: 'Social Security Number', required: true },
+                { id: 'apt4', type: 'text', label: 'Current Address', required: true },
+                { id: 'apt5', type: 'text', label: 'City, State, Zip', required: true },
+                { id: 'apt6', type: 'email', label: 'Email Address', required: true },
+                { id: 'apt7', type: 'phone', label: 'Phone Number', required: true },
+                { id: 'apt8', type: 'select', label: 'Marital Status', required: true, options: ['Single', 'Married', 'Divorced', 'Widowed'] },
+                { id: 'apt9', type: 'text', label: 'Spouse Full Name (if applicable)', required: false },
+                { id: 'apt10', type: 'textarea', label: 'List all children and their ages', required: false },
+                { id: 'apt11', type: 'textarea', label: 'Assets to be placed in trust', required: true },
+                { id: 'apt12', type: 'text', label: 'Estimated total value of assets', required: true },
+                { id: 'apt13', type: 'textarea', label: 'Beneficiaries and their relationship to you', required: true },
+                { id: 'apt14', type: 'text', label: 'Trustee Name', required: true },
+                { id: 'apt15', type: 'text', label: 'Successor Trustee Name', required: false }
+            ],
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 'form-durable-poa',
+            name: 'Durable Power of Attorney Questionnaire',
+            description: 'Form for establishing Durable Power of Attorney',
+            fields: [
+                { id: 'poa1', type: 'text', label: 'Your Full Legal Name (Principal)', required: true },
+                { id: 'poa2', type: 'text', label: 'Your Current Address', required: true },
+                { id: 'poa3', type: 'date', label: 'Your Date of Birth', required: true },
+                { id: 'poa4', type: 'text', label: 'Agent Full Name', required: true },
+                { id: 'poa5', type: 'text', label: 'Agent Address', required: true },
+                { id: 'poa6', type: 'phone', label: 'Agent Phone Number', required: true },
+                { id: 'poa7', type: 'text', label: 'Agent Relationship to You', required: true },
+                { id: 'poa8', type: 'text', label: 'Successor Agent Full Name', required: false },
+                { id: 'poa9', type: 'text', label: 'Successor Agent Address', required: false },
+                { id: 'poa10', type: 'checkbox', label: 'Powers Granted', required: true, options: ['Financial Transactions', 'Real Estate', 'Banking', 'Investments', 'Tax Matters', 'Legal Matters', 'Insurance', 'Government Benefits'] },
+                { id: 'poa11', type: 'select', label: 'When should this POA take effect?', required: true, options: ['Immediately', 'Upon my incapacity'] },
+                { id: 'poa12', type: 'textarea', label: 'Special Instructions or Limitations', required: false }
+            ],
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 'form-healthcare-poa',
+            name: 'Health Care Power of Attorney Questionnaire',
+            description: 'Form for establishing Health Care Power of Attorney',
+            fields: [
+                { id: 'hpoa1', type: 'text', label: 'Your Full Legal Name', required: true },
+                { id: 'hpoa2', type: 'date', label: 'Your Date of Birth', required: true },
+                { id: 'hpoa3', type: 'text', label: 'Health Care Agent Full Name', required: true },
+                { id: 'hpoa4', type: 'text', label: 'Agent Relationship to You', required: true },
+                { id: 'hpoa5', type: 'phone', label: 'Agent Phone Number', required: true },
+                { id: 'hpoa6', type: 'text', label: 'Agent Address', required: true },
+                { id: 'hpoa7', type: 'text', label: 'First Alternate Agent Name', required: false },
+                { id: 'hpoa8', type: 'phone', label: 'First Alternate Phone', required: false },
+                { id: 'hpoa9', type: 'text', label: 'Second Alternate Agent Name', required: false },
+                { id: 'hpoa10', type: 'phone', label: 'Second Alternate Phone', required: false },
+                { id: 'hpoa11', type: 'checkbox', label: 'Medical Treatment Preferences', required: true, options: ['Life Support', 'Artificial Nutrition', 'Pain Management', 'Organ Donation', 'Autopsy'] },
+                { id: 'hpoa12', type: 'textarea', label: 'Special Medical Instructions', required: false },
+                { id: 'hpoa13', type: 'textarea', label: 'Religious or Personal Beliefs Affecting Care', required: false }
+            ],
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 'form-trust-distribution',
+            name: 'Is Your Trust Making a Distribution Questionnaire',
+            description: 'Questionnaire to determine if trust should make a distribution',
+            fields: [
+                { id: 'td1', type: 'text', label: 'Trust Name', required: true },
+                { id: 'td2', type: 'text', label: 'Trustee Name', required: true },
+                { id: 'td3', type: 'text', label: 'Beneficiary Name', required: true },
+                { id: 'td4', type: 'text', label: 'Requested Distribution Amount', required: true },
+                { id: 'td5', type: 'date', label: 'Date of Request', required: true },
+                { id: 'td6', type: 'select', label: 'Purpose of Distribution', required: true, options: ['Education', 'Medical', 'Housing', 'Living Expenses', 'Business Investment', 'Other'] },
+                { id: 'td7', type: 'textarea', label: 'Detailed Purpose Description', required: true },
+                { id: 'td8', type: 'select', label: 'Is this distribution mandatory or discretionary?', required: true, options: ['Mandatory', 'Discretionary'] },
+                { id: 'td9', type: 'text', label: 'Current Trust Balance', required: true },
+                { id: 'td10', type: 'select', label: 'Will this distribution affect other beneficiaries?', required: true, options: ['Yes', 'No'] },
+                { id: 'td11', type: 'textarea', label: 'If yes, explain how', required: false },
+                { id: 'td12', type: 'select', label: 'Are there any tax implications?', required: true, options: ['Yes', 'No', 'Unknown'] }
+            ],
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 'form-distribution-request',
+            name: 'Trust Distribution Request Form',
+            description: 'Formal request form for trust distributions',
+            fields: [
+                { id: 'dr1', type: 'text', label: 'Beneficiary Name', required: true },
+                { id: 'dr2', type: 'text', label: 'Trust Name', required: true },
+                { id: 'dr3', type: 'date', label: 'Date of Request', required: true },
+                { id: 'dr4', type: 'text', label: 'Amount Requested', required: true },
+                { id: 'dr5', type: 'select', label: 'Type of Distribution', required: true, options: ['Cash', 'Asset Transfer', 'Both'] },
+                { id: 'dr6', type: 'select', label: 'Reason for Distribution', required: true, options: ['Education', 'Medical Expenses', 'Housing', 'Living Expenses', 'Emergency', 'Other'] },
+                { id: 'dr7', type: 'textarea', label: 'Detailed Explanation of Need', required: true },
+                { id: 'dr8', type: 'textarea', label: 'Supporting Documentation Attached', required: false },
+                { id: 'dr9', type: 'select', label: 'Urgency Level', required: true, options: ['Immediate', 'Within 30 days', 'Within 60 days', 'No urgency'] },
+                { id: 'dr10', type: 'text', label: 'Bank Account for Deposit (if cash)', required: false },
+                { id: 'dr11', type: 'text', label: 'Contact Phone Number', required: true },
+                { id: 'dr12', type: 'email', label: 'Contact Email', required: true }
+            ],
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 'form-special-contribution',
+            name: 'Special Contribution and Distribution Meeting Minutes',
+            description: 'Meeting minutes for special contributions and distributions',
+            fields: [
+                { id: 'sc1', type: 'date', label: 'Meeting Date', required: true },
+                { id: 'sc2', type: 'text', label: 'Meeting Location/Platform', required: true },
+                { id: 'sc3', type: 'textarea', label: 'Attendees (Names and Roles)', required: true },
+                { id: 'sc4', type: 'select', label: 'Meeting Type', required: true, options: ['Special Contribution', 'Special Distribution', 'Both'] },
+                { id: 'sc5', type: 'textarea', label: 'Agenda Items', required: true },
+                { id: 'sc6', type: 'textarea', label: 'Contributions Discussed (Amount, Source, Purpose)', required: false },
+                { id: 'sc7', type: 'textarea', label: 'Distributions Discussed (Amount, Recipient, Purpose)', required: false },
+                { id: 'sc8', type: 'textarea', label: 'Resolutions Passed', required: true },
+                { id: 'sc9', type: 'select', label: 'Vote Results', required: true, options: ['Unanimous', 'Majority', 'No Consensus'] },
+                { id: 'sc10', type: 'textarea', label: 'Action Items and Responsible Parties', required: true },
+                { id: 'sc11', type: 'date', label: 'Next Meeting Date', required: false },
+                { id: 'sc12', type: 'text', label: 'Minutes Prepared By', required: true }
+            ],
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 'form-investment-advisor',
+            name: 'Investment Advisor Committee Establishment',
+            description: 'Form to establish Investment Advisor Committee',
+            fields: [
+                { id: 'iac1', type: 'text', label: 'Trust Name', required: true },
+                { id: 'iac2', type: 'date', label: 'Committee Establishment Date', required: true },
+                { id: 'iac3', type: 'text', label: 'Committee Chairperson Name', required: true },
+                { id: 'iac4', type: 'textarea', label: 'Committee Members (Names and Qualifications)', required: true },
+                { id: 'iac5', type: 'textarea', label: 'Committee Purpose and Objectives', required: true },
+                { id: 'iac6', type: 'select', label: 'Meeting Frequency', required: true, options: ['Monthly', 'Quarterly', 'Semi-Annually', 'Annually', 'As Needed'] },
+                { id: 'iac7', type: 'textarea', label: 'Investment Authority Granted', required: true },
+                { id: 'iac8', type: 'textarea', label: 'Investment Restrictions', required: false },
+                { id: 'iac9', type: 'text', label: 'Quorum Requirements', required: true },
+                { id: 'iac10', type: 'select', label: 'Voting Requirements', required: true, options: ['Simple Majority', 'Super Majority', 'Unanimous'] },
+                { id: 'iac11', type: 'textarea', label: 'Reporting Requirements', required: true },
+                { id: 'iac12', type: 'textarea', label: 'Committee Compensation (if any)', required: false }
+            ],
+            createdAt: new Date().toISOString()
         }
     ]);
     
