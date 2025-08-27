@@ -5,11 +5,13 @@ interface Document {
     id: string;
     title: string;
     description: string;
-    type: 'engagement_letter' | 'intake_form' | 'disclosure' | 'service_agreement' | 'other';
+    type: 'engagement_letter' | 'intake_form' | 'disclosure' | 'service_agreement' | 'trust_document' | 'meeting_minutes' | 'operating_agreement' | 'other';
     requiresSignature: boolean;
     createdAt: string;
     lastModified: string;
     fileSize: string;
+    placeholders?: string[];
+    isTemplate?: boolean;
 }
 
 const DocumentLibraryAdmin: React.FC = () => {
@@ -43,10 +45,61 @@ const DocumentLibraryAdmin: React.FC = () => {
             createdAt: '2024-01-05',
             lastModified: '2024-01-05',
             fileSize: '89 KB'
+        },
+        // Wyoming Trust Document Templates
+        {
+            id: 'doc-4',
+            title: 'Multi Member PTC Organizational Meeting',
+            description: 'Consent in lieu of organizational meeting for multi-member Private Family Trust Company',
+            type: 'meeting_minutes',
+            requiresSignature: true,
+            createdAt: '2024-01-20',
+            lastModified: '2024-01-20',
+            fileSize: '5.7 KB',
+            isTemplate: true,
+            placeholders: ['{{company_name}}', '{{member_names}}', '{{trustee_name}}', '{{address}}', '{{effective_date}}']
+        },
+        {
+            id: 'doc-5',
+            title: 'Single Member PTC Organizational Meeting',
+            description: 'Consent in lieu of organizational meeting for single-member Private Family Trust Company',
+            type: 'meeting_minutes',
+            requiresSignature: true,
+            createdAt: '2024-01-20',
+            lastModified: '2024-01-20',
+            fileSize: '5.9 KB',
+            isTemplate: true,
+            placeholders: ['{{company_name}}', '{{member.first_name}}', '{{member.last_name}}', '{{member.company}}', '{{manager.first_name}}', '{{manager.last_name}}', '{{manager.company}}', '{{address}}']
+        },
+        {
+            id: 'doc-6',
+            title: 'PFTC Operating Agreement - Two Grantors',
+            description: 'Operating agreement for Private Family Trust Company LLC with two grantors',
+            type: 'operating_agreement',
+            requiresSignature: true,
+            createdAt: '2024-01-20',
+            lastModified: '2024-01-20',
+            fileSize: '36.6 KB',
+            isTemplate: true,
+            placeholders: ['{{company_name}}', '{{grantor1_name}}', '{{grantor2_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}']
+        },
+        {
+            id: 'doc-7',
+            title: 'PTC Operating Agreement - Single Grantor',
+            description: 'Operating agreement for Private Trust Company with single grantor',
+            type: 'operating_agreement',
+            requiresSignature: true,
+            createdAt: '2024-01-20',
+            lastModified: '2024-01-20',
+            fileSize: '44.3 KB',
+            isTemplate: true,
+            placeholders: ['{{company_name}}', '{{grantor_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}', '{{address}}']
         }
     ]);
 
     const [showUploadModal, setShowUploadModal] = useState(false);
+    const [showPreviewModal, setShowPreviewModal] = useState(false);
+    const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
     const [selectedType, setSelectedType] = useState<Document['type']>('other');
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState<'all' | Document['type']>('all');
@@ -56,6 +109,9 @@ const DocumentLibraryAdmin: React.FC = () => {
         { value: 'intake_form', label: 'Intake Form' },
         { value: 'disclosure', label: 'Disclosure' },
         { value: 'service_agreement', label: 'Service Agreement' },
+        { value: 'trust_document', label: 'Trust Document' },
+        { value: 'meeting_minutes', label: 'Meeting Minutes' },
+        { value: 'operating_agreement', label: 'Operating Agreement' },
         { value: 'other', label: 'Other' }
     ];
 
@@ -86,6 +142,11 @@ const DocumentLibraryAdmin: React.FC = () => {
         if (window.confirm('Are you sure you want to delete this document?')) {
             setDocuments(documents.filter(doc => doc.id !== id));
         }
+    };
+
+    const handlePreview = (doc: Document) => {
+        setPreviewDocument(doc);
+        setShowPreviewModal(true);
     };
 
     const getTypeColor = (type: Document['type']) => {
@@ -152,10 +213,28 @@ const DocumentLibraryAdmin: React.FC = () => {
                             <tr key={doc.id} style={{ borderBottom: '1px solid var(--border-light)' }}>
                                 <td style={{ padding: '12px' }}>
                                     <div>
-                                        <div style={{ fontWeight: 500 }}>{doc.title}</div>
+                                        <div style={{ fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            {doc.title}
+                                            {doc.isTemplate && (
+                                                <span style={{ 
+                                                    fontSize: '11px', 
+                                                    background: 'var(--primary)', 
+                                                    color: 'white', 
+                                                    padding: '2px 6px', 
+                                                    borderRadius: '4px' 
+                                                }}>
+                                                    Template
+                                                </span>
+                                            )}
+                                        </div>
                                         <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
                                             {doc.description}
                                         </div>
+                                        {doc.placeholders && doc.placeholders.length > 0 && (
+                                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                                {doc.placeholders.length} placeholder{doc.placeholders.length > 1 ? 's' : ''}
+                                            </div>
+                                        )}
                                     </div>
                                 </td>
                                 <td style={{ padding: '12px' }}>
@@ -197,7 +276,7 @@ const DocumentLibraryAdmin: React.FC = () => {
                                         <button 
                                             className="button-outline" 
                                             style={{ width: 'auto', padding: '4px 12px' }}
-                                            onClick={() => alert('Preview functionality coming soon')}
+                                            onClick={() => handlePreview(doc)}
                                         >
                                             Preview
                                         </button>
@@ -289,6 +368,120 @@ const DocumentLibraryAdmin: React.FC = () => {
                             >
                                 Upload Document
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Preview Modal */}
+            {showPreviewModal && previewDocument && (
+                <div className="modal-overlay" onClick={() => setShowPreviewModal(false)}>
+                    <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '700px', maxHeight: '80vh', overflow: 'auto' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h3 className="section-title">Document Preview</h3>
+                            <button 
+                                className="button-outline" 
+                                onClick={() => setShowPreviewModal(false)}
+                                style={{ width: 'auto', fontSize: '20px', padding: '4px 12px' }}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        
+                        <div style={{ 
+                            border: '1px solid var(--border-light)', 
+                            borderRadius: '8px', 
+                            padding: '24px',
+                            backgroundColor: 'var(--background-primary)'
+                        }}>
+                            <h2 style={{ fontSize: '24px', marginBottom: '8px' }}>{previewDocument.title}</h2>
+                            <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
+                                {previewDocument.description}
+                            </p>
+                            
+                            {previewDocument.isTemplate && previewDocument.placeholders && (
+                                <div style={{ marginBottom: '24px' }}>
+                                    <h4 style={{ fontSize: '16px', marginBottom: '12px' }}>Template Placeholders</h4>
+                                    <div style={{ 
+                                        background: 'var(--gray-light)', 
+                                        padding: '16px', 
+                                        borderRadius: '6px',
+                                        fontSize: '14px'
+                                    }}>
+                                        <p style={{ marginBottom: '12px', fontWeight: 500 }}>
+                                            This template contains {previewDocument.placeholders.length} mail-merge placeholders:
+                                        </p>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '8px' }}>
+                                            {previewDocument.placeholders.map((placeholder, idx) => (
+                                                <div key={idx} style={{ 
+                                                    background: 'white', 
+                                                    padding: '6px 10px', 
+                                                    borderRadius: '4px',
+                                                    fontFamily: 'monospace',
+                                                    fontSize: '12px',
+                                                    border: '1px solid var(--border-light)'
+                                                }}>
+                                                    {placeholder}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            
+                            <div style={{ 
+                                background: 'var(--gray-light)', 
+                                padding: '20px', 
+                                borderRadius: '6px',
+                                minHeight: '200px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'var(--text-secondary)'
+                            }}>
+                                <div style={{ textAlign: 'center' }}>
+                                    <div style={{ fontSize: '48px', marginBottom: '12px' }}>📄</div>
+                                    <p>Document preview will be displayed here</p>
+                                    {previewDocument.fileSize && (
+                                        <p style={{ fontSize: '12px', marginTop: '8px' }}>File size: {previewDocument.fileSize}</p>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            <div style={{ 
+                                marginTop: '24px', 
+                                paddingTop: '20px', 
+                                borderTop: '1px solid var(--border-light)',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                            }}>
+                                <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                                    <div>Type: {documentTypes.find(t => t.value === previewDocument.type)?.label}</div>
+                                    <div>eSign Required: {previewDocument.requiresSignature ? 'Yes' : 'No'}</div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '12px' }}>
+                                    <button 
+                                        className="button-outline" 
+                                        style={{ width: 'auto' }}
+                                        onClick={() => setShowPreviewModal(false)}
+                                    >
+                                        Close
+                                    </button>
+                                    {previewDocument.isTemplate && (
+                                        <button 
+                                            className="form-button" 
+                                            style={{ width: 'auto' }}
+                                            onClick={() => {
+                                                alert('Mail merge functionality coming soon - will allow you to fill in placeholders and generate personalized documents');
+                                                setShowPreviewModal(false);
+                                            }}
+                                        >
+                                            Use Template
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
