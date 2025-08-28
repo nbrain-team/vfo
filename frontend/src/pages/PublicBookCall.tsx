@@ -120,7 +120,7 @@ const PublicBookCall: React.FC = () => {
 
   const handlePaymentError = (error: string) => {
     setPaymentError(error);
-    setShowPayment(false);
+    // Keep the payment modal open so the user can retry or use fallback
   };
 
   const handlePaymentCancel = () => {
@@ -431,6 +431,12 @@ const PublicBookCall: React.FC = () => {
                 ×
               </button>
             </div>
+            {paymentError && (
+              <div className="public-card" style={{ marginBottom: '12px', background: 'var(--danger-light)', border: '1px solid var(--danger)' }}>
+                <strong style={{ color: 'var(--danger)' }}>Payment Error</strong>
+                <p style={{ margin: '8px 0 0', color: 'var(--danger)' }}>{paymentError}</p>
+              </div>
+            )}
             
             <div style={{ marginBottom: '20px' }}>
               <p style={{ marginBottom: '16px' }}>

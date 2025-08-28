@@ -94,18 +94,62 @@ const LawPayIntegration: React.FC<LawPayIntegrationProps> = ({
   }, []);
 
   const initializeLawPay = () => {
-    if (!window.LawPay) {
-      // Wait briefly for global to be attached
-      setTimeout(() => {
-        if (!window.LawPay) {
-          setError('LawPay not available');
-          onError('LawPay not available');
-        } else {
-          initializeLawPay();
+    let attempts = 0;
+    const poll = () => {
+      if (window.LawPay) {
+        try {
+          const checkout = window.LawPay.checkout({
+            publicKey: publicKey,
+            amount: amount * 100, // Convert to cents
+            description: description,
+            customer: {
+              name: clientName,
+              email: clientEmail
+            },
+            appearance: {
+              theme: 'minimal',
+              variables: {
+                colorPrimary: '#3C4630',
+                colorBackground: '#ffffff',
+                colorText: '#1E1E1E',
+                colorDanger: '#dc3545',
+                borderRadius: '8px',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif'
+              }
+            },
+            onSuccess: (result: any) => {
+              console.log('LawPay payment successful:', result);
+              onSuccess(result.paymentId || result.id);
+            },
+            onError: (error: any) => {
+              console.error('LawPay payment error:', error);
+              setError(error.message || 'Payment failed');
+              onError(error.message || 'Payment failed');
+            },
+            onCancel: () => {
+              console.log('LawPay payment cancelled');
+              if (onCancel) onCancel();
+            }
+          });
+          checkout.mount('#lawpay-container');
+          return;
+        } catch (err) {
+          console.error('LawPay initialization error:', err);
+          setError('Failed to initialize payment form');
+          onError('Failed to initialize payment form');
+          return;
         }
-      }, 150);
-      return;
-    }
+      }
+      if (attempts < 10) {
+        attempts += 1;
+        setTimeout(poll, 200);
+      } else {
+        setError('LawPay not available');
+        onError('LawPay not available');
+      }
+    };
+    poll();
+  };
 
     try {
       const checkout = window.LawPay.checkout({
