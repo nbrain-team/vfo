@@ -15,12 +15,12 @@ const PipelineOverview: React.FC<PipelineOverviewProps> = ({ bookings, onSelectB
     const [selectedAction, setSelectedAction] = useState<'bot' | 'advisor'>('bot');
     
     const stages = [
-        { key: 'book-consults', name: 'Booked Consults', stage: 'New', filter: (b: Booking) => b.stage === 'New', color: '#3C4630' },
-        { key: 'pre-engagement', name: 'Pre-Engagement', stage: 'Booked', filter: (b: Booking) => b.stage === 'Booked' || b.stage === 'Paid', color: '#C07C3D' },
-        { key: 'engaged', name: 'Engaged', stage: 'engaged', filter: (b: Booking) => b.stage === 'engaged', color: '#DCA85E' },
-        { key: 'questionnaire', name: 'Questionnaire Received', stage: 'questionnaire_received', filter: (b: Booking) => b.stage === 'questionnaire_received', color: '#E9EDE4' },
-        { key: 'in-process', name: 'Matter in Process', stage: 'matter_in_process', filter: (b: Booking) => b.stage === 'matter_in_process', color: '#22c55e' },
-        { key: 'fulfilled', name: 'Matter Fulfilled', stage: 'matter_fulfilled', filter: (b: Booking) => b.stage === 'matter_fulfilled', color: '#44ffff' }
+        { key: 'book-consults', name: 'Booked Consults', stage: 'Booked' as Booking['stage'], filter: (b: Booking) => b.stage === 'Booked' || b.stage === 'Paid', color: '#3C4630' },
+        { key: 'pre-engagement', name: 'Pre-Engagement', stage: 'New' as Booking['stage'], filter: (b: Booking) => b.stage === 'New', color: '#C07C3D' },
+        { key: 'engaged', name: 'Engaged', stage: 'Signed' as Booking['stage'], filter: (b: Booking) => b.stage === 'Signed', color: '#DCA85E' },
+        { key: 'questionnaire', name: 'Questionnaire Received', stage: 'Onboarding' as Booking['stage'], filter: (b: Booking) => b.stage === 'Onboarding', color: '#E9EDE4' },
+        { key: 'in-process', name: 'Matter in Process', stage: 'Onboarding' as Booking['stage'], filter: (b: Booking) => b.stage === 'Onboarding', color: '#22c55e' },
+        { key: 'fulfilled', name: 'Matter Fulfilled', stage: 'Completed' as Booking['stage'], filter: (b: Booking) => b.stage === 'Completed', color: '#44ffff' }
     ];
 
     const handleDragStart = (e: React.DragEvent, booking: Booking) => {

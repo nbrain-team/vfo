@@ -41,6 +41,7 @@ export function getBookings(): Booking[] {
 
 export function saveBookings(bookings: Booking[]) {
   localStorage.setItem(BOOKINGS_KEY, JSON.stringify(bookings));
+  try { window.dispatchEvent(new CustomEvent('bookings-updated')); } catch {}
 }
 
 export function addBooking(booking: Booking) {

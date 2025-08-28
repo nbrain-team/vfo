@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar, PolarAngleAxis, BarChart, Bar, Cell } from 'recharts';
 import { getBookings } from '../adminData';
@@ -70,7 +70,13 @@ const Platform: React.FC = () => {
     };
 
     // Admin KPIs from mock bookings
-    const bookings = useMemo(() => getBookings(), []);
+    const [bookingsState, setBookingsState] = useState(getBookings());
+    useEffect(() => {
+        const handler = () => setBookingsState(getBookings());
+        window.addEventListener('bookings-updated', handler as EventListener);
+        return () => window.removeEventListener('bookings-updated', handler as EventListener);
+    }, []);
+    const bookings = useMemo(() => bookingsState, [bookingsState]);
     
     // Calculate KPIs based on period
     const now = Date.now();
