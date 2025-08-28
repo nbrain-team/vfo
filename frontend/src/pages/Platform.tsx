@@ -84,13 +84,13 @@ const Platform: React.FC = () => {
     
     // KPI calculations
     const kpiLeads = filteredBookings.filter(b => b.stage === 'New').length;
-    const kpiBooked = filteredBookings.filter(b => b.stage === 'Booked').length;
+    const kpiBooked = filteredBookings.filter(b => b.stage === 'Booked' || b.stage === 'Paid').length;
     const kpiShowed = filteredBookings.filter(b => ['Signed', 'Onboarding', 'Completed'].includes(b.stage)).length;
     const kpiSigned = filteredBookings.filter(b => b.stage === 'Signed' || b.stage === 'Completed').length;
     const kpiMattersInProcess = filteredBookings.filter(b => b.stage === 'Onboarding').length;
     
     // Calculate show up ratio and average $ per matter
-    const showUpRatio = kpiBooked > 0 ? Math.round((kpiShowed / kpiBooked) * 100) : 0;
+    const showUpRatio = kpiBooked > 0 ? Math.min(100, Math.round((kpiShowed / kpiBooked) * 100)) : 0;
     const avgDollarPerMatter = kpiSigned > 0 ? 18500 : 0; // $18,500 per WYDAPT matter
     
     const kpiTotalLeads = bookings.length;
@@ -236,12 +236,12 @@ const Platform: React.FC = () => {
                     }}></div>
                     
                     {[
-                        { name: 'Booked Consults', count: kpiLeads, color: '#3C4630' },
-                        { name: 'Pre-Engagement', count: kpiBooked, color: '#C07C3D' },
-                        { name: 'Engaged', count: kpiSigned, color: '#DCA85E' },
-                        { name: 'Questionnaire Received', count: Math.floor(kpiSigned * 0.8), color: '#E9EDE4' },
-                        { name: 'Matter in Process', count: kpiMattersInProcess, color: '#22c55e' },
-                        { name: 'Matter Fulfilled', count: filteredBookings.filter(b => b.stage === 'Completed').length, color: '#44ffff' }
+                        { name: 'Booked Consults', count: bookings.filter(b => b.stage === 'Booked' || b.stage === 'Paid').length, color: '#3C4630' },
+                        { name: 'Pre-Engagement', count: bookings.filter(b => b.stage === 'New').length, color: '#C07C3D' },
+                        { name: 'Engaged', count: bookings.filter(b => b.stage === 'Signed').length, color: '#DCA85E' },
+                        { name: 'Questionnaire Received', count: 0, color: '#E9EDE4' },
+                        { name: 'Matter in Process', count: bookings.filter(b => b.stage === 'Onboarding').length, color: '#22c55e' },
+                        { name: 'Matter Fulfilled', count: bookings.filter(b => b.stage === 'Completed').length, color: '#44ffff' }
                     ].map((stage, index) => (
                         <div key={stage.name} style={{ 
                             display: 'flex', 

@@ -147,7 +147,14 @@ const SiteBuilderAdmin: React.FC = () => {
             </div>
           </div>
           <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', background: 'var(--card-bg)' }}>
-            <iframe title="Public Site Preview" key={previewKey} src={`/wyoming-apt?ts=${previewKey}`} style={{ width: '100%', height: '720px', border: 'none' }} />
+            <iframe 
+              title="Public Site Preview" 
+              key={previewKey} 
+              src={`/wyoming-apt?ts=${previewKey}`} 
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowFullScreen
+              style={{ width: '100%', height: '720px', border: 'none' }} 
+            />
           </div>
         </div>
 
