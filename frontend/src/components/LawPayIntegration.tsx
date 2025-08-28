@@ -31,29 +31,79 @@ const LawPayIntegration: React.FC<LawPayIntegrationProps> = ({
   const publicKey = import.meta.env.VITE_LAWPAY_PUBLIC_KEY || 'DDpdqQzzTjyUDeVO28NdDg0eajQxAR1hpMdZEKmJhKR4RMcWmsCLrB9CwKav7JCW';
 
   useEffect(() => {
-    // Load LawPay script
-    const script = document.createElement('script');
-    script.src = 'https://cdn.lawpay.com/checkout/v2/checkout.js';
-    script.async = true;
-    script.onload = () => {
+    let cancelled = false;
+
+    const loadScriptWithRetry = (attempt: number) => {
+      if (cancelled) return;
+      // prevent double load
+      const existing = document.querySelector('script[data-lawpay="1"]') as HTMLScriptElement | null;
+      if (existing) {
+        if (!isLoading) return;
+        // if already present, wait a moment and initialize
+        setTimeout(() => {
+          if (!cancelled) {
+            setIsLoading(false);
+            initializeLawPay();
+          }
+        }, 100);
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://cdn.lawpay.com/checkout/v2/checkout.js';
+      script.async = true;
+      script.defer = true;
+      script.setAttribute('data-lawpay', '1');
+
+      const timeoutId = window.setTimeout(() => {
+        script.onerror?.(new Event('error'));
+      }, 8000);
+
+      script.onload = () => {
+        window.clearTimeout(timeoutId);
+        if (cancelled) return;
+        setIsLoading(false);
+        initializeLawPay();
+      };
+      script.onerror = () => {
+        window.clearTimeout(timeoutId);
+        if (cancelled) return;
+        if (attempt < 2) {
+          // retry after a brief backoff
+          setTimeout(() => loadScriptWithRetry(attempt + 1), 600);
+        } else {
+          setError('Failed to load LawPay');
+          setIsLoading(false);
+          onError('Failed to load LawPay');
+        }
+      };
+      document.body.appendChild(script);
+    };
+
+    // try to initialize if LawPay is already present
+    if ((window as any).LawPay) {
       setIsLoading(false);
       initializeLawPay();
-    };
-    script.onerror = () => {
-      setError('Failed to load LawPay');
-      setIsLoading(false);
-      onError('Failed to load LawPay');
-    };
-    document.body.appendChild(script);
+    } else {
+      loadScriptWithRetry(0);
+    }
 
     return () => {
-      document.body.removeChild(script);
+      cancelled = true;
     };
   }, []);
 
   const initializeLawPay = () => {
     if (!window.LawPay) {
-      setError('LawPay not available');
+      // Wait briefly for global to be attached
+      setTimeout(() => {
+        if (!window.LawPay) {
+          setError('LawPay not available');
+          onError('LawPay not available');
+        } else {
+          initializeLawPay();
+        }
+      }, 150);
       return;
     }
 
