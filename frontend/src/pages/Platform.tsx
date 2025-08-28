@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar, PolarAngleAxis, BarChart, Bar, Cell } from 'recharts';
 import { getBookings } from '../adminData';
 
@@ -6,6 +7,7 @@ import { getBookings } from '../adminData';
 const JOURNEY_STAGES = ['Obscured', 'Awakening', 'Stabilizing', 'Liberating', 'Regenerative'];
 
 const Platform: React.FC = () => {
+    const navigate = useNavigate();
     let userName = localStorage.getItem('user_name') || 'Matt';
     if (userName === 'wyoming-client') userName = 'Matt';
     const currentHour = new Date().getHours();
@@ -247,7 +249,9 @@ const Platform: React.FC = () => {
                             alignItems: 'center',
                             flex: 1,
                             zIndex: 1
-                        }}>
+                        }}
+                        onClick={() => navigate('/admin/crm')}
+                        >
                             <div style={{
                                 width: '50px',
                                 height: '50px',
@@ -261,7 +265,8 @@ const Platform: React.FC = () => {
                                 fontSize: '18px',
                                 marginBottom: '8px',
                                 border: '3px solid white',
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                cursor: 'pointer'
                             }}>
                                 {stage.count}
                             </div>
