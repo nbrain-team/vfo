@@ -29,7 +29,7 @@ const Login: React.FC = () => {
             // Simple role default: 'Mike' -> Admin, else Client
             const role = userName.toLowerCase() === 'mike' ? 'Admin' : 'Client';
             localStorage.setItem('role', role);
-            navigate('/welcome');
+            navigate('/platform');
         } catch (error) {
             setMessage('Invalid credentials. Please try again.');
             console.error(error);
@@ -55,7 +55,7 @@ const Login: React.FC = () => {
                 localStorage.setItem('google_refresh_token', response.data.google_refresh_token);
             }
             
-            navigate('/welcome');
+            navigate('/platform');
         } catch (error) {
             setMessage('Google authentication failed. Please try again.');
             console.error('Google login error:', error);

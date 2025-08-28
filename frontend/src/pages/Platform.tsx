@@ -16,6 +16,9 @@ const Platform: React.FC = () => {
     const [liberationScore] = useState(68);
     const [selfMasteryScore] = useState(72);
     
+    // KPI time period toggle
+    const [kpiPeriod, setKpiPeriod] = useState<'month' | 'inception'>('month');
+    
     // Module scores with traffic light indicators
     const moduleScores = [
         { name: 'legalIQ', score: 85, status: 'green', description: 'Documents up to date' },
@@ -66,10 +69,29 @@ const Platform: React.FC = () => {
 
     // Admin KPIs from mock bookings
     const bookings = useMemo(() => getBookings(), []);
-    const kpiTotalLeads = bookings.length;
-    const kpiBooked = bookings.filter(b => b.stage === 'Booked').length;
-    const kpiSigned = bookings.filter(b => b.stage === 'Signed' || b.stage === 'Completed').length;
+    
+    // Calculate KPIs based on period
     const now = Date.now();
+    const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+    const filteredBookings = kpiPeriod === 'month' 
+        ? bookings.filter(b => {
+            const ts = Date.parse(b.createdAt || '');
+            return !isNaN(ts) && (now - ts) < thirtyDaysMs;
+          })
+        : bookings;
+    
+    // KPI calculations
+    const kpiLeads = filteredBookings.filter(b => b.stage === 'New').length;
+    const kpiBooked = filteredBookings.filter(b => b.stage === 'Booked').length;
+    const kpiShowed = filteredBookings.filter(b => ['Signed', 'Onboarding', 'Completed'].includes(b.stage)).length;
+    const kpiSigned = filteredBookings.filter(b => b.stage === 'Signed' || b.stage === 'Completed').length;
+    const kpiMattersInProcess = filteredBookings.filter(b => b.stage === 'Onboarding').length;
+    
+    // Calculate show up ratio and average $ per matter
+    const showUpRatio = kpiBooked > 0 ? Math.round((kpiShowed / kpiBooked) * 100) : 0;
+    const avgDollarPerMatter = kpiSigned > 0 ? 18500 : 0; // $18,500 per WYDAPT matter
+    
+    const kpiTotalLeads = bookings.length;
     const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
     const kpiNewThisWeek = bookings.filter(b => {
         const ts = Date.parse(b.createdAt || '');
@@ -128,23 +150,131 @@ const Platform: React.FC = () => {
 
             
 
+            {/* KPI Toggle */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px', gap: '8px' }}>
+                <button 
+                    onClick={() => setKpiPeriod('month')}
+                    style={{
+                        padding: '6px 16px',
+                        background: kpiPeriod === 'month' ? 'var(--primary)' : 'var(--background-secondary)',
+                        color: kpiPeriod === 'month' ? 'white' : 'var(--text-primary)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                    }}
+                >
+                    Month to Date
+                </button>
+                <button 
+                    onClick={() => setKpiPeriod('inception')}
+                    style={{
+                        padding: '6px 16px',
+                        background: kpiPeriod === 'inception' ? 'var(--primary)' : 'var(--background-secondary)',
+                        color: kpiPeriod === 'inception' ? 'white' : 'var(--text-primary)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                    }}
+                >
+                    Inception to Date
+                </button>
+            </div>
+
             {/* Admin KPIs */}
-            <div className="summary-row" style={{ marginBottom: '24px' }}>
+            <div className="summary-row" style={{ marginBottom: '24px', display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '16px' }}>
                 <div className="summary-card">
-                    <div className="summary-label">Total Leads</div>
-                    <div className="summary-value">{kpiTotalLeads}</div>
+                    <div className="summary-label">Leads</div>
+                    <div className="summary-value">{kpiLeads}</div>
                 </div>
                 <div className="summary-card">
                     <div className="summary-label">Booked</div>
                     <div className="summary-value">{kpiBooked}</div>
                 </div>
                 <div className="summary-card">
+                    <div className="summary-label">Show up Ratio</div>
+                    <div className="summary-value">{showUpRatio}%</div>
+                </div>
+                <div className="summary-card">
                     <div className="summary-label">Signed</div>
                     <div className="summary-value">{kpiSigned}</div>
                 </div>
                 <div className="summary-card">
+                    <div className="summary-label">Avg $ per Matter</div>
+                    <div className="summary-value">${avgDollarPerMatter.toLocaleString()}</div>
+                </div>
+                <div className="summary-card success">
                     <div className="summary-label">Matters In Process</div>
-                    <div className="summary-value">{kpiNewThisWeek}</div>
+                    <div className="summary-value">{kpiMattersInProcess}</div>
+                </div>
+            </div>
+
+            {/* Pipeline Widget */}
+            <div className="module-card" style={{ marginBottom: '20px' }}>
+                <h3 className="section-title">LIFTed Advisor Pipeline</h3>
+                <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between',
+                    marginTop: '16px',
+                    position: 'relative',
+                    padding: '0 20px'
+                }}>
+                    {/* Pipeline stages */}
+                    <div style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '40px',
+                        right: '40px',
+                        height: '4px',
+                        background: 'var(--border-light)',
+                        transform: 'translateY(-50%)',
+                        zIndex: 0
+                    }}></div>
+                    
+                    {[
+                        { name: 'Book Consults', count: kpiLeads, color: '#3C4630' },
+                        { name: 'Pre-Engagement', count: kpiBooked, color: '#C07C3D' },
+                        { name: 'Engaged', count: kpiSigned, color: '#DCA85E' },
+                        { name: 'Questionnaire Received', count: Math.floor(kpiSigned * 0.8), color: '#E9EDE4' },
+                        { name: 'Matter in Process', count: kpiMattersInProcess, color: '#22c55e' },
+                        { name: 'Matter Fulfilled', count: filteredBookings.filter(b => b.stage === 'Completed').length, color: '#44ffff' }
+                    ].map((stage, index) => (
+                        <div key={stage.name} style={{ 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            alignItems: 'center',
+                            flex: 1,
+                            zIndex: 1
+                        }}>
+                            <div style={{
+                                width: '50px',
+                                height: '50px',
+                                borderRadius: '50%',
+                                background: stage.color,
+                                color: 'white',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontWeight: 'bold',
+                                fontSize: '18px',
+                                marginBottom: '8px',
+                                border: '3px solid white',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                            }}>
+                                {stage.count}
+                            </div>
+                            <div style={{ 
+                                fontSize: '12px', 
+                                textAlign: 'center',
+                                color: 'var(--text-secondary)',
+                                maxWidth: '80px'
+                            }}>
+                                {stage.name}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
 
@@ -185,41 +315,7 @@ const Platform: React.FC = () => {
                     </ul>
                 </div>
 
-                <div className="module-card">
-                    <h3 className="section-title">Pipeline</h3>
-                    <div style={{ marginTop: 12 }}>
-                        <div style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontSize: 13 }}>Leads</span>
-                                <span className="status-badge" style={{ background: 'var(--primary)' }}>{bookings.filter(b => b.stage === 'New').length}</span>
-                            </div>
-                        </div>
-                        <div style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontSize: 13 }}>Consults</span>
-                                <span className="status-badge" style={{ background: '#C07C3D' }}>{bookings.filter(b => b.stage === 'Booked').length}</span>
-                            </div>
-                        </div>
-                        <div style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontSize: 13 }}>Engagements</span>
-                                <span className="status-badge" style={{ background: '#DCA85E' }}>{bookings.filter(b => b.stage === 'Signed').length}</span>
-                            </div>
-                        </div>
-                        <div style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontSize: 13 }}>Service</span>
-                                <span className="status-badge" style={{ background: '#22c55e' }}>{bookings.filter(b => b.stage === 'Onboarding').length}</span>
-                            </div>
-                        </div>
-                        <div style={{ padding: '8px 0' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontSize: 13 }}>Fulfilled</span>
-                                <span className="status-badge" style={{ background: '#44ffff' }}>{bookings.filter(b => b.stage === 'Completed').length}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
 
                 <div className="module-card" style={{ gridColumn: '1 / -1' }}>
                     <h3 className="section-title">Website & Funnel Analytics</h3>
