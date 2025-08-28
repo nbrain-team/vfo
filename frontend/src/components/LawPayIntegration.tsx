@@ -206,24 +206,22 @@ const LawPayIntegration: React.FC<LawPayIntegrationProps> = ({
     );
   }
 
-  if (error) {
-    return (
-      <div style={{ textAlign: 'center', padding: '40px' }}>
-        <div style={{ color: 'var(--error)', marginBottom: '16px' }}>
-          {error}
-        </div>
-        <button className="button-outline" onClick={() => window.location.reload()}>
-          Try Again
-        </button>
-      </div>
-    );
-  }
-
   return (
     <div>
+      {error && (
+        <div style={{ textAlign: 'center', padding: '12px', marginTop: '8px' }}>
+          <div style={{ color: 'var(--danger)', marginBottom: '12px', fontWeight: 600 }}>
+            {error}
+          </div>
+          <button className="button-outline" onClick={() => window.location.reload()}>
+            Try Again
+          </button>
+        </div>
+      )}
+
       <div id="lawpay-container" style={{ marginTop: '20px' }} />
       
-      {/* Fallback form for demo purposes */}
+      {/* Fallback form for demo purposes (works even if LawPay fails) */}
       <div style={{ 
         marginTop: '20px', 
         padding: '20px', 
