@@ -24,6 +24,7 @@ export type Booking = {
   stage: 'New' | 'Booked' | 'Paid' | 'Signed' | 'Onboarding' | 'Completed';
   notes?: string[];
   docs?: { id: string; title: string; type: string; createdAt: string; url?: string }[];
+  paymentId?: string | null;
 };
 
 const BOOKINGS_KEY = 'wyAPT_bookings';

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../public.css';
 import { useLocation, useNavigate } from 'react-router-dom';
+import LawPayIntegration from '../components/LawPayIntegration';
 
 const PACKAGES = [
   { id: 'consult-30', label: '30-min Initial Consult (Free)' },
@@ -82,10 +83,17 @@ const PublicBookCall: React.FC = () => {
   const [urgency, setUrgency] = useState(URGENCY_OPTIONS[0]);
   const [assetValueRange, setAssetValueRange] = useState(VALUE_RANGE_OPTIONS[0]);
   const [phone, setPhone] = useState('');
+  const [showPayment, setShowPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock submission
+    // Show payment step for paid consultations
+    setShowPayment(true);
+  };
+
+  const handlePaymentSuccess = (paymentId: string) => {
+    // Navigate to confirmation page after successful payment
     navigate('/wyoming-apt/confirmed', { state: {
       name,
       email,
@@ -105,8 +113,18 @@ const PublicBookCall: React.FC = () => {
       urgency,
       assetValueRange,
       phone,
-      price: { amount: 375, currency: 'USD' }
+      price: { amount: 375, currency: 'USD' },
+      paymentId: paymentId
     } });
+  };
+
+  const handlePaymentError = (error: string) => {
+    setPaymentError(error);
+    setShowPayment(false);
+  };
+
+  const handlePaymentCancel = () => {
+    setShowPayment(false);
   };
 
   return (
@@ -379,26 +397,72 @@ const PublicBookCall: React.FC = () => {
                   Please select a time first.
                 </div>
               )}
-              {/* Payment Placeholder */}
-              <div className="public-card">
-                <strong>Payment information *</strong>
-                <div style={{ marginTop: 6 }}>Price: $375 USD</div>
-                <div style={{ color: 'var(--brand-slate)', fontSize: 12, marginTop: 6 }}>
-                  Payment placeholder only (Stripe test mode in production).
-                </div>
-              </div>
+
               <button
                 className="btn-gradient"
                 type="submit"
                 style={{ width: '100%', marginTop: 8, opacity: slot ? 1 : 0.7, cursor: slot ? 'pointer' : 'not-allowed' }}
                 disabled={!slot}
               >
-                Continue
+                Continue to Payment
               </button>
             </div>
           </form>
+          
+          {paymentError && (
+            <div className="public-card" style={{ marginTop: '16px', background: 'var(--danger-light)', border: '1px solid var(--danger)' }}>
+              <strong style={{ color: 'var(--danger)' }}>Payment Error</strong>
+              <p style={{ margin: '8px 0 0', color: 'var(--danger)' }}>{paymentError}</p>
+            </div>
+          )}
         </section>
       </div>
+      
+      {/* Payment Modal */}
+      {showPayment && (
+        <div className="modal-overlay" onClick={handlePaymentCancel}>
+          <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '500px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 className="section-title">Complete Payment</h3>
+              <button 
+                onClick={handlePaymentCancel}
+                style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--text-secondary)' }}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div style={{ marginBottom: '20px' }}>
+              <p style={{ marginBottom: '16px' }}>
+                Complete your payment to confirm your consultation booking.
+              </p>
+              <div className="public-card" style={{ background: 'var(--primary-light)', border: '1px solid var(--primary)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <strong>30-Minute Consultation</strong>
+                    <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                      {slot}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--primary)' }}>
+                    $375
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <LawPayIntegration
+              amount={375}
+              description="30-Minute Asset Protection Consultation"
+              clientName={name}
+              clientEmail={email}
+              onSuccess={handlePaymentSuccess}
+              onError={handlePaymentError}
+              onCancel={handlePaymentCancel}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

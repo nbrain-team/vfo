@@ -25,7 +25,8 @@ const PublicConfirm: React.FC = () => {
     urgency,
     assetValueRange,
     phone,
-    price
+    price,
+    paymentId
   } = (location.state || {});
 
   useEffect(() => {
@@ -52,7 +53,8 @@ const PublicConfirm: React.FC = () => {
         assetValueRange,
         phone,
         price,
-        stage: 'Booked'
+        stage: 'Booked',
+        paymentId: paymentId || null
       });
       // Also send to backend to persist to CRM if available
       apiClient.post('/public/lead', {
@@ -74,7 +76,8 @@ const PublicConfirm: React.FC = () => {
         urgency,
         assetValueRange,
         phone,
-        price
+        price,
+        paymentId: paymentId || null
       }).catch(() => { /* silent fail for demo */ });
     }
   }, [name, email, slot]);
@@ -131,7 +134,15 @@ const PublicConfirm: React.FC = () => {
             <p><strong>SMS Number:</strong> {phone}</p>
           )}
           {price && (
-            <p><strong>Price:</strong> ${price.amount} {price.currency} (placeholder)</p>
+            <p><strong>Price:</strong> ${price.amount} {price.currency}</p>
+          )}
+          {paymentId && (
+            <div className="public-card" style={{ background: 'var(--success-light)', border: '1px solid var(--success)', marginTop: '16px' }}>
+              <strong style={{ color: 'var(--success)' }}>✓ Payment Confirmed</strong>
+              <p style={{ margin: '8px 0 0', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                Payment ID: {paymentId}
+              </p>
+            </div>
           )}
           <p style={{ color: 'var(--brand-slate)' }}>In production, you would receive a calendar invite and confirmation email. A record has been added to your admin dashboard.</p>
           <div style={{ display: 'flex', gap: 10 }}>
