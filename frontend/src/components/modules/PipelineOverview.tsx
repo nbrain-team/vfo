@@ -4,9 +4,10 @@ import { Booking, updateBooking } from '../../adminData';
 interface PipelineOverviewProps {
     bookings: Booking[];
     onSelectBooking?: (id: string) => void;
+    onStageUpdate?: () => void;
 }
 
-const PipelineOverview: React.FC<PipelineOverviewProps> = ({ bookings, onSelectBooking }) => {
+const PipelineOverview: React.FC<PipelineOverviewProps> = ({ bookings, onSelectBooking, onStageUpdate }) => {
     const [draggedClient, setDraggedClient] = useState<Booking | null>(null);
     const [dragOverStage, setDragOverStage] = useState<string | null>(null);
     const [showRuleModal, setShowRuleModal] = useState(false);
@@ -44,7 +45,7 @@ const PipelineOverview: React.FC<PipelineOverviewProps> = ({ bookings, onSelectB
         e.preventDefault();
         if (draggedClient) {
             updateBooking(draggedClient.id, { stage: targetStage.stage as any });
-            window.location.reload(); // Refresh to show updated data
+            if (onStageUpdate) onStageUpdate();
         }
         setDraggedClient(null);
         setDragOverStage(null);

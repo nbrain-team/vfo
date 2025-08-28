@@ -36,6 +36,10 @@ const CRMAdmin: React.FC = () => {
   }, []);
 
   const bookings = useMemo(() => bookingsState, [bookingsState]);
+
+  const refreshBookings = () => {
+    setBookingsState(getBookings());
+  };
   const selected = bookings.find(b => b.id === selectedId);
 
   const resetAdd = () => {
@@ -274,6 +278,7 @@ const CRMAdmin: React.FC = () => {
               setSelectedId(id);
               setActiveTab('clients');
             }}
+            onStageUpdate={refreshBookings}
           />
           
           {/* Pipeline Widget Duplicate - Quick Actions */}
