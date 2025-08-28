@@ -3,6 +3,8 @@ import '../public.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LawPayIntegration from '../components/LawPayIntegration';
 
+const LAWPay_HPP_URL = 'https://secure.lawpay.com/pages/meuli-law-office/30-minute-consultation-call-with-attorney';
+
 const PACKAGES = [
   { id: 'consult-30', label: '30-min Initial Consult (Free)' },
   { id: 'consult-60', label: '60-min Deep Dive (Paid Placeholder)' },
@@ -457,15 +459,39 @@ const PublicBookCall: React.FC = () => {
               </div>
             </div>
             
-            <LawPayIntegration
-              amount={375}
-              description="30-Minute Asset Protection Consultation"
-              clientName={name}
-              clientEmail={email}
-              onSuccess={handlePaymentSuccess}
-              onError={handlePaymentError}
-              onCancel={handlePaymentCancel}
-            />
+            {/* Hosted Payment Page Bypass (iframe) */}
+            <div style={{ border: '1px solid var(--border-light)', borderRadius: '8px', overflow: 'hidden' }}>
+              <iframe
+                src={LAWPay_HPP_URL}
+                title="Secure LawPay Checkout"
+                style={{ width: '100%', height: '640px', border: '0', background: '#ffffff' }}
+                sandbox="allow-forms allow-scripts allow-same-origin allow-popups"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                If the form doesn’t appear, open the secure payment page in a new tab and return here after completing payment.
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <a
+                  className="button-outline"
+                  href={LAWPay_HPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ textDecoration: 'none' }}
+                >
+                  Open Secure Payment
+                </a>
+                <button
+                  className="form-button"
+                  onClick={() => handlePaymentSuccess('hpp-' + Date.now())}
+                >
+                  I Completed Payment
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
