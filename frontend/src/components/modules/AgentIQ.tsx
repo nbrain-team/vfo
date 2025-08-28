@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import ModuleTemplate from './ModuleTemplate';
 import { useNavigate } from 'react-router-dom';
+import EditableSection from './EditableSection';
+import { getSiteConfig, saveSiteConfig } from '../../adminData';
 
 type TabKey = 'overview' | 'blog' | 'services' | 'consult' | 'client-portal' | 'testimonials' | 'contact';
 
@@ -18,6 +20,36 @@ const AgentIQ: React.FC = () => {
     const [selectedAction, setSelectedAction] = useState<string | null>(null);
     const [scheduled, setScheduled] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+    
+    // Site content state
+    const siteConfig = getSiteConfig();
+    const [advisorName, setAdvisorName] = useState(siteConfig.advisorName || 'Matt Meuli');
+    const [advisorDescription, setAdvisorDescription] = useState(
+        siteConfig.advisorDescription || 
+        'Get expert asset protection advice and strategies to help shield your wealth from anything and anyone.'
+    );
+    const [advisorPhone, setAdvisorPhone] = useState(siteConfig.advisorPhone || '(307) 463-3600');
+    
+    const handleContentSave = (field: string, value: string) => {
+        const updatedConfig = {
+            ...siteConfig,
+            [field]: value
+        };
+        saveSiteConfig(updatedConfig);
+        
+        // Update local state
+        switch(field) {
+            case 'advisorName':
+                setAdvisorName(value);
+                break;
+            case 'advisorDescription':
+                setAdvisorDescription(value);
+                break;
+            case 'advisorPhone':
+                setAdvisorPhone(value);
+                break;
+        }
+    };
 
     const services: ServiceItem[] = [
         {
@@ -170,13 +202,23 @@ const AgentIQ: React.FC = () => {
         <>
             <div className="module-card">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <h2 style={{ margin: 0 }}>Meet Matt Meuli</h2>
-                    <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
-                        Get expert asset protection advice and strategies to help shield your wealth from anything and anyone.
-                    </p>
+                    <EditableSection
+                        content={<h2 style={{ margin: 0 }}>Meet {advisorName}</h2>}
+                        onSave={(value) => handleContentSave('advisorName', value.replace('Meet ', ''))}
+                    />
+                    <EditableSection
+                        content={
+                            <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
+                                {advisorDescription}
+                            </p>
+                        }
+                        onSave={(value) => handleContentSave('advisorDescription', value)}
+                    />
                     <div style={{ display: 'flex', gap: '10px', marginTop: '12px' }}>
                         <button className="form-button" style={{ width: 'auto' }} onClick={() => setActiveTab('consult')}>Book an Appointment</button>
-                        <button className="button-outline" style={{ width: 'auto' }} onClick={() => setActiveTab('contact')}>Call: (307) 463-3600</button>
+                        <button className="button-outline" style={{ width: 'auto' }} onClick={() => setActiveTab('contact')}>
+                            Call: {advisorPhone}
+                        </button>
                     </div>
                 </div>
             </div>
