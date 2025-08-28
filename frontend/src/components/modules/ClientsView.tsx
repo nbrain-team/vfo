@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Booking } from '../../adminData';
+import { Booking, getSiteConfig } from '../../adminData';
 import ClientDetails from './ClientDetails';
 
 interface ClientsViewProps {
@@ -118,7 +118,7 @@ const ClientsView: React.FC<ClientsViewProps> = ({ bookings, onSelectClient, sel
                                         {new Date(booking.createdAt || '').toLocaleDateString()}
                                     </div>
                                 </td>
-                                <td>Matt Johnson</td>
+                                <td>{getSiteConfig().advisorName || 'Matt Meuli'}</td>
                             </tr>
                         ))}
                     </tbody>

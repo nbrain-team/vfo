@@ -20,6 +20,7 @@ const VaultAdmin: React.FC = () => {
   const [selectedMatter, setSelectedMatter] = useState<string>('');
   const [generatedDraft, setGeneratedDraft] = useState<string>('');
   const [draftPreview, setDraftPreview] = useState(false);
+  const [draftEditable, setDraftEditable] = useState<string>('');
   const [showPayment, setShowPayment] = useState(false);
 
   useEffect(() => {
@@ -304,7 +305,9 @@ const VaultAdmin: React.FC = () => {
                   onClick={() => {
                     // Generate draft with client data
                     const client = bookings.find(b => b.id === selectedClient);
-                    setGeneratedDraft(`Generated ${selectedDocument} for ${client?.name} - ${selectedMatter}`);
+                    const text = `Generated ${selectedDocument} for ${client?.name} - ${selectedMatter}`;
+                    setGeneratedDraft(text);
+                    setDraftEditable(text);
                     setDraftPreview(true);
                   }}
                 >
@@ -316,11 +319,30 @@ const VaultAdmin: React.FC = () => {
             {draftPreview && (
               <div style={{ marginTop: '20px', padding: '16px', background: 'var(--background-secondary)', borderRadius: '8px' }}>
                 <h4>Draft Preview</h4>
-                <p style={{ color: 'var(--text-secondary)', marginBottom: '12px' }}>{generatedDraft}</p>
+                <textarea 
+                  className="form-input" 
+                  style={{ minHeight: 160, whiteSpace: 'pre-wrap' }}
+                  value={draftEditable}
+                  onChange={(e) => setDraftEditable(e.target.value)}
+                />
                 <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
                   This document has been populated with client data from their intake forms and CRM record.
                 </p>
                 <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                  <button 
+                    className="button-outline" 
+                    style={{ width: 'auto' }}
+                    onClick={() => {
+                      // Save a new draft version
+                      if (selectedClient) {
+                        addDocVersion({ id: `ver-${Date.now()}`, bookingId: selectedClient, name: `${selectedDocument || 'Document'} (Draft)`, content: draftEditable || generatedDraft, status: 'Draft', createdAt: new Date().toISOString() });
+                        setVersions(getDocVersions(selectedClient));
+                        alert('Draft saved.');
+                      }
+                    }}
+                  >
+                    Save Draft
+                  </button>
                   <button 
                     className="form-button" 
                     style={{ width: 'auto' }}
@@ -333,9 +355,6 @@ const VaultAdmin: React.FC = () => {
                     }}
                   >
                     Approve & Send for E-Sign
-                  </button>
-                  <button className="button-outline" style={{ width: 'auto' }}>
-                    Edit Document
                   </button>
                 </div>
               </div>

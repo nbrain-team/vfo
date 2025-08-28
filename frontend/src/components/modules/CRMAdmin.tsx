@@ -261,15 +261,7 @@ const CRMAdmin: React.FC = () => {
         <div />
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button className="form-button" style={{ width: 'auto' }} onClick={() => setShowAdd(true)}>Add Contact</button>
-          <button className="form-button" style={{ width: 'auto' }} onClick={() => navigate('/platform/formbuilder')}>Add Lead Form</button>
-          <button className="form-button" style={{ width: 'auto' }} onClick={() => alert('Service types: WYDAPT ($18,500), Life & Legacy Planning ($3,500), Wealth Credit & Liquidity ($2,500)')}>Add Service Type</button>
-          <button className="form-button" style={{ width: 'auto' }} onClick={() => navigate('/platform/workflows')}>Add Sequence</button>
           <button className="button-outline" style={{ width: 'auto' }} onClick={() => setShowImport(true)}>Import CSV</button>
-          {localStorage.getItem('google_access_token') && (
-            <button className="button-outline" style={{ width: 'auto' }} onClick={() => handleGoogleContactsImport()}>
-              Add Google Contacts
-            </button>
-          )}
         </div>
       </div>
 
@@ -285,10 +277,10 @@ const CRMAdmin: React.FC = () => {
               {[
                 { key: 'book_consults', label: 'Book Consults', count: bookings.filter(b => b.stage === 'New').length },
                 { key: 'pre_engagement', label: 'Pre-Engagement', count: bookings.filter(b => b.stage === 'Booked' || b.stage === 'Paid').length },
-                { key: 'engaged', label: 'Engaged', count: bookings.filter(b => b.stage === 'engaged').length },
-                { key: 'questionnaire', label: 'Questionnaire Received', count: bookings.filter(b => b.stage === 'questionnaire_received').length },
-                { key: 'in_process', label: 'Matter in Process', count: bookings.filter(b => b.stage === 'matter_in_process').length },
-                { key: 'fulfilled', label: 'Matter Fulfilled', count: bookings.filter(b => b.stage === 'matter_fulfilled').length }
+                { key: 'engaged', label: 'Engaged', count: 0 },
+                { key: 'questionnaire', label: 'Questionnaire Received', count: 0 },
+                { key: 'in_process', label: 'Matter in Process', count: 0 },
+                { key: 'fulfilled', label: 'Matter Fulfilled', count: bookings.filter(b => b.stage === 'Completed').length }
               ].map(stage => (
                 <div key={stage.key} className="stage-card" style={{ cursor: 'pointer' }} onClick={() => {
                   setActiveTab('clients');
@@ -345,26 +337,22 @@ const CRMAdmin: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {bookings.filter(b => b.stage === 'Signed' || b.stage === 'matter_in_process').map(b => (
+                  {bookings.filter(b => b.stage === 'Signed').map(b => (
                     <tr key={b.id}>
                       <td>{b.name}</td>
                       <td>WYDAPT Matter Workflow</td>
                       <td>
-                        {b.stage === 'Signed' ? 'Payment Instructions Sent' : 
-                         b.stage === 'matter_in_process' ? 'Documents in Progress' : 
-                         'Pending'}
+                        {b.stage === 'Signed' ? 'Payment Instructions Sent' : 'Pending'}
                       </td>
                       <td>
                         <span className="status-badge active">Running</span>
                       </td>
                       <td>
-                        {b.stage === 'Signed' ? 'Awaiting payment ($18,500)' : 
-                         b.stage === 'matter_in_process' ? 'Generate trust documents' : 
-                         'Next step pending'}
+                        {b.stage === 'Signed' ? 'Awaiting payment ($18,500)' : 'Next step pending'}
                       </td>
                     </tr>
                   ))}
-                  {bookings.filter(b => b.stage === 'Signed' || b.stage === 'matter_in_process').length === 0 && (
+                  {bookings.filter(b => b.stage === 'Signed').length === 0 && (
                     <tr>
                       <td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
                         No active workflows running

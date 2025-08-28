@@ -462,6 +462,7 @@ Wyoming Asset Protection Trust Attorney, LLC`
                       <input type="checkbox" checked={st.enabled} onChange={() => toggleStep(s.id, st.id)} />
                       <span>{st.type.toUpperCase()} — {st.label}</span>
                     </span>
+                    <button className="button-outline" style={{ width: 'auto', padding: '4px 8px', fontSize: '12px' }} onClick={() => editSequence(s)}>Edit Step</button>
                     {st.type === 'email' && (
                       <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <select className="form-input" value={st.templateId || ''} onChange={(e) => linkTemplateToStep(s.id, st.id, e.target.value)} style={{ width: 220 }}>

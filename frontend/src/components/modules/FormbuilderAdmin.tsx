@@ -621,7 +621,6 @@ const FormbuilderAdmin: React.FC = () => {
                                                 type="text" 
                                                 className="form-input" 
                                                 placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
-                                                disabled
                                             />
                                         )}
                                         
@@ -630,7 +629,6 @@ const FormbuilderAdmin: React.FC = () => {
                                                 type="email" 
                                                 className="form-input" 
                                                 placeholder={field.placeholder || 'email@example.com'}
-                                                disabled
                                             />
                                         )}
                                         
@@ -639,7 +637,6 @@ const FormbuilderAdmin: React.FC = () => {
                                                 type="tel" 
                                                 className="form-input" 
                                                 placeholder={field.placeholder || '(555) 123-4567'}
-                                                disabled
                                             />
                                         )}
                                         
@@ -647,7 +644,6 @@ const FormbuilderAdmin: React.FC = () => {
                                             <input 
                                                 type="date" 
                                                 className="form-input"
-                                                disabled
                                             />
                                         )}
                                         
@@ -656,12 +652,11 @@ const FormbuilderAdmin: React.FC = () => {
                                                 className="form-input" 
                                                 rows={4}
                                                 placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
-                                                disabled
                                             />
                                         )}
                                         
                                         {field.type === 'select' && (
-                                            <select className="form-input" disabled>
+                                            <select className="form-input">
                                                 <option value="">Select an option</option>
                                                 {field.options?.map((opt, optIdx) => (
                                                     <option key={optIdx} value={opt}>{opt}</option>
@@ -670,11 +665,12 @@ const FormbuilderAdmin: React.FC = () => {
                                         )}
                                         
                                         {field.type === 'checkbox' && (
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <input type="checkbox" id={`preview-${field.id}`} disabled />
-                                                <label htmlFor={`preview-${field.id}`} style={{ marginBottom: 0 }}>
-                                                    {field.placeholder || 'Check to confirm'}
-                                                </label>
+                                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                                {(field.options && field.options.length > 0 ? field.options : ['Option 1']).map((opt, i) => (
+                                                    <label key={i} className="button-outline" style={{ padding: '6px 10px' }}>
+                                                        <input type="checkbox" /> {opt}
+                                                    </label>
+                                                ))}
                                             </div>
                                         )}
                                     </div>
@@ -700,7 +696,6 @@ const FormbuilderAdmin: React.FC = () => {
                                         type="submit"
                                         className="form-button" 
                                         style={{ width: 'auto' }}
-                                        disabled
                                     >
                                         Submit Form
                                     </button>
