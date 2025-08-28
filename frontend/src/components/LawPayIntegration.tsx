@@ -84,7 +84,7 @@ const LawPayIntegration: React.FC<LawPayIntegrationProps> = ({
     };
 
     // try to initialize if LawPay is already present
-    if ((window as any).LawPay) {
+    if ((window as any).LawPay || (window as any).LawPayCheckout || (window as any).LPCheckout) {
       setIsLoading(false);
       initializeLawPay();
     } else {
@@ -99,9 +99,10 @@ const LawPayIntegration: React.FC<LawPayIntegrationProps> = ({
   const initializeLawPay = () => {
     let attempts = 0;
     const poll = () => {
-      if (window.LawPay) {
+      const provider: any = (window as any).LawPay || (window as any).LawPayCheckout || (window as any).LPCheckout;
+      if (provider) {
         try {
-          const checkout = window.LawPay.checkout({
+          const checkout = provider.checkout({
             publicKey: publicKey,
             amount: amount * 100, // Convert to cents
             currency: 'USD',
@@ -146,9 +147,9 @@ const LawPayIntegration: React.FC<LawPayIntegrationProps> = ({
           return;
         }
       }
-      if (attempts < 10) {
+      if (attempts < 50) {
         attempts += 1;
-        setTimeout(poll, 200);
+        setTimeout(poll, 250);
       } else {
         setError('LawPay not available');
         setErrorDetails({ reason: 'global_missing' });
