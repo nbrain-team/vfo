@@ -422,7 +422,7 @@ const FormbuilderAdmin: React.FC = () => {
                 }}
                 onClick={() => { setShowCreateModal(false); setEditingForm(null); }}
                 >
-                    <div className="module-card" style={{ width: '90%', maxWidth: '800px', maxHeight: '90vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                    <div className="module-card" style={{ width: '90%', maxWidth: '800px', maxHeight: '90vh', overflow: 'auto', background: '#ffffff' }} onClick={(e) => e.stopPropagation()}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                             <h2 className="section-title" style={{ margin: 0 }}>
                                 {editingForm ? 'Edit Form' : 'Create New Form'}

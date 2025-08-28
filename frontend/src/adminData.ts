@@ -71,8 +71,6 @@ export type SiteConfig = {
   images?: string[];
   paywallEnabled?: boolean;
   emailTemplates?: EmailTemplate[];
-  lawpayMerchantId?: string;
-  lawpayPublicKey?: string;
   advisorName?: string;
   advisorDescription?: string;
   advisorPhone?: string;

@@ -17,9 +17,7 @@ const SiteBuilderAdmin: React.FC = () => {
   const [goldEnd, setGoldEnd] = useState(initial.goldEnd || '#C07C3D');
   const [images, setImages] = useState<string[]>(initial.images || []);
   const [paywallEnabled, setPaywallEnabled] = useState(!!initial.paywallEnabled);
-  const [lawpayMerchantId, setLawpayMerchantId] = useState(initial.lawpayMerchantId || '');
-  const [lawpayPublicKey, setLawpayPublicKey] = useState(initial.lawpayPublicKey || '');
-  const [showLawPaySettings, setShowLawPaySettings] = useState(false);
+  // LawPay credentials are now managed through environment variables
 
   return (
     <ModuleTemplate
@@ -116,8 +114,7 @@ const SiteBuilderAdmin: React.FC = () => {
                     setPaywallEnabled(e.target.checked);
                     saveSiteConfig({ 
                       videoUrl, logoPath, logoDataUrl, headline, subhead, ctaText, ctaHref, 
-                      primaryColor, goldStart, goldEnd, images, paywallEnabled: e.target.checked,
-                      lawpayMerchantId, lawpayPublicKey
+                      primaryColor, goldStart, goldEnd, images, paywallEnabled: e.target.checked
                     });
                   }} 
                 />
@@ -125,48 +122,15 @@ const SiteBuilderAdmin: React.FC = () => {
               </div>
               
               {paywallEnabled && (
-                <div style={{ marginTop: '12px' }}>
-                  <button 
-                    className="button-outline" 
-                    style={{ width: 'auto', marginBottom: '12px' }}
-                    onClick={() => setShowLawPaySettings(!showLawPaySettings)}
-                  >
-                    {showLawPaySettings ? 'Hide' : 'Configure'} LawPay Account
-                  </button>
-                  
-                  {showLawPaySettings && (
-                    <div style={{ background: 'var(--background-secondary)', padding: '16px', borderRadius: '8px', marginTop: '12px' }}>
-                      <div style={{ marginBottom: '12px' }}>
-                        <label className="form-label">LawPay Merchant ID</label>
-                        <input 
-                          className="form-input" 
-                          value={lawpayMerchantId} 
-                          onChange={(e) => setLawpayMerchantId(e.target.value)}
-                          placeholder="Enter your LawPay Merchant ID"
-                        />
-                      </div>
-                      <div style={{ marginBottom: '12px' }}>
-                        <label className="form-label">LawPay Public Key</label>
-                        <input 
-                          className="form-input" 
-                          value={lawpayPublicKey} 
-                          onChange={(e) => setLawpayPublicKey(e.target.value)}
-                          placeholder="Enter your LawPay Public Key"
-                        />
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '8px' }}>
-                        These credentials can be found in your LawPay dashboard under API Settings.
-                      </div>
-                    </div>
-                  )}
+                <div style={{ marginTop: '12px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                  <p>✓ LawPay integration is configured via backend environment variables</p>
                 </div>
               )}
             </div>
             <button className="form-button" style={{ width: 'auto' }} onClick={() => {
               saveSiteConfig({ 
                 videoUrl, logoPath, logoDataUrl, headline, subhead, ctaText, ctaHref, 
-                primaryColor, goldStart, goldEnd, images, paywallEnabled,
-                lawpayMerchantId, lawpayPublicKey
+                primaryColor, goldStart, goldEnd, images, paywallEnabled
               });
               setPreviewKey(Date.now());
               alert('Settings saved successfully!');
