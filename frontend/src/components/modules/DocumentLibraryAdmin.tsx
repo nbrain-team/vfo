@@ -392,7 +392,6 @@ const DocumentLibraryAdmin: React.FC = () => {
         }
     ]);
 
-    const [showUploadModal, setShowUploadModal] = useState(false);
     const [showPreviewModal, setShowPreviewModal] = useState(false);
     const [previewDocument, setPreviewDocument] = useState<Document | null>(null);
     const [selectedType, setSelectedType] = useState<Document['type']>('other');
