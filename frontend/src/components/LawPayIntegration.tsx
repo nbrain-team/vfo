@@ -27,6 +27,7 @@ const LawPayIntegration: React.FC<LawPayIntegrationProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<any>(null);
   
   const publicKey = import.meta.env.VITE_LAWPAY_PUBLIC_KEY || 'DDpdqQzzTjyUDeVO28NdDg0eajQxAR1hpMdZEKmJhKR4RMcWmsCLrB9CwKav7JCW';
 
@@ -62,6 +63,7 @@ const LawPayIntegration: React.FC<LawPayIntegrationProps> = ({
       script.onload = () => {
         window.clearTimeout(timeoutId);
         if (cancelled) return;
+        try { console.log('[LawPay] Script loaded. Using key:', (publicKey || '').slice(0,6) + '...'); } catch {}
         setIsLoading(false);
         initializeLawPay();
       };
@@ -73,6 +75,7 @@ const LawPayIntegration: React.FC<LawPayIntegrationProps> = ({
           setTimeout(() => loadScriptWithRetry(attempt + 1), 600);
         } else {
           setError('Failed to load LawPay');
+          setErrorDetails({ reason: 'script_load_failed' });
           setIsLoading(false);
           onError('Failed to load LawPay');
         }
@@ -101,6 +104,7 @@ const LawPayIntegration: React.FC<LawPayIntegrationProps> = ({
           const checkout = window.LawPay.checkout({
             publicKey: publicKey,
             amount: amount * 100, // Convert to cents
+            currency: 'USD',
             description: description,
             customer: {
               name: clientName,
@@ -123,7 +127,8 @@ const LawPayIntegration: React.FC<LawPayIntegrationProps> = ({
             },
             onError: (error: any) => {
               console.error('LawPay payment error:', error);
-              setError(error.message || 'Payment failed');
+              setError(error?.message || 'Payment failed');
+              setErrorDetails(error);
               onError(error.message || 'Payment failed');
             },
             onCancel: () => {
@@ -136,6 +141,7 @@ const LawPayIntegration: React.FC<LawPayIntegrationProps> = ({
         } catch (err) {
           console.error('LawPay initialization error:', err);
           setError('Failed to initialize payment form');
+          setErrorDetails(String(err));
           onError('Failed to initialize payment form');
           return;
         }
@@ -145,6 +151,7 @@ const LawPayIntegration: React.FC<LawPayIntegrationProps> = ({
         setTimeout(poll, 200);
       } else {
         setError('LawPay not available');
+        setErrorDetails({ reason: 'global_missing' });
         onError('LawPay not available');
       }
     };
@@ -169,6 +176,20 @@ const LawPayIntegration: React.FC<LawPayIntegrationProps> = ({
           <div style={{ color: 'var(--danger)', marginBottom: '12px', fontWeight: 600 }}>
             {error}
           </div>
+          {errorDetails && (
+            <pre style={{ 
+              textAlign: 'left',
+              padding: '8px',
+              background: '#fff4f4',
+              border: '1px solid var(--danger)',
+              borderRadius: '6px',
+              fontSize: '12px',
+              maxHeight: 180,
+              overflow: 'auto'
+            }}>
+{typeof errorDetails === 'string' ? errorDetails : JSON.stringify(errorDetails, null, 2)}
+            </pre>
+          )}
           <button className="button-outline" onClick={() => window.location.reload()}>
             Try Again
           </button>
