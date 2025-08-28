@@ -31,6 +31,7 @@ import PublicBookCall from './pages/PublicBookCall';
 import PublicConfirm from './pages/PublicConfirm';
 import PublicSelectTime from './pages/PublicSelectTime';
 import TestGoogleAuth from './pages/TestGoogleAuth';
+import PublicBlog from './pages/PublicBlog';
 import AuditAdmin from './components/modules/AuditAdmin';
 import FormbuilderAdmin from './components/modules/FormbuilderAdmin';
 import DocumentLibraryAdmin from './components/modules/DocumentLibraryAdmin';
@@ -49,6 +50,8 @@ function App() {
         <Route path="/wyoming-apt/select" element={<PublicSelectTime />} />
         <Route path="/wyoming-apt/book" element={<PublicBookCall />} />
         <Route path="/wyoming-apt/confirmed" element={<PublicConfirm />} />
+        <Route path="/blog" element={<PublicBlog />} />
+        <Route path="/blog/:postId" element={<PublicBlog />} />
         <Route element={<ProtectedRoute />}>
 
           <Route path="/platform" element={

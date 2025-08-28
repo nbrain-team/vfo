@@ -419,11 +419,21 @@ const FormbuilderAdmin: React.FC = () => {
                     alignItems: 'center', 
                     justifyContent: 'center', 
                     zIndex: 50 
-                }}>
-                    <div className="module-card" style={{ width: '90%', maxWidth: '800px', maxHeight: '90vh', overflow: 'auto' }}>
-                        <h2 className="section-title">
-                            {editingForm ? 'Edit Form' : 'Create New Form'}
-                        </h2>
+                }}
+                onClick={() => { setShowCreateModal(false); setEditingForm(null); }}
+                >
+                    <div className="module-card" style={{ width: '90%', maxWidth: '800px', maxHeight: '90vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h2 className="section-title" style={{ margin: 0 }}>
+                                {editingForm ? 'Edit Form' : 'Create New Form'}
+                            </h2>
+                            <button 
+                                onClick={() => { setShowCreateModal(false); setEditingForm(null); }}
+                                style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--text-secondary)' }}
+                            >
+                                ×
+                            </button>
+                        </div>
                         
                         <div style={{ marginBottom: '20px' }}>
                             <label className="form-label">Form Name</label>
@@ -502,6 +512,48 @@ const FormbuilderAdmin: React.FC = () => {
                                                 Required field
                                             </label>
                                         </div>
+                                        
+                                        {(field.type === 'select' || field.type === 'checkbox') && (
+                                            <div style={{ marginTop: '12px' }}>
+                                                <label className="form-label">Options</label>
+                                                <div style={{ display: 'grid', gap: '8px' }}>
+                                                    {(field.options || []).map((option, optIndex) => (
+                                                        <div key={optIndex} style={{ display: 'flex', gap: '8px' }}>
+                                                            <input 
+                                                                className="form-input"
+                                                                value={option}
+                                                                onChange={(e) => {
+                                                                    const newOptions = [...(field.options || [])];
+                                                                    newOptions[optIndex] = e.target.value;
+                                                                    updateField(index, { options: newOptions });
+                                                                }}
+                                                                placeholder={`Option ${optIndex + 1}`}
+                                                            />
+                                                            <button 
+                                                                className="button-outline"
+                                                                style={{ width: 'auto' }}
+                                                                onClick={() => {
+                                                                    const newOptions = (field.options || []).filter((_, i) => i !== optIndex);
+                                                                    updateField(index, { options: newOptions });
+                                                                }}
+                                                            >
+                                                                Remove
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                    <button 
+                                                        className="button-outline"
+                                                        style={{ width: 'auto' }}
+                                                        onClick={() => {
+                                                            const newOptions = [...(field.options || []), ''];
+                                                            updateField(index, { options: newOptions });
+                                                        }}
+                                                    >
+                                                        + Add Option
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>

@@ -3,31 +3,254 @@ import ModuleTemplate from './ModuleTemplate';
 import { getNurtureSequences, saveNurtureSequences, NurtureSequence, NurtureStep, getEmailTemplates, upsertEmailTemplate, deleteEmailTemplate, EmailTemplate, getAutomationRules, upsertAutomationRule, deleteAutomationRule, AutomationRule, getSiteConfig, saveSiteConfig } from '../../adminData';
 
 const NurtureAdmin: React.FC = () => {
+  const initializeWYDAPTTemplates = () => {
+    const templates = getEmailTemplates();
+    const wydaptTemplates = [
+      {
+        id: 'wydapt-booking-confirmation',
+        name: 'WYDAPT Booking Confirmation',
+        subject: 'Your WYDAPT Consultation is Confirmed',
+        html: `Hi {{name}},<br><br>
+Thank you for booking your 30-minute Wyoming Domestic Asset Protection Trust (WYDAPT) consultation with me.<br><br>
+<strong>Here are the details:</strong><br>
+Date/Time: {{appointment_date}} at {{appointment_time}}<br>
+Location: {{meeting_link}}<br><br>
+This is your first step toward protecting your assets and ensuring your family's legacy is safe for generations.<br><br>
+<strong>To make the most of our time together:</strong><br>
+- Bring clarity on your goals and any questions you'd like answered.<br>
+- I'll walk you through exactly how the WYDAPT structure works — and why it is the strongest available under U.S. law.<br><br>
+I look forward to speaking with you.<br><br>
+Warm regards,<br>
+Matt Meuli<br>
+Wyoming Asset Protection Trust Attorney, LLC`
+      },
+      {
+        id: 'wydapt-no-show',
+        name: 'WYDAPT No-Show Follow-Up',
+        subject: 'We Missed You — Let\'s Reschedule',
+        html: `Hi {{name}},<br><br>
+I noticed we weren't able to connect for your scheduled WYDAPT consultation. I understand — life happens.<br><br>
+Your consultation fee is non-refundable, but I want to make sure you get the full value you've already invested.<br><br>
+👉 Simply reply to this email with a time that works for you, and we'll reschedule.<br><br>
+This conversation could be the difference between leaving your wealth exposed or securing it for future generations.<br><br>
+Best,<br>
+Matt`
+      },
+      {
+        id: 'wydapt-engagement-letter',
+        name: 'WYDAPT Engagement Letter',
+        subject: 'Your WYDAPT Engagement Letter & Next Steps',
+        html: `Hi {{name}},<br><br>
+Thank you for your time today. As discussed, I've prepared your Engagement Letter to officially begin building your Wyoming Domestic Asset Protection Trust.<br><br>
+Attached, you'll also find a WYDAPT Diagram to visualize how the trust protects your assets.<br><br>
+👉 Please review and sign the Engagement Letter here: {{esign_link}}<br><br>
+Once signed, we'll proceed immediately with the next step: securing payment and beginning the setup of your complete WYDAPT.<br><br>
+Your legacy deserves nothing less.<br><br>
+Gratefully,<br>
+Matt`
+      },
+      {
+        id: 'wydapt-payment-instructions',
+        name: 'WYDAPT Payment Instructions',
+        subject: 'Begin Your WYDAPT Setup — Payment Instructions',
+        html: `Hi {{name}},<br><br>
+Now that your Engagement Letter is in place, the next step is to secure your trust by completing payment of $18,500.<br><br>
+This covers all legal drafting, customization, and compliance for your WYDAPT.<br><br>
+👉 Click here to pay securely via LawPay: {{payment_link}}<br><br>
+Please complete payment within the next 48 hours so we can begin setup immediately.<br><br>
+This is the moment your protection moves from "planned" to "real."<br><br>
+To your legacy,<br>
+Matt`
+      },
+      {
+        id: 'wydapt-questionnaire',
+        name: 'WYDAPT Questionnaire Send',
+        subject: 'Complete Your Asset Protection Questionnaire',
+        html: `Hi {{name}},<br><br>
+Congratulations — your WYDAPT setup is officially underway.<br><br>
+The next step is to complete your Asset Protection Trust Questionnaire. This gives me the details I need to tailor your trust precisely to your assets, goals, and family needs.<br><br>
+👉 Complete your questionnaire here: {{questionnaire_link}}<br><br>
+It should take 20–30 minutes. Please complete it right away so we can keep your project on schedule.<br><br>
+The sooner we have your answers, the sooner your assets are fully protected.<br><br>
+Warmly,<br>
+Matt`
+      },
+      {
+        id: 'wydapt-matter-complete',
+        name: 'WYDAPT Matter Complete',
+        subject: 'Congratulations — Your WYDAPT is Complete',
+        html: `Hi {{name}},<br><br>
+Congratulations — your Wyoming Domestic Asset Protection Trust is complete.<br><br>
+<strong>This means:</strong><br>
+- Your assets are now shielded under one of the strongest legal frameworks available in the U.S.<br>
+- You've secured a personalized structure aligned with your family's goals.<br>
+- You've joined a select group of individuals who have taken a serious step toward multi-generational protection.<br><br>
+Attached are your final trust documents. They are also securely stored in your Client Vault for safekeeping.<br><br>
+<strong>👉 Next Steps:</strong><br>
+- Save these documents in both physical and digital form.<br>
+- Schedule a walkthrough with me if you'd like a guided review.<br>
+- Share only with your most trusted advisors.<br><br>
+Thank you for trusting me with this critical part of your family's future. It's been an honor to serve you.<br><br>
+Warm regards,<br>
+Matt Meuli<br>
+Wyoming Asset Protection Trust Attorney, LLC`
+      }
+    ];
+    
+    // Add rescue sequence templates
+    const rescueTemplates = [
+      // Didn't Sign Engagement Letter
+      {
+        id: 'wydapt-rescue-sign-day2',
+        name: 'Rescue: Still Need Your Signature',
+        subject: 'Still Need Your Signature to Begin Your WYDAPT',
+        html: `Hi {{name}},<br><br>I noticed your WYDAPT Engagement Letter is still unsigned.<br><br>Your trust setup cannot begin until this critical document is signed. Every day of delay is another day your assets remain unprotected.<br><br>👉 Sign your Engagement Letter now: {{esign_link}}<br><br>If you have questions or concerns, simply reply to this email. I'm here to help.<br><br>Best,<br>Matt`
+      },
+      {
+        id: 'wydapt-rescue-sign-day5',
+        name: 'Rescue: WYDAPT on Hold - Signature',
+        subject: 'Your WYDAPT Is on Hold — Action Required',
+        html: `Hi {{name}},<br><br>Your Wyoming Domestic Asset Protection Trust is currently on hold because your Engagement Letter remains unsigned.<br><br>We've reserved time on our calendar specifically for your matter, but we cannot proceed without your signature.<br><br>👉 Sign now to move forward: {{esign_link}}<br><br>Remember: asset protection only works if it's in place before you need it.<br><br>Sincerely,<br>Matt`
+      },
+      {
+        id: 'wydapt-rescue-sign-day7',
+        name: 'Rescue: Final Reminder - Signature',
+        subject: 'Final Reminder: Sign Your WYDAPT Engagement Letter',
+        html: `Hi {{name}},<br><br>This is your final reminder.<br><br>Your WYDAPT file will be closed if your Engagement Letter is not signed by {{deadline_date}}.<br><br>Don't let this opportunity to protect your family's wealth slip away.<br><br>👉 Sign here before it's too late: {{esign_link}}<br><br>Matt`
+      },
+      // Didn't Pay Invoice
+      {
+        id: 'wydapt-rescue-pay-day2',
+        name: 'Rescue: Payment Needed to Start',
+        subject: 'Your WYDAPT Setup Can\'t Start Until Payment Is Received',
+        html: `Hi {{name}},<br><br>Your signed Engagement Letter shows you're serious about protecting your assets. Now we need to complete payment so we can begin the actual work.<br><br>Your investment of $18,500 covers all legal drafting, customization, and compliance for your WYDAPT.<br><br>👉 Complete payment now: {{payment_link}}<br><br>The sooner you pay, the sooner your assets are protected.<br><br>Best,<br>Matt`
+      },
+      {
+        id: 'wydapt-rescue-pay-day4',
+        name: 'Rescue: WYDAPT Stuck at Payment',
+        subject: 'Your WYDAPT Is Stuck at Payment — Let\'s Fix That',
+        html: `Hi {{name}},<br><br>I see you've signed your Engagement Letter (great!), but your WYDAPT setup is stuck because payment hasn't been received.<br><br>Every day without protection is a day of unnecessary risk.<br><br>👉 Secure your trust now: {{payment_link}}<br><br>If you're experiencing any issues with payment or have questions, please reply immediately so we can help.<br><br>To your protection,<br>Matt`
+      },
+      {
+        id: 'wydapt-rescue-pay-day7',
+        name: 'Rescue: Final Notice - Payment',
+        subject: 'Final Notice: Secure Your WYDAPT Setup Today',
+        html: `Hi {{name}},<br><br>This is your final notice regarding payment for your WYDAPT setup.<br><br>Your file will be closed if payment is not received by {{deadline_date}}.<br><br>Don't let bureaucratic delays put your wealth at risk.<br><br>👉 Pay now to protect your legacy: {{payment_link}}<br><br>Matt`
+      },
+      // Didn't Submit Questionnaire
+      {
+        id: 'wydapt-rescue-quest-day3',
+        name: 'Rescue: Questionnaire Needed',
+        subject: 'WYDAPT Questionnaire — Please Complete Today',
+        html: `Hi {{name}},<br><br>Great news — your payment has been processed! Now I need your completed questionnaire to customize your trust documents.<br><br>This questionnaire ensures your WYDAPT is tailored precisely to your family's unique situation.<br><br>👉 Complete it here (takes ~20 min): {{questionnaire_link}}<br><br>The sooner you complete this, the sooner your documents will be ready.<br><br>Best,<br>Matt`
+      },
+      {
+        id: 'wydapt-rescue-quest-day5',
+        name: 'Rescue: WYDAPT on Hold - Questionnaire',
+        subject: 'Your WYDAPT Is on Hold — Questionnaire Needed',
+        html: `Hi {{name}},<br><br>Your WYDAPT document preparation is on hold because we haven't received your completed questionnaire.<br><br>Our legal team is ready to draft your documents, but we need your specific information first.<br><br>👉 Complete your questionnaire now: {{questionnaire_link}}<br><br>If you're stuck on any questions, simply reply and I'll help clarify.<br><br>Looking forward to moving forward,<br>Matt`
+      },
+      {
+        id: 'wydapt-rescue-quest-day7',
+        name: 'Rescue: Final Reminder - Questionnaire',
+        subject: 'Final Reminder: Complete WYDAPT Questionnaire',
+        html: `Hi {{name}},<br><br>This is your final reminder to complete your WYDAPT questionnaire.<br><br>Your file will be closed if not received by {{deadline_date}}.<br><br>You've already invested $18,500 — don't let it go to waste.<br><br>👉 Complete now: {{questionnaire_link}}<br><br>Matt`
+      }
+    ];
+    
+    // Add templates if they don't exist
+    [...wydaptTemplates, ...rescueTemplates].forEach(tpl => {
+      if (!templates.find(t => t.id === tpl.id)) {
+        upsertEmailTemplate(tpl);
+      }
+    });
+  };
+
   const [seqs, setSeqs] = useState<NurtureSequence[]>(() => {
     const existing = getNurtureSequences();
-    // Add default WYDAPT workflow if not exists
-    if (!existing.find(s => s.id === 'wydapt-workflow')) {
-      const wydaptWorkflow: NurtureSequence = {
-        id: 'wydapt-workflow',
-        name: 'WYDAPT Matter Workflow',
+    initializeWYDAPTTemplates();
+    
+    // Remove old WYDAPT workflow and add the updated one
+    const filtered = existing.filter(s => s.id !== 'wydapt-workflow');
+    
+    const wydaptWorkflow: NurtureSequence = {
+      id: 'wydapt-workflow',
+      name: 'WYDAPT Full Matter Workflow',
+      enabled: true,
+      steps: [
+        { id: 'wydapt-1', type: 'email', label: 'Booking Confirmation (T+0)', enabled: true, templateId: 'wydapt-booking-confirmation' },
+        { id: 'wydapt-1a', type: 'sms', label: 'SMS: Booking Confirmation (T+5min)', enabled: true, smsContent: 'Hi {{name}}, it\'s Matt Meuli. Your WYDAPT consult is confirmed for {{appointment_date}} at {{appointment_time}}. Add this to your calendar — this step protects your legacy.' },
+        { id: 'wydapt-2', type: 'email', label: 'No-Show Follow-Up (If missed)', enabled: true, templateId: 'wydapt-no-show' },
+        { id: 'wydapt-2a', type: 'sms', label: 'SMS: No-Show Follow-Up (T+30min)', enabled: true, smsContent: 'Hi {{name}}, looks like we missed each other for your WYDAPT consult. Your fee is already applied — just reply here or email me to reschedule.' },
+        { id: 'wydapt-3', type: 'email', label: 'Engagement Letter & Diagram (T+15min)', enabled: true, templateId: 'wydapt-engagement-letter' },
+        { id: 'wydapt-3a', type: 'sms', label: 'SMS: Engagement Letter Sent (T+1hr)', enabled: true, smsContent: 'Hi {{name}}, thanks for today\'s call. I\'ve sent your WYDAPT Engagement Letter + diagram. Please review & sign here: {{esign_link}}' },
+        { id: 'wydapt-4', type: 'email', label: 'Payment Instructions - $18,500 (T+1day)', enabled: true, templateId: 'wydapt-payment-instructions' },
+        { id: 'wydapt-4a', type: 'sms', label: 'SMS: Payment Reminder (Same morning)', enabled: true, smsContent: 'Hi {{name}}, this is Matt. Your WYDAPT payment link is here: {{payment_link}}. Once paid, we\'ll start drafting your trust docs.' },
+        { id: 'wydapt-5', type: 'email', label: 'Questionnaire Send (After payment)', enabled: true, templateId: 'wydapt-questionnaire' },
+        { id: 'wydapt-5a', type: 'sms', label: 'SMS: Questionnaire Reminder (T+5min)', enabled: true, smsContent: 'Hi {{name}}, thanks for your payment. Next step: complete your WYDAPT Questionnaire here: {{questionnaire_link}}. Takes ~20 min.' },
+        { id: 'wydapt-6', type: 'alert_advisor', label: 'Advisor Alert: Questionnaire Received', enabled: true },
+        { id: 'wydapt-7', type: 'document_send', label: 'Generate Trust Documents (T+14days)', enabled: true },
+        { id: 'wydapt-8', type: 'manual_review', label: 'Advisor Manual Review (T+15days)', enabled: true },
+        { id: 'wydapt-9', type: 'email', label: 'Matter Complete Email (T+21days)', enabled: true, templateId: 'wydapt-matter-complete' },
+        { id: 'wydapt-9a', type: 'sms', label: 'SMS: Matter Complete (Same day)', enabled: true, smsContent: 'Hi {{name}}, congrats — your WYDAPT is complete 🎉. Docs are in your Client Vault & attached via email. Book walkthrough here: {{walkthrough_link}}' }
+      ]
+    };
+    
+    // Add rescue sequences
+    const rescueSequences = [
+      {
+        id: 'wydapt-rescue-signature',
+        name: 'WYDAPT Rescue: Didn\'t Sign Engagement Letter',
         enabled: true,
         steps: [
-          { id: 'wydapt-1', type: 'email', label: 'Send WYDAPT Welcome Email (T+0)', enabled: true, templateId: 'wydapt-welcome' },
-          { id: 'wydapt-2', type: 'esign_request', label: 'Send Engagement Letter for E-Sign (T+1 day)', enabled: true },
-          { id: 'wydapt-3', type: 'email', label: 'Payment Instructions - $18,500 (T+2 days)', enabled: true, templateId: 'wydapt-payment' },
-          { id: 'wydapt-4', type: 'form_send', label: 'Send Life & Legacy Planning Questionnaire (T+3 days)', enabled: true },
-          { id: 'wydapt-5', type: 'alert_advisor', label: 'Notify Advisor: Questionnaire Due (T+7 days)', enabled: true },
-          { id: 'wydapt-6', type: 'document_send', label: 'Generate & Send Trust Documents (T+14 days)', enabled: true },
-          { id: 'wydapt-7', type: 'manual_review', label: 'Advisor Review: Final Documents (T+15 days)', enabled: true },
-          { id: 'wydapt-8', type: 'email', label: 'Matter Complete Email (T+21 days)', enabled: true, templateId: 'wydapt-complete' }
+          { id: 'rescue-sign-1', type: 'email', label: 'Day 2: Still Need Your Signature', enabled: true, templateId: 'wydapt-rescue-sign-day2' },
+          { id: 'rescue-sign-1a', type: 'sms', label: 'Day 2 SMS: Sign reminder', enabled: true, smsContent: 'Hi {{name}}, your WYDAPT setup can\'t start until your Engagement Letter is signed. Here\'s your link: {{esign_link}}' },
+          { id: 'rescue-sign-2', type: 'email', label: 'Day 5: WYDAPT on Hold', enabled: true, templateId: 'wydapt-rescue-sign-day5' },
+          { id: 'rescue-sign-2a', type: 'sms', label: 'Day 5 SMS: WYDAPT paused', enabled: true, smsContent: 'Hi {{name}}, your WYDAPT is paused. Sign your Engagement Letter now to protect your assets: {{esign_link}}' },
+          { id: 'rescue-sign-3', type: 'email', label: 'Day 7: Final Reminder', enabled: true, templateId: 'wydapt-rescue-sign-day7' },
+          { id: 'rescue-sign-3a', type: 'sms', label: 'Day 7 SMS: Final reminder', enabled: true, smsContent: 'Final reminder: sign your WYDAPT Engagement Letter by {{deadline_date}} or your file closes. {{esign_link}}' }
         ]
-      };
-      existing.push(wydaptWorkflow);
-      saveNurtureSequences(existing);
-    }
-    return existing;
+      },
+      {
+        id: 'wydapt-rescue-payment',
+        name: 'WYDAPT Rescue: Didn\'t Pay Invoice',
+        enabled: true,
+        steps: [
+          { id: 'rescue-pay-1', type: 'email', label: 'Day 2: Payment Needed', enabled: true, templateId: 'wydapt-rescue-pay-day2' },
+          { id: 'rescue-pay-1a', type: 'sms', label: 'Day 2 SMS: Payment reminder', enabled: true, smsContent: 'Hi {{name}}, payment of $18,500 is due to start your WYDAPT. Secure link: {{payment_link}}' },
+          { id: 'rescue-pay-2', type: 'email', label: 'Day 4: WYDAPT Stuck at Payment', enabled: true, templateId: 'wydapt-rescue-pay-day4' },
+          { id: 'rescue-pay-2a', type: 'sms', label: 'Day 4 SMS: Payment waiting', enabled: true, smsContent: 'Reminder: your WYDAPT is waiting on payment. Protect your legacy now: {{payment_link}}' },
+          { id: 'rescue-pay-3', type: 'email', label: 'Day 7: Final Notice', enabled: true, templateId: 'wydapt-rescue-pay-day7' },
+          { id: 'rescue-pay-3a', type: 'sms', label: 'Day 7 SMS: Final notice', enabled: true, smsContent: 'Final notice — pay by {{deadline_date}} to keep your WYDAPT active. Link: {{payment_link}}' }
+        ]
+      },
+      {
+        id: 'wydapt-rescue-questionnaire',
+        name: 'WYDAPT Rescue: Didn\'t Submit Questionnaire',
+        enabled: true,
+        steps: [
+          { id: 'rescue-quest-1', type: 'email', label: 'Day 3: Questionnaire Needed', enabled: true, templateId: 'wydapt-rescue-quest-day3' },
+          { id: 'rescue-quest-1a', type: 'sms', label: 'Day 3 SMS: Complete questionnaire', enabled: true, smsContent: 'Hi {{name}}, complete your WYDAPT Questionnaire here: {{questionnaire_link}}. It only takes ~20 min.' },
+          { id: 'rescue-quest-2', type: 'email', label: 'Day 5: WYDAPT on Hold', enabled: true, templateId: 'wydapt-rescue-quest-day5' },
+          { id: 'rescue-quest-2a', type: 'sms', label: 'Day 5 SMS: Questionnaire waiting', enabled: true, smsContent: 'Your WYDAPT is on hold. Please finish your Questionnaire so we can draft your trust docs: {{questionnaire_link}}' },
+          { id: 'rescue-quest-3', type: 'email', label: 'Day 7: Final Reminder', enabled: true, templateId: 'wydapt-rescue-quest-day7' },
+          { id: 'rescue-quest-3a', type: 'sms', label: 'Day 7 SMS: Final reminder', enabled: true, smsContent: 'Final reminder: complete your WYDAPT Questionnaire by {{deadline_date}} or your file closes. {{questionnaire_link}}' }
+        ]
+      }
+    ];
+    
+    filtered.push(wydaptWorkflow);
+    rescueSequences.forEach(seq => {
+      if (!filtered.find(s => s.id === seq.id)) {
+        filtered.push(seq);
+      }
+    });
+    
+    saveNurtureSequences(filtered);
+    return filtered;
   });
   const [showSeqModal, setShowSeqModal] = useState(false);
+  const [editingSeqId, setEditingSeqId] = useState<string | null>(null);
   const [draftName, setDraftName] = useState('New Sequence');
   const [draftEnabled, setDraftEnabled] = useState(true);
   const [draftSteps, setDraftSteps] = useState<NurtureStep[]>([
@@ -70,18 +293,53 @@ const NurtureAdmin: React.FC = () => {
     setDraftSteps(prev => prev.filter((_, i) => i !== idx));
   };
 
-  const createSequence = () => {
-    const id = draftName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '') || `seq-${Date.now()}`;
-    const newSeq: NurtureSequence = {
-      id,
-      name: draftName,
-      enabled: draftEnabled,
-      steps: draftSteps
-    };
-    const next = [...seqs, newSeq];
+  const saveSequence = () => {
+    if (editingSeqId) {
+      // Update existing sequence
+      const next = seqs.map(s => 
+        s.id === editingSeqId 
+          ? { ...s, name: draftName, enabled: draftEnabled, steps: draftSteps }
+          : s
+      );
+      setSeqs(next);
+      saveNurtureSequences(next);
+    } else {
+      // Create new sequence
+      const id = draftName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '') || `seq-${Date.now()}`;
+      const newSeq: NurtureSequence = {
+        id,
+        name: draftName,
+        enabled: draftEnabled,
+        steps: draftSteps
+      };
+      const next = [...seqs, newSeq];
+      setSeqs(next);
+      saveNurtureSequences(next);
+    }
+    setShowSeqModal(false);
+    setEditingSeqId(null);
+  };
+
+  const editSequence = (seq: NurtureSequence) => {
+    setEditingSeqId(seq.id);
+    setDraftName(seq.name);
+    setDraftEnabled(seq.enabled);
+    setDraftSteps([...seq.steps]);
+    setShowSeqModal(true);
+  };
+
+  const deleteSequence = (id: string) => {
+    const next = seqs.filter(s => s.id !== id);
     setSeqs(next);
     saveNurtureSequences(next);
-    setShowSeqModal(false);
+  };
+
+  const duplicateStep = (idx: number) => {
+    const step = draftSteps[idx];
+    const newStep = { ...step, id: `${step.id}-copy-${Date.now()}`, label: `${step.label} (Copy)` };
+    const newSteps = [...draftSteps];
+    newSteps.splice(idx + 1, 0, newStep);
+    setDraftSteps(newSteps);
   };
 
   const openTplEditor = (tpl?: EmailTemplate) => {
@@ -175,16 +433,26 @@ const NurtureAdmin: React.FC = () => {
           <button className="button-outline" style={{ width: 'auto' }} onClick={() => setShowRules(true)}>Automations</button>
           <button className="button-outline" style={{ width: 'auto' }} onClick={() => openTplEditor()}>Manage Email Templates</button>
         </div>
-        <button className="form-button" style={{ width: 'auto' }} onClick={() => setShowSeqModal(true)}>Create New Sequence</button>
+        <button className="form-button" style={{ width: 'auto' }} onClick={() => {
+          setEditingSeqId(null);
+          setDraftName('New Sequence');
+          setDraftEnabled(true);
+          setDraftSteps([{ id: 'step-1', type: 'email', label: 'Welcome email (T+0)', enabled: true }]);
+          setShowSeqModal(true);
+        }}>Create New Sequence</button>
       </div>
       <div className="module-grid">
         {seqs.map(s => (
           <div key={s.id} className="module-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 className="section-title">{s.name}</h3>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <input type="checkbox" checked={s.enabled} onChange={() => toggleSeq(s.id)} /> Enabled
-              </label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <button className="button-outline" style={{ width: 'auto', padding: '4px 8px', fontSize: '12px' }} onClick={() => editSequence(s)}>Edit</button>
+                <button className="button-outline" style={{ width: 'auto', padding: '4px 8px', fontSize: '12px' }} onClick={() => deleteSequence(s.id)}>Delete</button>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <input type="checkbox" checked={s.enabled} onChange={() => toggleSeq(s.id)} /> Enabled
+                </label>
+              </div>
             </div>
             <div style={{ display: 'grid', gap: 8 }}>
               {s.steps.map(st => (
@@ -205,6 +473,11 @@ const NurtureAdmin: React.FC = () => {
                         <button className="button-outline" style={{ width: 'auto' }} onClick={() => openTplEditor(templates.find(t => t.id === st.templateId))}>Edit</button>
                       </span>
                     )}
+                    {st.type === 'sms' && st.smsContent && (
+                      <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontStyle: 'italic', maxWidth: '300px' }}>
+                        "{st.smsContent.substring(0, 50)}..."
+                      </span>
+                    )}
                   </label>
                 </div>
               ))}
@@ -217,9 +490,17 @@ const NurtureAdmin: React.FC = () => {
       </div>
 
       {showSeqModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div className="module-card" style={{ width: 520, maxWidth: '90%' }}>
-            <h3 className="section-title">New Sequence</h3>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }} onClick={() => { setShowSeqModal(false); setEditingSeqId(null); }}>
+          <div className="module-card" style={{ width: 520, maxWidth: '90%' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 className="section-title">{editingSeqId ? 'Edit Sequence' : 'New Sequence'}</h3>
+              <button 
+                onClick={() => { setShowSeqModal(false); setEditingSeqId(null); }}
+                style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--text-secondary)' }}
+              >
+                ×
+              </button>
+            </div>
             <div style={{ display: 'grid', gap: 12, marginTop: 8 }}>
               <div>
                 <label className="form-label">Name</label>
@@ -246,25 +527,59 @@ const NurtureAdmin: React.FC = () => {
                 </div>
                 <div style={{ display: 'grid', gap: 8, marginTop: 8 }}>
                   {draftSteps.map((st, idx) => (
-                    <div key={st.id} style={{ display: 'grid', gridTemplateColumns: '120px 1fr auto', gap: 8, alignItems: 'center' }}>
-                      <select className="form-input" value={st.type} onChange={(e) => updateDraftStep(idx, { type: e.target.value as NurtureStep['type'] })}>
-                        <option value="email">Email</option>
-                        <option value="sms">SMS</option>
-                        <option value="form_send">Form send</option>
-                        <option value="esign_request">eSign request</option>
-                        <option value="alert_advisor">Alert Advisor</option>
-                        <option value="document_send">Document send</option>
-                        <option value="manual_review">Manual Review/Edit</option>
-                      </select>
-                      <input className="form-input" value={st.label} onChange={(e) => updateDraftStep(idx, { label: e.target.value })} />
-                      <button className="button-outline" style={{ width: 'auto' }} onClick={() => removeDraftStep(idx)}>Remove</button>
+                    <div key={st.id} style={{ display: 'grid', gap: 8 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr auto', gap: 8, alignItems: 'center' }}>
+                        <select className="form-input" value={st.type} onChange={(e) => updateDraftStep(idx, { type: e.target.value as NurtureStep['type'] })}>
+                          <option value="email">Email</option>
+                          <option value="sms">SMS</option>
+                          <option value="form_send">Form send</option>
+                          <option value="esign_request">eSign request</option>
+                          <option value="alert_advisor">Alert Advisor</option>
+                          <option value="document_send">Document send</option>
+                          <option value="manual_review">Manual Review/Edit</option>
+                        </select>
+                        <input className="form-input" value={st.label} onChange={(e) => updateDraftStep(idx, { label: e.target.value })} />
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          <button className="button-outline" style={{ width: 'auto', padding: '4px 8px', fontSize: '12px' }} onClick={() => duplicateStep(idx)}>Copy</button>
+                          <button className="button-outline" style={{ width: 'auto' }} onClick={() => removeDraftStep(idx)}>Remove</button>
+                        </div>
+                      </div>
+                      {st.type === 'sms' && (
+                        <div style={{ marginLeft: '128px', marginRight: '100px' }}>
+                          <textarea 
+                            className="form-input" 
+                            value={st.smsContent || ''} 
+                            onChange={(e) => updateDraftStep(idx, { smsContent: e.target.value })}
+                            placeholder="SMS message content (160 chars max)"
+                            rows={2}
+                            style={{ fontSize: '13px' }}
+                          />
+                          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                            {(st.smsContent || '').length}/160 characters
+                          </div>
+                        </div>
+                      )}
+                      {st.type === 'email' && (
+                        <div style={{ marginLeft: '128px', marginRight: '100px' }}>
+                          <select 
+                            className="form-input" 
+                            value={st.templateId || ''} 
+                            onChange={(e) => updateDraftStep(idx, { templateId: e.target.value })}
+                          >
+                            <option value="">Select email template...</option>
+                            {templates.map(t => (
+                              <option key={t.id} value={t.id}>{t.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                 <button className="button-outline" style={{ width: 'auto' }} onClick={() => setShowSeqModal(false)}>Cancel</button>
-                <button className="form-button" style={{ width: 'auto' }} onClick={createSequence}>Create</button>
+                <button className="form-button" style={{ width: 'auto' }} onClick={saveSequence}>{editingSeqId ? 'Save' : 'Create'}</button>
               </div>
             </div>
           </div>
@@ -272,9 +587,17 @@ const NurtureAdmin: React.FC = () => {
       )}
 
       {showTplModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div className="module-card" style={{ width: 760, maxWidth: '95%' }}>
-            <h3 className="section-title">{tplId ? 'Edit Template' : 'New Template'}</h3>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }} onClick={() => setShowTplModal(false)}>
+          <div className="module-card" style={{ width: 760, maxWidth: '95%' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 className="section-title">{tplId ? 'Edit Template' : 'New Template'}</h3>
+              <button 
+                onClick={() => setShowTplModal(false)}
+                style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--text-secondary)' }}
+              >
+                ×
+              </button>
+            </div>
             <div style={{ display: 'grid', gap: 12, marginTop: 8 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
@@ -346,9 +669,17 @@ const NurtureAdmin: React.FC = () => {
       )}
 
       {showRules && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div className="module-card" style={{ width: 940, maxWidth: '95%', maxHeight: '90vh', overflowY: 'auto' }}>
-            <h3 className="section-title">Workflow Automations</h3>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }} onClick={() => setShowRules(false)}>
+          <div className="module-card" style={{ width: 940, maxWidth: '95%', maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 className="section-title">Workflow Automations</h3>
+              <button 
+                onClick={() => setShowRules(false)}
+                style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--text-secondary)' }}
+              >
+                ×
+              </button>
+            </div>
             
             {/* WYDAPT Quick Rules */}
             <div style={{ marginBottom: '20px', padding: '16px', background: 'var(--card-hover)', borderRadius: '8px' }}>

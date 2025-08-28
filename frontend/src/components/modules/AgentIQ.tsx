@@ -358,9 +358,12 @@ const AgentIQ: React.FC = () => {
                                 className="form-input"
                                 value={blogContent}
                                 onChange={(e) => setBlogContent(e.target.value)}
-                                placeholder="Write your blog post content here..."
+                                placeholder="Write your blog post content here... (You can use HTML for formatting)"
                                 style={{ minHeight: '300px', resize: 'vertical' }}
                             />
+                            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '8px' }}>
+                                Tip: You can add images using HTML: {`<img src="image-url" alt="description" style="max-width: 100%;" />`}
+                            </p>
                         </div>
                         
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
@@ -767,7 +770,7 @@ const AgentIQ: React.FC = () => {
 
     return (
         <ModuleTemplate 
-            title="Wyoming Asset Protection Trust (Mock)"
+            title="Wyoming Asset Protection Trust"
             description="Static, no-API mock experience replacing AgentIQ for the Wyoming APT workflow"
         >
             <div style={{ display: 'flex', gap: '10px', marginBottom: '24px', flexWrap: 'wrap' }}>

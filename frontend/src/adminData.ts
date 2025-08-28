@@ -98,7 +98,14 @@ export function saveSiteConfig(patch: Partial<SiteConfig>) {
 }
 
 // Nurture sequences (mock)
-export type NurtureStep = { id: string; type: 'email' | 'sms'; label: string; enabled: boolean; templateId?: string };
+export type NurtureStep = { 
+  id: string; 
+  type: 'email' | 'sms' | 'form_send' | 'esign_request' | 'alert_advisor' | 'document_send' | 'manual_review'; 
+  label: string; 
+  enabled: boolean; 
+  templateId?: string;
+  smsContent?: string;
+};
 export type NurtureSequence = { id: string; name: string; enabled: boolean; steps: NurtureStep[] };
 
 const NURTURE_KEY = 'wyAPT_nurture';

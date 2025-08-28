@@ -4,8 +4,10 @@ import { getBookings, updateBooking, Booking, seedMockDataIfEmpty, addBooking, s
 import apiClient from '../../apiClient';
 import PipelineOverview from './PipelineOverview';
 import ClientsView from './ClientsView';
+import { useNavigate } from 'react-router-dom';
 
 const CRMAdmin: React.FC = () => {
+  const navigate = useNavigate();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [bookingsState, setBookingsState] = useState(getBookings());
   const [activeTab, setActiveTab] = useState<'overview' | 'clients' | 'automation' | 'analytics'>('overview');
@@ -152,6 +154,40 @@ const CRMAdmin: React.FC = () => {
     reader.readAsText(file);
   };
 
+  const handleGoogleContactsImport = async () => {
+    try {
+      // This would be replaced with actual Google Contacts API call
+      const mockGoogleContacts = [
+        { name: 'Google Contact 1', email: 'contact1@gmail.com', phone: '+1 (555) 111-1111' },
+        { name: 'Google Contact 2', email: 'contact2@gmail.com', phone: '+1 (555) 222-2222' }
+      ];
+      
+      const newBookings = mockGoogleContacts.map(contact => ({
+        id: `google-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        createdAt: new Date().toISOString(),
+        name: contact.name,
+        email: contact.email,
+        phone: contact.phone,
+        guests: [],
+        pkg: '',
+        slot: '',
+        stage: 'New' as const,
+        notes: ['Imported from Google Contacts'],
+        docs: []
+      }));
+      
+      const current = getBookings();
+      const next = [...current, ...newBookings];
+      saveBookings(next);
+      setBookingsState(getBookings());
+      
+      alert(`Successfully imported ${newBookings.length} contacts from Google`);
+    } catch (error) {
+      console.error('Failed to import Google contacts:', error);
+      alert('Failed to import Google contacts. Please try again.');
+    }
+  };
+
   return (
     <ModuleTemplate
       title="LIFTed Advisor Pipeline"
@@ -225,10 +261,15 @@ const CRMAdmin: React.FC = () => {
         <div />
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button className="form-button" style={{ width: 'auto' }} onClick={() => setShowAdd(true)}>Add Contact</button>
-          <button className="form-button" style={{ width: 'auto' }} onClick={() => window.open('/platform/formbuilder', '_blank')}>Add Lead Form</button>
+          <button className="form-button" style={{ width: 'auto' }} onClick={() => navigate('/platform/formbuilder')}>Add Lead Form</button>
           <button className="form-button" style={{ width: 'auto' }} onClick={() => alert('Service types: WYDAPT ($18,500), Life & Legacy Planning ($3,500), Wealth Credit & Liquidity ($2,500)')}>Add Service Type</button>
-          <button className="form-button" style={{ width: 'auto' }} onClick={() => window.location.href = '/platform/workflows'}>Add Sequence</button>
+          <button className="form-button" style={{ width: 'auto' }} onClick={() => navigate('/platform/workflows')}>Add Sequence</button>
           <button className="button-outline" style={{ width: 'auto' }} onClick={() => setShowImport(true)}>Import CSV</button>
+          {localStorage.getItem('google_access_token') && (
+            <button className="button-outline" style={{ width: 'auto' }} onClick={() => handleGoogleContactsImport()}>
+              Add Google Contacts
+            </button>
+          )}
         </div>
       </div>
 

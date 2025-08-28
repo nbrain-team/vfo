@@ -15,6 +15,9 @@ interface Document {
 }
 
 const DocumentLibraryAdmin: React.FC = () => {
+    const [showUploadModal, setShowUploadModal] = useState(false);
+    const [uploadingDocument, setUploadingDocument] = useState<Document | null>(null);
+    const [uploadFile, setUploadFile] = useState<File | null>(null);
     const [showEditModal, setShowEditModal] = useState(false);
     const [editingDocument, setEditingDocument] = useState<Document | null>(null);
     const [editFormData, setEditFormData] = useState({ title: '', description: '', placeholders: [''] });
@@ -441,6 +444,28 @@ const DocumentLibraryAdmin: React.FC = () => {
         setShowPreviewModal(true);
     };
 
+    const handleUploadNewVersion = (doc: Document) => {
+        setUploadingDocument(doc);
+        setShowUploadModal(true);
+    };
+
+    const handleUploadSubmit = () => {
+        if (uploadingDocument && uploadFile) {
+            // In a real app, this would upload the file
+            const updatedDoc = {
+                ...uploadingDocument,
+                lastModified: new Date().toISOString().split('T')[0],
+                fileSize: `${(uploadFile.size / 1024).toFixed(1)} KB`
+            };
+            setDocuments(documents.map(d => 
+                d.id === uploadingDocument.id ? updatedDoc : d
+            ));
+            setShowUploadModal(false);
+            setUploadingDocument(null);
+            setUploadFile(null);
+        }
+    };
+
     const handleEdit = (doc: Document) => {
         setEditingDocument(doc);
         setEditFormData({
@@ -609,9 +634,9 @@ const DocumentLibraryAdmin: React.FC = () => {
                                         <button 
                                             className="button-outline" 
                                             style={{ width: 'auto', padding: '4px 12px' }}
-                                            onClick={() => handleEdit(doc)}
+                                            onClick={() => handleUploadNewVersion(doc)}
                                         >
-                                            Edit
+                                            Upload New Version
                                         </button>
                                         <button 
                                             className="button-outline" 
@@ -828,6 +853,64 @@ const DocumentLibraryAdmin: React.FC = () => {
             )}
 
             {/* Edit Modal */}
+            {showUploadModal && uploadingDocument && (
+                <div className="modal-overlay" onClick={() => setShowUploadModal(false)}>
+                    <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h3 className="section-title">Upload New Version</h3>
+                            <button 
+                                className="button-outline" 
+                                onClick={() => setShowUploadModal(false)}
+                                style={{ width: 'auto', fontSize: '20px', padding: '4px 12px' }}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        
+                        <div style={{ marginBottom: '20px' }}>
+                            <p><strong>Document:</strong> {uploadingDocument.title}</p>
+                            <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
+                                Current version: {uploadingDocument.lastModified}
+                            </p>
+                        </div>
+                        
+                        <div style={{ marginBottom: '20px' }}>
+                            <label className="form-label">Select New Version File</label>
+                            <input 
+                                type="file"
+                                className="form-input"
+                                onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                                accept=".pdf,.doc,.docx"
+                            />
+                            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '8px' }}>
+                                Accepted formats: PDF, DOC, DOCX
+                            </p>
+                        </div>
+                        
+                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                            <button 
+                                className="button-outline" 
+                                style={{ width: 'auto' }}
+                                onClick={() => {
+                                    setShowUploadModal(false);
+                                    setUploadFile(null);
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                className="form-button" 
+                                style={{ width: 'auto' }}
+                                onClick={handleUploadSubmit}
+                                disabled={!uploadFile}
+                            >
+                                Upload New Version
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {showEditModal && editingDocument && (
                 <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
                     <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
