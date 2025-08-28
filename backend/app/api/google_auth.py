@@ -97,6 +97,9 @@ async def google_auth(credential_data: dict, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
+        import traceback
+        print(f"Google auth error: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Authentication failed: {str(e)}")
 
 @router.post("/google/calendar-access")
