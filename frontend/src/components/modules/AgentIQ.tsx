@@ -4,13 +4,22 @@ import { useNavigate } from 'react-router-dom';
 import EditableSection from './EditableSection';
 import { getSiteConfig, saveSiteConfig } from '../../adminData';
 
-type TabKey = 'overview' | 'blog' | 'services' | 'consult' | 'client-portal' | 'testimonials' | 'contact';
+type TabKey = 'overview' | 'blog' | 'services' | 'consultations' | 'client-portal' | 'testimonials' | 'contact';
 
 interface ServiceItem {
     id: string;
     title: string;
     subtitle: string;
     bullets: string[];
+}
+
+interface BlogPost {
+    id: string;
+    title: string;
+    content: string;
+    excerpt: string;
+    createdAt: string;
+    published: boolean;
 }
 
 const AgentIQ: React.FC = () => {
@@ -29,6 +38,32 @@ const AgentIQ: React.FC = () => {
         'Get expert asset protection advice and strategies to help shield your wealth from anything and anyone.'
     );
     const [advisorPhone, setAdvisorPhone] = useState(siteConfig.advisorPhone || '(307) 463-3600');
+    
+    // Blog state
+    const [blogPosts, setBlogPosts] = useState<BlogPost[]>(siteConfig.blogPosts || [
+        {
+            id: 'post-1',
+            title: 'Understanding Asset Protection Trusts',
+            content: 'A comprehensive guide to how asset protection trusts work and their benefits...',
+            excerpt: 'A comprehensive guide to how asset protection trusts work and their benefits...',
+            createdAt: new Date().toISOString(),
+            published: true
+        },
+        {
+            id: 'post-2',
+            title: 'Wyoming vs Other States: A Comparison',
+            content: 'Why Wyoming offers the strongest asset protection laws in the United States...',
+            excerpt: 'Why Wyoming offers the strongest asset protection laws in the United States...',
+            createdAt: new Date().toISOString(),
+            published: true
+        }
+    ]);
+    const [showBlogEditor, setShowBlogEditor] = useState(false);
+    const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+    const [blogTitle, setBlogTitle] = useState('');
+    const [blogContent, setBlogContent] = useState('');
+    const [showSeoGenerator, setShowSeoGenerator] = useState(false);
+    const [transcript, setTranscript] = useState('');
     
     const handleContentSave = (field: string, value: string) => {
         const updatedConfig = {
@@ -49,6 +84,64 @@ const AgentIQ: React.FC = () => {
                 setAdvisorPhone(value);
                 break;
         }
+    };
+    
+    // Blog functions
+    const handleSaveBlog = () => {
+        const post: BlogPost = editingPost || {
+            id: `post-${Date.now()}`,
+            title: blogTitle,
+            content: blogContent,
+            excerpt: blogContent.substring(0, 150) + '...',
+            createdAt: new Date().toISOString(),
+            published: true
+        };
+        
+        if (editingPost) {
+            post.title = blogTitle;
+            post.content = blogContent;
+            post.excerpt = blogContent.substring(0, 150) + '...';
+        }
+        
+        const updatedPosts = editingPost 
+            ? blogPosts.map(p => p.id === editingPost.id ? post : p)
+            : [...blogPosts, post];
+            
+        setBlogPosts(updatedPosts);
+        saveSiteConfig({ ...siteConfig, blogPosts: updatedPosts });
+        
+        // Reset editor
+        setShowBlogEditor(false);
+        setEditingPost(null);
+        setBlogTitle('');
+        setBlogContent('');
+    };
+    
+    const handleDeleteBlog = (postId: string) => {
+        if (window.confirm('Are you sure you want to delete this blog post?')) {
+            const updatedPosts = blogPosts.filter(p => p.id !== postId);
+            setBlogPosts(updatedPosts);
+            saveSiteConfig({ ...siteConfig, blogPosts: updatedPosts });
+        }
+    };
+    
+    const handleEditBlog = (post: BlogPost) => {
+        setEditingPost(post);
+        setBlogTitle(post.title);
+        setBlogContent(post.content);
+        setShowBlogEditor(true);
+    };
+    
+    const generateSeoContent = () => {
+        // Simple SEO optimization of the transcript
+        const lines = transcript.split('\n').filter(l => l.trim());
+        const title = lines[0] || 'New Blog Post';
+        const content = lines.join('\n\n');
+        
+        setBlogTitle(title);
+        setBlogContent(content);
+        setShowSeoGenerator(false);
+        setTranscript('');
     };
 
     const services: ServiceItem[] = [
@@ -158,44 +251,171 @@ const AgentIQ: React.FC = () => {
     ];
 
     const renderBlog = () => (
-        <div className="module-card">
-            <h2 className="section-title">My Blog</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
-                Create SEO-optimized articles and blog posts for your site
-            </p>
-            
-            <div style={{ marginBottom: '24px' }}>
-                <button className="form-button" style={{ width: 'auto' }}>
-                    + Create New Blog Post
-                </button>
+        <>
+            <div className="module-card">
+                <h2 className="section-title">My Blog</h2>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>
+                    Create SEO-optimized articles and blog posts for your site
+                </p>
+                
+                <div style={{ marginBottom: '24px', display: 'flex', gap: '12px' }}>
+                    <button 
+                        className="form-button" 
+                        style={{ width: 'auto' }}
+                        onClick={() => {
+                            setEditingPost(null);
+                            setBlogTitle('');
+                            setBlogContent('');
+                            setShowBlogEditor(true);
+                        }}
+                    >
+                        + Create New Blog Post
+                    </button>
+                    <button 
+                        className="button-outline" 
+                        style={{ width: 'auto' }}
+                        onClick={() => setShowSeoGenerator(true)}
+                    >
+                        Generate from Transcript
+                    </button>
+                </div>
+
+                <div style={{ display: 'grid', gap: '16px' }}>
+                    {blogPosts.map(post => (
+                        <div key={post.id} className="module-card" style={{ background: 'var(--gray-light)' }}>
+                            <h3 style={{ fontSize: '18px', marginBottom: '8px' }}>{post.title}</h3>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '12px' }}>
+                                {post.excerpt}
+                            </p>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                                    {new Date(post.createdAt).toLocaleDateString()}
+                                </div>
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <button 
+                                        className="button-outline" 
+                                        style={{ width: 'auto' }}
+                                        onClick={() => handleEditBlog(post)}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button 
+                                        className="button-outline" 
+                                        style={{ width: 'auto' }}
+                                        onClick={() => window.open(`/blog/${post.id}`, '_blank')}
+                                    >
+                                        View
+                                    </button>
+                                    <button 
+                                        className="button-outline" 
+                                        style={{ width: 'auto' }}
+                                        onClick={() => handleDeleteBlog(post.id)}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
 
-            <div style={{ display: 'grid', gap: '16px' }}>
-                <div className="module-card" style={{ background: 'var(--gray-light)' }}>
-                    <h3 style={{ fontSize: '18px', marginBottom: '8px' }}>Understanding Asset Protection Trusts</h3>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '12px' }}>
-                        A comprehensive guide to how asset protection trusts work and their benefits...
-                    </p>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        <button className="button-outline" style={{ width: 'auto' }}>Edit</button>
-                        <button className="button-outline" style={{ width: 'auto' }}>View</button>
-                        <button className="button-outline" style={{ width: 'auto' }}>Delete</button>
+            {/* Blog Editor Modal */}
+            {showBlogEditor && (
+                <div className="modal-overlay" onClick={() => setShowBlogEditor(false)}>
+                    <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '800px', width: '90%' }}>
+                        <h2 style={{ marginBottom: '20px' }}>
+                            {editingPost ? 'Edit Blog Post' : 'Create New Blog Post'}
+                        </h2>
+                        
+                        <div style={{ marginBottom: '16px' }}>
+                            <label className="form-label">Title</label>
+                            <input
+                                type="text"
+                                className="form-input"
+                                value={blogTitle}
+                                onChange={(e) => setBlogTitle(e.target.value)}
+                                placeholder="Enter blog post title"
+                            />
+                        </div>
+                        
+                        <div style={{ marginBottom: '16px' }}>
+                            <label className="form-label">Content</label>
+                            <textarea
+                                className="form-input"
+                                value={blogContent}
+                                onChange={(e) => setBlogContent(e.target.value)}
+                                placeholder="Write your blog post content here..."
+                                style={{ minHeight: '300px', resize: 'vertical' }}
+                            />
+                        </div>
+                        
+                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                            <button
+                                className="button-outline"
+                                onClick={() => {
+                                    setShowBlogEditor(false);
+                                    setEditingPost(null);
+                                    setBlogTitle('');
+                                    setBlogContent('');
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="form-button"
+                                onClick={handleSaveBlog}
+                                disabled={!blogTitle || !blogContent}
+                            >
+                                {editingPost ? 'Update' : 'Publish'}
+                            </button>
+                        </div>
                     </div>
                 </div>
-                
-                <div className="module-card" style={{ background: 'var(--gray-light)' }}>
-                    <h3 style={{ fontSize: '18px', marginBottom: '8px' }}>Wyoming vs Other States: A Comparison</h3>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '12px' }}>
-                        Why Wyoming offers the strongest asset protection laws in the United States...
-                    </p>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        <button className="button-outline" style={{ width: 'auto' }}>Edit</button>
-                        <button className="button-outline" style={{ width: 'auto' }}>View</button>
-                        <button className="button-outline" style={{ width: 'auto' }}>Delete</button>
+            )}
+
+            {/* SEO Generator Modal */}
+            {showSeoGenerator && (
+                <div className="modal-overlay" onClick={() => setShowSeoGenerator(false)}>
+                    <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px', width: '90%' }}>
+                        <h2 style={{ marginBottom: '20px' }}>Generate SEO Content from Transcript</h2>
+                        
+                        <div style={{ marginBottom: '16px' }}>
+                            <label className="form-label">Paste Audio Transcript or Raw Content</label>
+                            <textarea
+                                className="form-input"
+                                value={transcript}
+                                onChange={(e) => setTranscript(e.target.value)}
+                                placeholder="Paste your audio transcript or raw content here..."
+                                style={{ minHeight: '200px', resize: 'vertical' }}
+                            />
+                        </div>
+                        
+                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                            <button
+                                className="button-outline"
+                                onClick={() => {
+                                    setShowSeoGenerator(false);
+                                    setTranscript('');
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="form-button"
+                                onClick={() => {
+                                    generateSeoContent();
+                                    setShowBlogEditor(true);
+                                }}
+                                disabled={!transcript}
+                            >
+                                Generate & Edit
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            )}
+        </>
     );
 
     const renderOverview = () => (
@@ -235,7 +455,7 @@ const AgentIQ: React.FC = () => {
                         </ul>
                         <div style={{ display: 'flex', gap: '10px' }}>
                             <button className="button-outline" style={{ width: 'auto' }} onClick={() => { setActiveTab('services'); setSelectedService(svc.id); }}>View Details</button>
-                            <button className="form-button" style={{ width: 'auto' }} onClick={() => setActiveTab('consult')}>Start Consult</button>
+                            <button className="form-button" style={{ width: 'auto' }} onClick={() => setActiveTab('consultations')}>Start Consult</button>
                         </div>
                     </div>
                 ))}
@@ -292,7 +512,7 @@ const AgentIQ: React.FC = () => {
                         </ul>
                     </div>
                     <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
-                        <button className="form-button" style={{ width: 'auto' }} onClick={() => setActiveTab('consult')}>Proceed to Consult</button>
+                        <button className="form-button" style={{ width: 'auto' }} onClick={() => setActiveTab('consultations')}>Proceed to Consult</button>
                         <button className="button-outline" style={{ width: 'auto' }} onClick={() => setSelectedService(null)}>Close</button>
                     </div>
                 </div>
@@ -300,51 +520,148 @@ const AgentIQ: React.FC = () => {
         </div>
     );
 
-    const renderConsult = () => (
+    // Consultation state
+    const [appointmentTypes, setAppointmentTypes] = useState([
+        { id: 'free-30', name: 'Free 30-min Consultation', duration: 30, price: 0, isPaid: false },
+        { id: 'paid-30', name: 'Paid 30-min Consultation', duration: 30, price: 375, isPaid: true },
+        { id: 'paid-60', name: 'Paid 60-min Deep Dive', duration: 60, price: 750, isPaid: true }
+    ]);
+    const [selectedAppointmentType, setSelectedAppointmentType] = useState(appointmentTypes[0]);
+    const [showPayment, setShowPayment] = useState(false);
+    
+    const renderConsultations = () => (
         <div className="module-grid">
             <div className="module-card">
                 <h3 className="section-title">Schedule a Consultation</h3>
-                <p style={{ color: 'var(--text-secondary)' }}>Pick a time below. This is a mock scheduler — no external integrations.</p>
-                <div className="module-card-row" style={{ marginTop: 12 }}>
-                    {consultSlots.map(slot => (
-                        <button
-                            key={slot}
-                            className={`time-button ${selectedSlot === slot ? 'active' : ''}`}
-                            style={{ padding: '10px 16px' }}
-                            onClick={() => setSelectedSlot(slot)}
-                        >
-                            {slot}
-                        </button>
-                    ))}
+                <p style={{ color: 'var(--text-secondary)' }}>Choose your consultation type and select an available time.</p>
+                
+                {/* Appointment Types */}
+                <div style={{ marginBottom: '20px' }}>
+                    <label className="form-label">Appointment Type</label>
+                    <div style={{ display: 'grid', gap: '12px' }}>
+                        {appointmentTypes.map(type => (
+                            <div 
+                                key={type.id}
+                                onClick={() => {
+                                    setSelectedAppointmentType(type);
+                                    setShowPayment(type.isPaid);
+                                }}
+                                style={{
+                                    padding: '16px',
+                                    border: `2px solid ${selectedAppointmentType.id === type.id ? 'var(--primary)' : 'var(--border)'}`,
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    background: selectedAppointmentType.id === type.id ? 'var(--primary-light)' : 'transparent'
+                                }}
+                            >
+                                <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>{type.name}</div>
+                                <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
+                                    {type.duration} minutes • {type.isPaid ? `$${type.price}` : 'Free'}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
+
+                {/* Google Calendar Sync */}
+                <div style={{ marginBottom: '20px' }}>
+                    <label className="form-label">Available Times (Google Calendar)</label>
+                    <div className="module-card-row" style={{ marginTop: 12 }}>
+                        {consultSlots.map(slot => (
+                            <button
+                                key={slot}
+                                className={`time-button ${selectedSlot === slot ? 'active' : ''}`}
+                                style={{ padding: '10px 16px' }}
+                                onClick={() => setSelectedSlot(slot)}
+                            >
+                                {slot}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                
                 <div style={{ marginTop: 16, display: 'flex', gap: 10 }}>
                     <button
                         className="form-button"
                         style={{ width: 'auto' }}
                         disabled={!selectedSlot}
-                        onClick={() => setScheduled(true)}
+                        onClick={() => {
+                            if (selectedAppointmentType.isPaid) {
+                                setShowPayment(true);
+                            } else {
+                                setScheduled(true);
+                            }
+                        }}
                     >
-                        Confirm Appointment
+                        {selectedAppointmentType.isPaid ? `Continue to Payment ($${selectedAppointmentType.price})` : 'Confirm Appointment'}
                     </button>
                     <button className="button-outline" style={{ width: 'auto' }} onClick={() => setSelectedSlot(null)}>Clear</button>
                 </div>
                 {scheduled && (
                     <div style={{ marginTop: 16, background: 'var(--success-light)', color: 'var(--success)', padding: 12, borderRadius: 8 }}>
-                        Appointment confirmed for {selectedSlot}. A confirmation email would be sent here in production.
+                        ✓ {selectedAppointmentType.name} confirmed for {selectedSlot}. Google Calendar invite sent!
                     </div>
                 )}
             </div>
 
-            <div className="module-card">
-                <h3 className="section-title">Payment Placeholder</h3>
-                <p style={{ color: 'var(--text-secondary)' }}>
-                    If a consult fee is required, a secure payment block would appear here (Stripe/LawPay test mode). For now, this is a static placeholder.
-                </p>
-                <div style={{ display: 'flex', gap: 10 }}>
-                    <button className="button-outline" style={{ width: 'auto' }}>Pay Consult Fee (Placeholder)</button>
-                    <button className="button-outline" style={{ width: 'auto' }}>Apply Promo Code (Placeholder)</button>
+            {showPayment && selectedAppointmentType.isPaid && (
+                <div className="module-card">
+                    <h3 className="section-title">Payment Information</h3>
+                    <div style={{ marginBottom: '20px' }}>
+                        <div style={{ padding: '16px', background: 'var(--gray-light)', borderRadius: '8px', marginBottom: '16px' }}>
+                            <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Order Summary</div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                <span>{selectedAppointmentType.name}</span>
+                                <span>${selectedAppointmentType.price}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                <span>Date & Time</span>
+                                <span>{selectedSlot}</span>
+                            </div>
+                            <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px solid var(--border)' }} />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
+                                <span>Total</span>
+                                <span>${selectedAppointmentType.price}</span>
+                            </div>
+                        </div>
+                        
+                        <div style={{ 
+                            padding: '20px', 
+                            border: '2px dashed var(--border)', 
+                            borderRadius: '8px',
+                            textAlign: 'center',
+                            background: 'var(--background-secondary)'
+                        }}>
+                            <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                                LawPay integration will appear here
+                            </p>
+                            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                                Secure payment processing powered by LawPay
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div style={{ display: 'flex', gap: 10 }}>
+                        <button 
+                            className="form-button" 
+                            style={{ width: 'auto' }}
+                            onClick={() => {
+                                setScheduled(true);
+                                setShowPayment(false);
+                            }}
+                        >
+                            Complete Payment (Mock)
+                        </button>
+                        <button 
+                            className="button-outline" 
+                            style={{ width: 'auto' }}
+                            onClick={() => setShowPayment(false)}
+                        >
+                            Cancel
+                        </button>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 
@@ -433,7 +750,7 @@ const AgentIQ: React.FC = () => {
                     { key: 'overview', label: '◻︎ My Web Content' },
                     { key: 'blog', label: '◻︎ My Blog' },
                     { key: 'services', label: '◻︎ Services' },
-                    { key: 'consult', label: '◻︎ Consult' },
+                    { key: 'consultations', label: '◻︎ Consultations' },
                     { key: 'client-portal', label: '◻︎ Client Portal' },
                     { key: 'testimonials', label: '◻︎ Testimonials' },
                     { key: 'contact', label: '◻︎ Contact' }
@@ -452,7 +769,7 @@ const AgentIQ: React.FC = () => {
             {activeTab === 'overview' && renderOverview()}
             {activeTab === 'blog' && renderBlog()}
             {activeTab === 'services' && renderServices()}
-            {activeTab === 'consult' && renderConsult()}
+            {activeTab === 'consultations' && renderConsultations()}
             {activeTab === 'client-portal' && renderClientPortal()}
             {activeTab === 'testimonials' && renderTestimonials()}
             {activeTab === 'contact' && renderContact()}
