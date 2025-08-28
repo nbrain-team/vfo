@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../public.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import LawPayIntegration from '../components/LawPayIntegration';
@@ -87,6 +87,7 @@ const PublicBookCall: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [showPayment, setShowPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [hppOpened, setHppOpened] = useState(false);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,7 +128,16 @@ const PublicBookCall: React.FC = () => {
 
   const handlePaymentCancel = () => {
     setShowPayment(false);
+    setHppOpened(false);
   };
+
+  // Automatically open hosted payment page in a new tab when the modal is shown
+  useEffect(() => {
+    if (showPayment && !hppOpened) {
+      window.open(LAWPay_HPP_URL, '_blank', 'noopener,noreferrer');
+      setHppOpened(true);
+    }
+  }, [showPayment, hppOpened]);
 
   return (
     <div className="public-site">
@@ -459,15 +469,12 @@ const PublicBookCall: React.FC = () => {
               </div>
             </div>
             
-            {/* Hosted Payment Page Bypass (iframe) */}
-            <div style={{ border: '1px solid var(--border-light)', borderRadius: '8px', overflow: 'hidden' }}>
-              <iframe
-                src={LAWPay_HPP_URL}
-                title="Secure LawPay Checkout"
-                style={{ width: '100%', height: '640px', border: '0', background: '#ffffff' }}
-                sandbox="allow-forms allow-scripts allow-same-origin allow-popups"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
+            {/* Hosted Payment Page opens in a new tab due to frame restrictions */}
+            <div className="public-card" style={{ background: 'var(--background-secondary)' }}>
+              <div style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
+                We opened the secure payment page in a new tab. Complete payment there, then click
+                <strong> “I Completed Payment”</strong> below to continue.
+              </div>
             </div>
 
             <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
@@ -475,15 +482,7 @@ const PublicBookCall: React.FC = () => {
                 If the form doesn’t appear, open the secure payment page in a new tab and return here after completing payment.
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
-                <a
-                  className="button-outline"
-                  href={LAWPay_HPP_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ textDecoration: 'none' }}
-                >
-                  Open Secure Payment
-                </a>
+                <a className="button-outline" href={LAWPay_HPP_URL} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>Open Secure Payment</a>
                 <button
                   className="form-button"
                   onClick={() => handlePaymentSuccess('hpp-' + Date.now())}
