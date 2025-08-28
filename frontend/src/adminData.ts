@@ -70,6 +70,17 @@ export type SiteConfig = {
   ctaHref?: string;
   images?: string[];
   paywallEnabled?: boolean;
+  emailTemplates?: EmailTemplate[];
+  lawpayMerchantId?: string;
+  lawpayPublicKey?: string;
+  advisorName?: string;
+  advisorDescription?: string;
+  advisorPhone?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  contactAddress?: string;
+  testimonials?: string;
+  blogPosts?: any[];
 };
 
 export function getSiteConfig(): SiteConfig {

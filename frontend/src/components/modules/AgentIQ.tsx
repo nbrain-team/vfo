@@ -83,6 +83,18 @@ const AgentIQ: React.FC = () => {
             case 'advisorPhone':
                 setAdvisorPhone(value);
                 break;
+            case 'contactPhone':
+                setContactPhone(value);
+                break;
+            case 'contactEmail':
+                setContactEmail(value);
+                break;
+            case 'contactAddress':
+                setContactAddress(value);
+                break;
+            case 'testimonials':
+                setEditableTestimonials(JSON.parse(value));
+                break;
         }
     };
     
@@ -529,6 +541,14 @@ const AgentIQ: React.FC = () => {
     const [selectedAppointmentType, setSelectedAppointmentType] = useState(appointmentTypes[0]);
     const [showPayment, setShowPayment] = useState(false);
     
+    // Contact info state
+    const [contactPhone, setContactPhone] = useState(siteConfig.contactPhone || '(307) 463-3600');
+    const [contactEmail, setContactEmail] = useState(siteConfig.contactEmail || 'hello@wyomingassetprotectiontrust.com');
+    const [contactAddress, setContactAddress] = useState(siteConfig.contactAddress || '1621 Central Avenue #8866, Cheyenne, WY 82001');
+    
+    // Testimonials state
+    const [editableTestimonials, setEditableTestimonials] = useState(siteConfig.testimonials || testimonials);
+    
     const renderConsultations = () => (
         <div className="module-grid">
             <div className="module-card">
@@ -700,16 +720,26 @@ const AgentIQ: React.FC = () => {
 
     const renderTestimonials = () => (
         <div className="module-card">
-            <h3 className="section-title">What Our Clients Say</h3>
-            <div className="module-card-row" style={{ marginTop: 12 }}>
-                {testimonials.map((t, i) => (
-                    <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 16, background: 'var(--bg)' }}>
-                        <div style={{ fontWeight: 600, marginBottom: 6 }}>{t.name}</div>
-                        <div style={{ color: 'var(--text-secondary)' }}>“{t.quote}”</div>
-                    </div>
-                ))}
-            </div>
-            <div style={{ marginTop: 16, color: 'var(--text-secondary)' }}>45+ five-star reviews</div>
+            <EditableSection
+                content={
+                    <>
+                        <h3 className="section-title">What Our Clients Say</h3>
+                        <div className="module-card-row" style={{ marginTop: 12 }}>
+                            {editableTestimonials.map((t, i) => (
+                                <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 16, background: 'var(--bg)' }}>
+                                    <div style={{ fontWeight: 600, marginBottom: 6 }}>{t.name}</div>
+                                    <div style={{ color: 'var(--text-secondary)' }}>"{t.quote}"</div>
+                                </div>
+                            ))}
+                        </div>
+                        <div style={{ marginTop: 16, color: 'var(--text-secondary)' }}>45+ five-star reviews</div>
+                    </>
+                }
+                onSave={(value) => {
+                    // For now, save the entire testimonials array as JSON
+                    handleContentSave('testimonials', JSON.stringify(editableTestimonials));
+                }}
+            />
         </div>
     );
 
@@ -718,13 +748,22 @@ const AgentIQ: React.FC = () => {
             <div className="module-card">
                 <h3 className="section-title">Contact Us</h3>
                 <div style={{ display: 'grid', gap: 12 }}>
-                    <div><strong>Phone:</strong> (307) 463-3600</div>
-                    <div><strong>Email:</strong> hello@wyomingassetprotectiontrust.com</div>
-                    <div><strong>Address:</strong> 1621 Central Avenue #8866, Cheyenne, WY 82001</div>
+                    <EditableSection
+                        content={<div><strong>Phone:</strong> {contactPhone}</div>}
+                        onSave={(value) => handleContentSave('contactPhone', value.replace('Phone: ', ''))}
+                    />
+                    <EditableSection
+                        content={<div><strong>Email:</strong> {contactEmail}</div>}
+                        onSave={(value) => handleContentSave('contactEmail', value.replace('Email: ', ''))}
+                    />
+                    <EditableSection
+                        content={<div><strong>Address:</strong> {contactAddress}</div>}
+                        onSave={(value) => handleContentSave('contactAddress', value.replace('Address: ', ''))}
+                    />
                 </div>
                 <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
-                    <button className="form-button" style={{ width: 'auto' }} onClick={() => setActiveTab('consult')}>Book an Appointment</button>
-                    <button className="button-outline" style={{ width: 'auto' }} onClick={() => navigate('/wyoming-apt')}>Visit Public Page (Mock)</button>
+                    <button className="form-button" style={{ width: 'auto' }} onClick={() => setActiveTab('consultations')}>Book an Appointment</button>
+                    <button className="button-outline" style={{ width: 'auto' }} onClick={() => navigate('/wyoming-apt')}>Visit Public Page</button>
                 </div>
             </div>
 

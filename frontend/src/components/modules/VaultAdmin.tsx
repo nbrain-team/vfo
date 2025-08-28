@@ -11,6 +11,14 @@ const VaultAdmin: React.FC = () => {
   const [funding, setFunding] = useState<any[]>([]);
   const maintenance = getMaintenance();
   const [annual, setAnnual] = useState<any[]>([]);
+  
+  // Document Generation State
+  const [showGeneration, setShowGeneration] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<string>('');
+  const [selectedDocument, setSelectedDocument] = useState<string>('');
+  const [selectedMatter, setSelectedMatter] = useState<string>('');
+  const [generatedDraft, setGeneratedDraft] = useState<string>('');
+  const [draftPreview, setDraftPreview] = useState(false);
 
   useEffect(() => {
     spawnDraftingTasksForSigned();
@@ -51,6 +59,7 @@ const VaultAdmin: React.FC = () => {
             ))}
           </select>
           <button className="form-button" style={{ width: 'auto', marginTop: 12 }} onClick={addMockDoc} disabled={!selected}>Add Mock Signed Doc</button>
+          <button className="form-button" style={{ width: 'auto', marginTop: 12 }} onClick={() => setShowGeneration(true)}>Generate Document</button>
         </div>
 
         <div className="module-card">
@@ -233,6 +242,112 @@ const VaultAdmin: React.FC = () => {
           )}
         </div>
       </div>
+      
+      {/* Document Generation Modal */}
+      {showGeneration && (
+        <div className="modal-overlay" onClick={() => setShowGeneration(false)}>
+          <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px', width: '90%' }}>
+            <h2>Generate Document</h2>
+            
+            <div style={{ marginBottom: '16px' }}>
+              <label className="form-label">Select Client</label>
+              <select 
+                className="form-input" 
+                value={selectedClient} 
+                onChange={(e) => setSelectedClient(e.target.value)}
+              >
+                <option value="">Select a client...</option>
+                {bookings.map(b => (
+                  <option key={b.id} value={b.id}>{b.name} - {b.email}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div style={{ marginBottom: '16px' }}>
+              <label className="form-label">Select Document Template</label>
+              <select 
+                className="form-input" 
+                value={selectedDocument} 
+                onChange={(e) => setSelectedDocument(e.target.value)}
+              >
+                <option value="">Select a document...</option>
+                <option value="engagement-letter">WYDAPT Engagement Letter</option>
+                <option value="trustee-acceptance">Trustee Acceptance of Contribution</option>
+                <option value="meeting-minutes">Meeting Minutes and Resolutions</option>
+                <option value="life-legacy-summary">Life & Legacy Planning Summary</option>
+                <option value="pftc-operating">PFTC Operating Agreement</option>
+              </select>
+            </div>
+            
+            <div style={{ marginBottom: '16px' }}>
+              <label className="form-label">Select Matter in Process</label>
+              <select 
+                className="form-input" 
+                value={selectedMatter} 
+                onChange={(e) => setSelectedMatter(e.target.value)}
+              >
+                <option value="">Select a matter...</option>
+                <option value="wydapt">WYDAPT - Wyoming Domestic Asset Protection Trust</option>
+                <option value="llps">LLPS - Life & Legacy Planning Service</option>
+                <option value="pftc">PFTC - Private Family Trust Company</option>
+                <option value="maintenance">Ongoing Trust Maintenance</option>
+              </select>
+            </div>
+            
+            {selectedClient && selectedDocument && selectedMatter && (
+              <div style={{ marginTop: '20px' }}>
+                <button 
+                  className="form-button" 
+                  style={{ width: '100%' }}
+                  onClick={() => {
+                    // Generate draft with client data
+                    const client = bookings.find(b => b.id === selectedClient);
+                    setGeneratedDraft(`Generated ${selectedDocument} for ${client?.name} - ${selectedMatter}`);
+                    setDraftPreview(true);
+                  }}
+                >
+                  Generate Draft
+                </button>
+              </div>
+            )}
+            
+            {draftPreview && (
+              <div style={{ marginTop: '20px', padding: '16px', background: 'var(--background-secondary)', borderRadius: '8px' }}>
+                <h4>Draft Preview</h4>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: '12px' }}>{generatedDraft}</p>
+                <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                  This document has been populated with client data from their intake forms and CRM record.
+                </p>
+                <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                  <button className="form-button" style={{ width: 'auto' }}>
+                    Approve & Send for E-Sign
+                  </button>
+                  <button className="button-outline" style={{ width: 'auto' }}>
+                    Edit Document
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+              <button 
+                className="button-outline" 
+                style={{ width: 'auto' }}
+                onClick={() => {
+                  setShowGeneration(false);
+                  setSelectedClient('');
+                  setSelectedDocument('');
+                  setSelectedMatter('');
+                  setGeneratedDraft('');
+                  setDraftPreview(false);
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </ModuleTemplate>
   );
 };

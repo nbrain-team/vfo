@@ -225,16 +225,57 @@ const CRMAdmin: React.FC = () => {
         <div />
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button className="form-button" style={{ width: 'auto' }} onClick={() => setShowAdd(true)}>Add Contact</button>
-          <button className="form-button" style={{ width: 'auto' }} onClick={() => alert('Add Lead Form functionality coming soon')}>Add Lead Form</button>
-          <button className="form-button" style={{ width: 'auto' }} onClick={() => alert('Add Service Type functionality coming soon')}>Add Service Type</button>
-          <button className="form-button" style={{ width: 'auto' }} onClick={() => alert('Add Sequence functionality coming soon')}>Add Sequence</button>
+          <button className="form-button" style={{ width: 'auto' }} onClick={() => window.open('/platform/formbuilder', '_blank')}>Add Lead Form</button>
+          <button className="form-button" style={{ width: 'auto' }} onClick={() => alert('Service types: WYDAPT ($18,500), Life & Legacy Planning ($3,500), Wealth Credit & Liquidity ($2,500)')}>Add Service Type</button>
+          <button className="form-button" style={{ width: 'auto' }} onClick={() => window.location.href = '/platform/workflows'}>Add Sequence</button>
           <button className="button-outline" style={{ width: 'auto' }} onClick={() => setShowImport(true)}>Import CSV</button>
         </div>
       </div>
 
       {/* Tab Content */}
       {activeTab === 'overview' && (
-        <PipelineOverview bookings={bookings} />
+        <>
+          <PipelineOverview bookings={bookings} />
+          
+          {/* Pipeline Widget Duplicate - Quick Actions */}
+          <div className="module-card" style={{ marginTop: '16px' }}>
+            <h3 className="section-title">Quick Pipeline Actions</h3>
+            <div className="stage-overview">
+              {[
+                { key: 'book_consults', label: 'Book Consults', count: bookings.filter(b => b.stage === 'New').length },
+                { key: 'pre_engagement', label: 'Pre-Engagement', count: bookings.filter(b => b.stage === 'Booked' || b.stage === 'Paid').length },
+                { key: 'engaged', label: 'Engaged', count: bookings.filter(b => b.stage === 'engaged').length },
+                { key: 'questionnaire', label: 'Questionnaire Received', count: bookings.filter(b => b.stage === 'questionnaire_received').length },
+                { key: 'in_process', label: 'Matter in Process', count: bookings.filter(b => b.stage === 'matter_in_process').length },
+                { key: 'fulfilled', label: 'Matter Fulfilled', count: bookings.filter(b => b.stage === 'matter_fulfilled').length }
+              ].map(stage => (
+                <div key={stage.key} className="stage-card" style={{ cursor: 'pointer' }} onClick={() => {
+                  setActiveTab('clients');
+                  // Filter clients by stage when clicking
+                }}>
+                  <div className="stage-header">
+                    <span className="stage-name">{stage.label}</span>
+                    <span className="stage-count">{stage.count}</span>
+                  </div>
+                  <div className="stage-progress">
+                    <div className="progress-bar" style={{ width: '100%' }}>
+                      <div 
+                        className="progress-fill" 
+                        style={{ 
+                          width: `${Math.min(100, (stage.count / Math.max(1, bookings.length)) * 100 * 3)}%`,
+                          background: 'var(--primary)'
+                        }} 
+                      />
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '8px' }}>
+                    Click to view {stage.count} client{stage.count !== 1 ? 's' : ''}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
       )}
 
       {activeTab === 'clients' && (
@@ -248,9 +289,92 @@ const CRMAdmin: React.FC = () => {
       {activeTab === 'automation' && (
         <div className="module-card">
           <h3 className="section-title">Automation Status</h3>
-          <p style={{ color: 'var(--text-secondary)', marginTop: '16px' }}>
-            Workflow automations and rules will be displayed here.
-          </p>
+          <div style={{ marginTop: '16px' }}>
+            {/* Active Workflows */}
+            <h4 style={{ fontSize: '14px', marginBottom: '12px' }}>Active Workflows</h4>
+            <div className="table-container">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Client</th>
+                    <th>Workflow</th>
+                    <th>Current Step</th>
+                    <th>Status</th>
+                    <th>Next Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {bookings.filter(b => b.stage === 'Signed' || b.stage === 'matter_in_process').map(b => (
+                    <tr key={b.id}>
+                      <td>{b.name}</td>
+                      <td>WYDAPT Matter Workflow</td>
+                      <td>
+                        {b.stage === 'Signed' ? 'Payment Instructions Sent' : 
+                         b.stage === 'matter_in_process' ? 'Documents in Progress' : 
+                         'Pending'}
+                      </td>
+                      <td>
+                        <span className="status-badge active">Running</span>
+                      </td>
+                      <td>
+                        {b.stage === 'Signed' ? 'Awaiting payment ($18,500)' : 
+                         b.stage === 'matter_in_process' ? 'Generate trust documents' : 
+                         'Next step pending'}
+                      </td>
+                    </tr>
+                  ))}
+                  {bookings.filter(b => b.stage === 'Signed' || b.stage === 'matter_in_process').length === 0 && (
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                        No active workflows running
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Automation Rules */}
+            <h4 style={{ fontSize: '14px', marginTop: '24px', marginBottom: '12px' }}>Configured Rules</h4>
+            <div style={{ display: 'grid', gap: '8px' }}>
+              {[
+                { name: 'WYDAPT: Signed → Payment Instructions', trigger: 'Stage change to Signed', action: 'Send payment email' },
+                { name: 'WYDAPT: Payment → Questionnaire', trigger: 'Payment received', action: 'Send questionnaire form' },
+                { name: 'WYDAPT: Questionnaire → Documents', trigger: 'Form completed', action: 'Generate documents' },
+                { name: 'WYDAPT: Annual Review', trigger: 'Matter complete + 365 days', action: 'Schedule review' }
+              ].map((rule, idx) => (
+                <div key={idx} style={{ 
+                  padding: '12px', 
+                  background: 'var(--card-hover)', 
+                  borderRadius: '8px',
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr 1fr',
+                  gap: '16px',
+                  alignItems: 'center'
+                }}>
+                  <div>
+                    <strong style={{ fontSize: '13px' }}>{rule.name}</strong>
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                    Trigger: {rule.trigger}
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                    Action: {rule.action}
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div style={{ marginTop: '20px' }}>
+              <button 
+                className="form-button" 
+                style={{ width: 'auto' }}
+                onClick={() => window.location.href = '/platform/workflows'}
+              >
+                Manage Workflows & Rules
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

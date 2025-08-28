@@ -69,6 +69,19 @@ const DocumentLibraryAdmin: React.FC = () => {
             isTemplate: true,
             placeholders: ['{{company_name}}', '{{grantor_name}}', '{{trustee_name}}', '{{trust_name}}', '{{effective_date}}', '{{state}}', '{{county}}', '{{address}}']
         },
+        // Life & Legacy Planning Documents
+        {
+            id: 'doc-life-legacy-summary',
+            title: 'Life & Legacy Planning Summary',
+            description: 'Comprehensive summary document populated from Life & Legacy Planning Assessment',
+            type: 'other',
+            requiresSignature: false,
+            createdAt: '2024-01-22',
+            lastModified: '2024-01-22',
+            fileSize: '48 KB',
+            isTemplate: true,
+            placeholders: ['{{client_name}}', '{{date}}', '{{marital_status}}', '{{spouse_name}}', '{{children_info}}', '{{life_goals}}', '{{legacy_vision}}', '{{estate_priorities}}', '{{current_plan}}', '{{key_assets}}', '{{planning_timeline}}', '{{family_dynamics}}', '{{charitable_intentions}}']
+        },
         // Contributions to Trust Documents
         {
             id: 'doc-8',

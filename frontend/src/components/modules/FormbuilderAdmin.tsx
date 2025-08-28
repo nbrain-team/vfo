@@ -23,13 +23,26 @@ const FormbuilderAdmin: React.FC = () => {
     const [previewForm, setPreviewForm] = useState<FormTemplate | null>(null);
     const [forms, setForms] = useState<FormTemplate[]>([
         {
-            id: 'form-1',
-            name: 'Contact Information Form',
-            description: 'Basic contact information collection',
+            id: 'form-paid-consult-booking',
+            name: 'Paid 30-Minute Consultation Booking',
+            description: 'Booking form for paid consultations with all required intake questions',
             fields: [
-                { id: 'f1', type: 'text', label: 'Full Name', required: true },
-                { id: 'f2', type: 'email', label: 'Email Address', required: true },
-                { id: 'f3', type: 'phone', label: 'Phone Number', required: false }
+                { id: 'booking1', type: 'text', label: 'Full Name', required: true },
+                { id: 'booking2', type: 'email', label: 'Email Address', required: true },
+                { id: 'booking3', type: 'phone', label: 'Phone Number (for text reminders)', required: false },
+                { id: 'booking4', type: 'text', label: 'Guest Emails (comma separated)', required: false },
+                { id: 'booking5', type: 'select', label: 'How did you hear about us?', required: true, options: ['Google / Search', 'Referral', 'YouTube', 'Podcast', 'Social Media', 'Other'] },
+                { id: 'booking6', type: 'text', label: 'If Other/Referral, please specify', required: false },
+                { id: 'booking7', type: 'text', label: 'State of Residence', required: true },
+                { id: 'booking8', type: 'select', label: 'Are you a U.S. citizen?', required: true, options: ['Yes', 'No', 'Other'] },
+                { id: 'booking9', type: 'text', label: 'If Other, please specify citizenship', required: false },
+                { id: 'booking10', type: 'select', label: 'Marital Status', required: true, options: ['Single', 'Married', 'Divorced', 'Widowed', 'Domestic Partnership', 'Prefer not to say'] },
+                { id: 'booking11', type: 'checkbox', label: 'What are your priorities?', required: true, options: ['Asset protection', 'Estate planning', 'Tax efficiency', 'Legacy planning', 'Other'] },
+                { id: 'booking12', type: 'text', label: 'If Other priority, please specify', required: false },
+                { id: 'booking13', type: 'checkbox', label: 'Types of assets you have', required: true, options: ['Real estate', 'Business interests', 'Cash or cash equivalents', 'Bitcoin and Cryptocurrency holdings', 'Investments (stocks, bonds, funds)', 'Intellectual Property', 'Other'] },
+                { id: 'booking14', type: 'text', label: 'If Other assets, please specify', required: false },
+                { id: 'booking15', type: 'select', label: 'How soon are you looking to act?', required: true, options: ['Immediately', 'Within 1–2 weeks', 'Within 30 days', 'Exploring options'] },
+                { id: 'booking16', type: 'select', label: 'Total asset value range', required: true, options: ['< $500k', '$500k – $1M', '$1M – $5M', '$5M – $10M', '$10M+'] }
             ],
             createdAt: new Date().toISOString()
         },
@@ -212,6 +225,51 @@ const FormbuilderAdmin: React.FC = () => {
                 { id: 'iac10', type: 'select', label: 'Voting Requirements', required: true, options: ['Simple Majority', 'Super Majority', 'Unanimous'] },
                 { id: 'iac11', type: 'textarea', label: 'Reporting Requirements', required: true },
                 { id: 'iac12', type: 'textarea', label: 'Committee Compensation (if any)', required: false }
+            ],
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 'form-life-legacy-planning',
+            name: 'Life & Legacy Planning Questionnaire',
+            description: 'Comprehensive questionnaire for life and legacy planning',
+            fields: [
+                { id: 'llp1', type: 'text', label: 'Full Legal Name', required: true },
+                { id: 'llp2', type: 'date', label: 'Date of Birth', required: true },
+                { id: 'llp3', type: 'select', label: 'Marital Status', required: true, options: ['Single', 'Married', 'Divorced', 'Widowed', 'Domestic Partnership'] },
+                { id: 'llp4', type: 'text', label: 'Spouse/Partner Full Name', required: false },
+                { id: 'llp5', type: 'textarea', label: 'Children Names and Ages', required: false },
+                { id: 'llp6', type: 'textarea', label: 'Primary Life Goals', required: true },
+                { id: 'llp7', type: 'textarea', label: 'Legacy Vision', required: true },
+                { id: 'llp8', type: 'checkbox', label: 'Estate Planning Priorities', required: true, options: ['Asset Protection', 'Tax Minimization', 'Family Wealth Transfer', 'Charitable Giving', 'Business Succession', 'Special Needs Planning'] },
+                { id: 'llp9', type: 'textarea', label: 'Current Estate Plan (if any)', required: false },
+                { id: 'llp10', type: 'textarea', label: 'Key Assets and Values', required: true },
+                { id: 'llp11', type: 'textarea', label: 'Specific Concerns or Questions', required: false },
+                { id: 'llp12', type: 'checkbox', label: 'Documents Needed', required: true, options: ['Will', 'Trust', 'Power of Attorney', 'Healthcare Directive', 'Business Agreements', 'Asset Protection Structure'] },
+                { id: 'llp13', type: 'select', label: 'Planning Timeline', required: true, options: ['Immediate', '1-3 months', '3-6 months', '6-12 months', 'Long-term'] },
+                { id: 'llp14', type: 'textarea', label: 'Family Dynamics to Consider', required: false },
+                { id: 'llp15', type: 'textarea', label: 'Charitable Intentions', required: false }
+            ],
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 'form-wealth-credit-liquidity',
+            name: 'Wealth Credit & Liquidity Assessment',
+            description: 'Assessment form for wealth, credit, and liquidity planning',
+            fields: [
+                { id: 'wcl1', type: 'text', label: 'Full Name', required: true },
+                { id: 'wcl2', type: 'email', label: 'Email', required: true },
+                { id: 'wcl3', type: 'phone', label: 'Phone', required: true },
+                { id: 'wcl4', type: 'select', label: 'Net Worth Range', required: true, options: ['< $1M', '$1M - $5M', '$5M - $10M', '$10M - $25M', '$25M - $50M', '$50M+'] },
+                { id: 'wcl5', type: 'select', label: 'Annual Income Range', required: true, options: ['< $250k', '$250k - $500k', '$500k - $1M', '$1M - $2.5M', '$2.5M+'] },
+                { id: 'wcl6', type: 'checkbox', label: 'Asset Types', required: true, options: ['Real Estate', 'Stocks/Bonds', 'Business Interests', 'Cash/Cash Equivalents', 'Alternative Investments', 'Cryptocurrency', 'Collectibles/Art'] },
+                { id: 'wcl7', type: 'textarea', label: 'Current Liquidity Needs', required: true },
+                { id: 'wcl8', type: 'select', label: 'Credit Score Range', required: true, options: ['< 650', '650-700', '700-750', '750-800', '800+'] },
+                { id: 'wcl9', type: 'textarea', label: 'Current Debt Obligations', required: true },
+                { id: 'wcl10', type: 'textarea', label: 'Future Capital Needs', required: true },
+                { id: 'wcl11', type: 'checkbox', label: 'Financial Goals', required: true, options: ['Increase Liquidity', 'Optimize Credit', 'Reduce Tax Burden', 'Asset Protection', 'Business Expansion', 'Estate Planning'] },
+                { id: 'wcl12', type: 'textarea', label: 'Risk Tolerance Description', required: true },
+                { id: 'wcl13', type: 'select', label: 'Time Horizon', required: true, options: ['< 1 year', '1-3 years', '3-5 years', '5-10 years', '10+ years'] },
+                { id: 'wcl14', type: 'textarea', label: 'Specific Challenges or Opportunities', required: false }
             ],
             createdAt: new Date().toISOString()
         }

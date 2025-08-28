@@ -3,6 +3,7 @@ import apiClient from '../apiClient';
 import UploadDocument from './UploadDocument';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import DocumentChat from './DocumentChat';
+import { getBookings } from '../adminData';
 
 interface Entity { id: number; name: string; }
 interface Document { id: number; name: string; document_type?: string; upload_date?: string; }
@@ -28,6 +29,10 @@ const LegalIQ: React.FC = () => {
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [insights, setInsights] = useState<string>('');
     const [insightsLoading, setInsightsLoading] = useState<boolean>(false);
+    
+    // Vault integration
+    const [vaultDocuments, setVaultDocuments] = useState<any[]>([]);
+    const bookings = getBookings();
 
     const generateInsights = async () => {
         if (!selectedEntityId) return;
@@ -78,6 +83,25 @@ const LegalIQ: React.FC = () => {
         };
         loadDocs();
     }, [selectedEntityId]);
+    
+    // Load vault documents from bookings
+    useEffect(() => {
+        const vaultDocs: any[] = [];
+        bookings.forEach(booking => {
+            if (booking.docs && booking.docs.length > 0) {
+                booking.docs.forEach(doc => {
+                    vaultDocs.push({
+                        ...doc,
+                        clientName: booking.name,
+                        clientEmail: booking.email,
+                        bookingId: booking.id,
+                        stage: booking.stage
+                    });
+                });
+            }
+        });
+        setVaultDocuments(vaultDocs);
+    }, []);
 
     // Mock compliance items remain for UI
     useEffect(() => {
@@ -257,6 +281,118 @@ const LegalIQ: React.FC = () => {
                         }} />
                     </div>
                 )}
+                
+                {/* Vault Documents Section */}
+                <div className="module-card" style={{ marginTop: '16px', gridColumn: 'span 2' }}>
+                    <h3 className="section-title">Client Vault Documents</h3>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                        Completed documents from all clients across the system
+                    </p>
+                    <div className="table-container">
+                        <table className="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Document</th>
+                                    <th>Client</th>
+                                    <th>Stage</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {vaultDocuments
+                                    .filter(doc => 
+                                        doc.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                        doc.clientName?.toLowerCase().includes(searchTerm.toLowerCase())
+                                    )
+                                    .slice(0, 10)
+                                    .map(doc => (
+                                        <tr key={`${doc.bookingId}-${doc.id}`}>
+                                            <td>{doc.title}</td>
+                                            <td>
+                                                <div>
+                                                    <div style={{ fontWeight: '500' }}>{doc.clientName}</div>
+                                                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{doc.clientEmail}</div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span className="status-badge">{doc.stage}</span>
+                                            </td>
+                                            <td>{new Date(doc.createdAt).toLocaleDateString()}</td>
+                                            <td>
+                                                <button className="button-outline" style={{ width: 'auto' }}>View</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                {vaultDocuments.length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                                            No vault documents found
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style={{ marginTop: '16px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                        Total vault documents: {vaultDocuments.length}
+                    </div>
+                </div>
+                
+                {/* Vault Analytics */}
+                <div className="module-card" style={{ marginTop: '16px', gridColumn: 'span 2' }}>
+                    <h3 className="section-title">Vault Document Analytics</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginTop: '16px' }}>
+                        <div style={{ padding: '16px', background: 'var(--card-hover)', borderRadius: '8px' }}>
+                            <div style={{ fontSize: '24px', fontWeight: '600', color: 'var(--primary)' }}>
+                                {vaultDocuments.length}
+                            </div>
+                            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Total Documents</div>
+                        </div>
+                        <div style={{ padding: '16px', background: 'var(--card-hover)', borderRadius: '8px' }}>
+                            <div style={{ fontSize: '24px', fontWeight: '600', color: 'var(--primary)' }}>
+                                {vaultDocuments.filter(d => d.title?.includes('Engagement Letter')).length}
+                            </div>
+                            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Engagement Letters</div>
+                        </div>
+                        <div style={{ padding: '16px', background: 'var(--card-hover)', borderRadius: '8px' }}>
+                            <div style={{ fontSize: '24px', fontWeight: '600', color: 'var(--primary)' }}>
+                                {vaultDocuments.filter(d => d.stage === 'matter_fulfilled').length}
+                            </div>
+                            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Completed Matters</div>
+                        </div>
+                        <div style={{ padding: '16px', background: 'var(--card-hover)', borderRadius: '8px' }}>
+                            <div style={{ fontSize: '24px', fontWeight: '600', color: 'var(--primary)' }}>
+                                {[...new Set(vaultDocuments.map(d => d.clientName))].length}
+                            </div>
+                            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Unique Clients</div>
+                        </div>
+                    </div>
+                    
+                    <div style={{ marginTop: '20px' }}>
+                        <h4 style={{ fontSize: '14px', marginBottom: '12px' }}>Document Types Distribution</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {[
+                                { type: 'Engagement Letters', count: vaultDocuments.filter(d => d.title?.includes('Engagement Letter')).length },
+                                { type: 'Assessments', count: vaultDocuments.filter(d => d.title?.includes('Assessment')).length },
+                                { type: 'Plans', count: vaultDocuments.filter(d => d.title?.includes('Plan')).length },
+                                { type: 'Other Documents', count: vaultDocuments.filter(d => !d.title?.includes('Engagement Letter') && !d.title?.includes('Assessment') && !d.title?.includes('Plan')).length }
+                            ].map(({ type, count }, idx) => (
+                                <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <div style={{ flex: 1, fontSize: '13px' }}>{type}</div>
+                                    <div style={{ width: '200px', height: '12px', background: 'var(--border-light)', borderRadius: '4px', overflow: 'hidden' }}>
+                                        <div style={{ 
+                                            width: `${(count / Math.max(vaultDocuments.length, 1)) * 100}%`, 
+                                            height: '100%', 
+                                            background: 'var(--primary)' 
+                                        }} />
+                                    </div>
+                                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)', width: '30px', textAlign: 'right' }}>{count}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
                 </>
             )}
 

@@ -1,9 +1,32 @@
 import React, { useState } from 'react';
 import ModuleTemplate from './ModuleTemplate';
-import { getNurtureSequences, saveNurtureSequences, NurtureSequence, NurtureStep, getEmailTemplates, upsertEmailTemplate, deleteEmailTemplate, EmailTemplate, getAutomationRules, upsertAutomationRule, deleteAutomationRule, AutomationRule } from '../../adminData';
+import { getNurtureSequences, saveNurtureSequences, NurtureSequence, NurtureStep, getEmailTemplates, upsertEmailTemplate, deleteEmailTemplate, EmailTemplate, getAutomationRules, upsertAutomationRule, deleteAutomationRule, AutomationRule, getSiteConfig, saveSiteConfig } from '../../adminData';
 
 const NurtureAdmin: React.FC = () => {
-  const [seqs, setSeqs] = useState<NurtureSequence[]>(getNurtureSequences());
+  const [seqs, setSeqs] = useState<NurtureSequence[]>(() => {
+    const existing = getNurtureSequences();
+    // Add default WYDAPT workflow if not exists
+    if (!existing.find(s => s.id === 'wydapt-workflow')) {
+      const wydaptWorkflow: NurtureSequence = {
+        id: 'wydapt-workflow',
+        name: 'WYDAPT Matter Workflow',
+        enabled: true,
+        steps: [
+          { id: 'wydapt-1', type: 'email', label: 'Send WYDAPT Welcome Email (T+0)', enabled: true, templateId: 'wydapt-welcome' },
+          { id: 'wydapt-2', type: 'esign_request', label: 'Send Engagement Letter for E-Sign (T+1 day)', enabled: true },
+          { id: 'wydapt-3', type: 'email', label: 'Payment Instructions - $18,500 (T+2 days)', enabled: true, templateId: 'wydapt-payment' },
+          { id: 'wydapt-4', type: 'form_send', label: 'Send Life & Legacy Planning Questionnaire (T+3 days)', enabled: true },
+          { id: 'wydapt-5', type: 'alert_advisor', label: 'Notify Advisor: Questionnaire Due (T+7 days)', enabled: true },
+          { id: 'wydapt-6', type: 'document_send', label: 'Generate & Send Trust Documents (T+14 days)', enabled: true },
+          { id: 'wydapt-7', type: 'manual_review', label: 'Advisor Review: Final Documents (T+15 days)', enabled: true },
+          { id: 'wydapt-8', type: 'email', label: 'Matter Complete Email (T+21 days)', enabled: true, templateId: 'wydapt-complete' }
+        ]
+      };
+      existing.push(wydaptWorkflow);
+      saveNurtureSequences(existing);
+    }
+    return existing;
+  });
   const [showSeqModal, setShowSeqModal] = useState(false);
   const [draftName, setDraftName] = useState('New Sequence');
   const [draftEnabled, setDraftEnabled] = useState(true);
@@ -78,9 +101,59 @@ const NurtureAdmin: React.FC = () => {
 
   const saveTemplate = () => {
     const id = tplId || tplName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '') || `tpl-${Date.now()}`;
-    const next: EmailTemplate = { id, name: tplName, subject: tplSubject, html: tplHtml };
+    
+    // Add public site header banner to the email template
+    const headerBanner = `
+<div style="background: #3C4630; padding: 20px; text-align: center;">
+  <img src="https://agentiq-vfo-frontend.onrender.com/wy-apt-logo.png" alt="Wyoming Asset Protection" style="height: 50px; margin-bottom: 10px;" />
+  <div style="color: #F3ECDD; font-size: 18px; font-weight: bold;">Wyoming Asset Protection</div>
+  <div style="color: #F3ECDD; font-size: 14px;">by Matt Meuli</div>
+</div>
+`;
+    
+    // Wrap the template with the header and proper email HTML structure
+    const fullHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
+    .email-container { max-width: 600px; margin: 0 auto; }
+    .email-content { padding: 20px; background: #ffffff; }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    ${headerBanner}
+    <div class="email-content">
+      ${tplHtml}
+    </div>
+    <div style="background: #F3ECDD; padding: 20px; text-align: center; color: #5C5C5C; font-size: 12px;">
+      <p>© ${new Date().getFullYear()} Wyoming Asset Protection Trust. All rights reserved.</p>
+      <p>1621 Central Avenue #8866, Cheyenne, WY 82001</p>
+    </div>
+  </div>
+</body>
+</html>
+`;
+    
+    const next: EmailTemplate = { id, name: tplName, subject: tplSubject, html: fullHtml };
     upsertEmailTemplate(next);
     setTemplates(getEmailTemplates());
+    
+    // Also save to site config for public site integration
+    const siteConfig = getSiteConfig();
+    const emailTemplates = siteConfig.emailTemplates || [];
+    const existingIndex = emailTemplates.findIndex(t => t.id === id);
+    if (existingIndex >= 0) {
+      emailTemplates[existingIndex] = { id, name: tplName, subject: tplSubject, html: fullHtml };
+    } else {
+      emailTemplates.push({ id, name: tplName, subject: tplSubject, html: fullHtml });
+    }
+    saveSiteConfig({ ...siteConfig, emailTemplates });
+    
     setShowTplModal(false);
   };
 
@@ -160,7 +233,15 @@ const NurtureAdmin: React.FC = () => {
                   <h4 className="section-title" style={{ fontSize: 14 }}>Steps</h4>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button className="button-outline" style={{ width: 'auto' }} onClick={addDraftStep}>Add Step</button>
-                    <button className="button-outline" style={{ width: 'auto' }} onClick={() => alert('Add rule functionality coming soon - will map to automations')}>Add Rule</button>
+                    <button className="button-outline" style={{ width: 'auto' }} onClick={() => {
+                      const newStep: NurtureStep = {
+                        id: `step-${Date.now()}`,
+                        type: 'manual_review',
+                        label: 'Rule: Check if WYDAPT matter',
+                        enabled: true
+                      };
+                      setDraftSteps([...draftSteps, newStep]);
+                    }}>Add Rule</button>
                   </div>
                 </div>
                 <div style={{ display: 'grid', gap: 8, marginTop: 8 }}>
@@ -206,10 +287,26 @@ const NurtureAdmin: React.FC = () => {
                 </div>
               </div>
               <div>
-                <label className="form-label">HTML</label>
+                <label className="form-label">HTML Content</label>
                 <textarea className="form-input" style={{ minHeight: 280, fontFamily: 'monospace' }} value={tplHtml} onChange={(e) => setTplHtml(e.target.value)} placeholder="<h1>Welcome</h1>..." />
                 <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
-                  Supports full HTML, including inline styles and merge tags later.
+                  Supports full HTML, including inline styles and merge tags. The public site header banner will be automatically added.
+                </div>
+                <div style={{ marginTop: 8 }}>
+                  <strong>Available merge tags:</strong>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
+                    {['{{name}}', '{{email}}', '{{phone}}', '{{appointment_date}}', '{{appointment_time}}', '{{advisor_name}}', '{{matter_type}}'].map(tag => (
+                      <code key={tag} style={{ 
+                        background: 'var(--background)', 
+                        padding: '2px 6px', 
+                        borderRadius: '4px',
+                        fontSize: '11px',
+                        cursor: 'pointer'
+                      }} onClick={() => setTplHtml(prev => prev + ' ' + tag)}>
+                        {tag}
+                      </code>
+                    ))}
+                  </div>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
@@ -250,28 +347,77 @@ const NurtureAdmin: React.FC = () => {
 
       {showRules && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div className="module-card" style={{ width: 840, maxWidth: '95%' }}>
-            <h3 className="section-title">Automations</h3>
+          <div className="module-card" style={{ width: 940, maxWidth: '95%', maxHeight: '90vh', overflowY: 'auto' }}>
+            <h3 className="section-title">Workflow Automations</h3>
+            
+            {/* WYDAPT Quick Rules */}
+            <div style={{ marginBottom: '20px', padding: '16px', background: 'var(--card-hover)', borderRadius: '8px' }}>
+              <h4 style={{ fontSize: '14px', marginBottom: '12px' }}>WYDAPT Matter Quick Rules</h4>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button className="button-outline" style={{ width: 'auto' }} onClick={() => {
+                  const wydaptRules = [
+                    { id: 'wydapt-auto-1', name: 'WYDAPT: Signed → Send Payment Instructions', fromStage: 'Signed', toStage: 'Signed', templateId: 'wydapt-payment' },
+                    { id: 'wydapt-auto-2', name: 'WYDAPT: Payment Received → Send Questionnaire', fromStage: 'Paid', toStage: 'questionnaire_received', templateId: 'wydapt-questionnaire' },
+                    { id: 'wydapt-auto-3', name: 'WYDAPT: Questionnaire Complete → Generate Documents', fromStage: 'questionnaire_received', toStage: 'matter_in_process', action: 'generate_docs' },
+                    { id: 'wydapt-auto-4', name: 'WYDAPT: Documents Signed → Matter Complete', fromStage: 'matter_in_process', toStage: 'matter_fulfilled', templateId: 'wydapt-complete' }
+                  ];
+                  wydaptRules.forEach(rule => {
+                    upsertAutomationRule({
+                      id: rule.id,
+                      name: rule.name,
+                      event: 'stage_change',
+                      conditions: { stage_from: rule.fromStage as any, stage_to: rule.toStage as any },
+                      actions: rule.templateId ? [{ type: 'send_email_template', templateId: rule.templateId }] : [{ type: 'log', message: 'WYDAPT action triggered' }]
+                    } as any);
+                  });
+                  setRules(getAutomationRules());
+                  alert('WYDAPT automation rules added!');
+                }}>Add All WYDAPT Rules</button>
+                
+                <button className="button-outline" style={{ width: 'auto' }} onClick={() => {
+                  upsertAutomationRule({
+                    id: 'wydapt-payment-check',
+                    name: 'WYDAPT: Check Payment Status',
+                    event: 'daily_check',
+                    conditions: { matter_type: 'WYDAPT', days_since_signed: 3 },
+                    actions: [{ type: 'alert_advisor', message: 'Check WYDAPT payment status' }]
+                  } as any);
+                  setRules(getAutomationRules());
+                }}>Add Payment Check Rule</button>
+                
+                <button className="button-outline" style={{ width: 'auto' }} onClick={() => {
+                  upsertAutomationRule({
+                    id: 'wydapt-annual-review',
+                    name: 'WYDAPT: Schedule Annual Review',
+                    event: 'matter_complete',
+                    conditions: { matter_type: 'WYDAPT' },
+                    actions: [{ type: 'schedule_task', task: 'Annual Review', delay_days: 365 }]
+                  } as any);
+                  setRules(getAutomationRules());
+                }}>Add Annual Review Rule</button>
+              </div>
+            </div>
+            
             <div style={{ display: 'grid', gap: 12, marginTop: 8 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 12 }}>
                 <div>
-                  <label className="form-label">Name</label>
+                  <label className="form-label">Rule Name</label>
                   <input className="form-input" value={ruleName} onChange={(e) => setRuleName(e.target.value)} />
                 </div>
                 <div>
-                  <label className="form-label">From Stage</label>
+                  <label className="form-label">Trigger: From Stage</label>
                   <select className="form-input" value={fromStage} onChange={(e) => setFromStage(e.target.value)}>
-                    {['New','Booked','Paid','Signed','Onboarding','Completed'].map(s => <option key={s} value={s}>{s}</option>)}
+                    {['New','Booked','Paid','Signed','engaged','questionnaire_received','matter_in_process','matter_fulfilled'].map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="form-label">To Stage</label>
+                  <label className="form-label">Action: To Stage</label>
                   <select className="form-input" value={toStage} onChange={(e) => setToStage(e.target.value)}>
-                    {['New','Booked','Paid','Signed','Onboarding','Completed'].map(s => <option key={s} value={s}>{s}</option>)}
+                    {['New','Booked','Paid','Signed','engaged','questionnaire_received','matter_in_process','matter_fulfilled'].map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="form-label">Email Template</label>
+                  <label className="form-label">Action: Send Email</label>
                   <select className="form-input" value={ruleTemplateId} onChange={(e) => setRuleTemplateId(e.target.value)}>
                     <option value="">None</option>
                     {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
