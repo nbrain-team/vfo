@@ -389,7 +389,7 @@ const CRMAdmin: React.FC = () => {
 
       {/* Original content - shown only when needed */}
       {(activeTab === 'overview' || activeTab === 'clients') && (
-      <div className="module-grid" style={{ display: 'none' }}>
+        <div className="module-grid" style={{ display: 'none' }}>
         <div className="module-card">
           <h3 className="section-title">Leads</h3>
           <div className="table-container" style={{ marginTop: 12 }}>
@@ -474,6 +474,7 @@ const CRMAdmin: React.FC = () => {
           )}
         </div>
       </div>
+      )}
 
       {showSchedule && selected && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
