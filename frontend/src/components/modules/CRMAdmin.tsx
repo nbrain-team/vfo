@@ -2,10 +2,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import ModuleTemplate from './ModuleTemplate';
 import { getBookings, updateBooking, Booking, seedMockDataIfEmpty, addBooking, saveBookings, seedFundingItemsIfMissing, enrollMaintenance, logAutomation, evaluateAutomations, getEmailTemplates, addOutboxEmail } from '../../adminData';
 import apiClient from '../../apiClient';
+import PipelineOverview from './PipelineOverview';
+import ClientsView from './ClientsView';
 
 const CRMAdmin: React.FC = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [bookingsState, setBookingsState] = useState(getBookings());
+  const [activeTab, setActiveTab] = useState<'overview' | 'clients' | 'automation' | 'analytics'>('overview');
 
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState('');
@@ -151,9 +154,73 @@ const CRMAdmin: React.FC = () => {
 
   return (
     <ModuleTemplate
-      title="CRM"
-      description="View and manage intake, stages, and notes (mock)."
+      title="LIFTed Advisor Pipeline"
+      description="Manage client journey from lead to matter fulfilled."
     >
+      {/* Tab Navigation */}
+      <div style={{ display: 'flex', gap: '20px', marginBottom: '24px', borderBottom: '1px solid var(--border)', paddingBottom: '8px' }}>
+        <button
+          onClick={() => setActiveTab('overview')}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: '8px 0',
+            cursor: 'pointer',
+            fontSize: '16px',
+            color: activeTab === 'overview' ? 'var(--primary)' : 'var(--text-secondary)',
+            borderBottom: activeTab === 'overview' ? '2px solid var(--primary)' : 'none',
+            marginBottom: '-9px'
+          }}
+        >
+          Pipeline Overview
+        </button>
+        <button
+          onClick={() => setActiveTab('clients')}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: '8px 0',
+            cursor: 'pointer',
+            fontSize: '16px',
+            color: activeTab === 'clients' ? 'var(--primary)' : 'var(--text-secondary)',
+            borderBottom: activeTab === 'clients' ? '2px solid var(--primary)' : 'none',
+            marginBottom: '-9px'
+          }}
+        >
+          Clients
+        </button>
+        <button
+          onClick={() => setActiveTab('automation')}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: '8px 0',
+            cursor: 'pointer',
+            fontSize: '16px',
+            color: activeTab === 'automation' ? 'var(--primary)' : 'var(--text-secondary)',
+            borderBottom: activeTab === 'automation' ? '2px solid var(--primary)' : 'none',
+            marginBottom: '-9px'
+          }}
+        >
+          Automation Status
+        </button>
+        <button
+          onClick={() => setActiveTab('analytics')}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: '8px 0',
+            cursor: 'pointer',
+            fontSize: '16px',
+            color: activeTab === 'analytics' ? 'var(--primary)' : 'var(--text-secondary)',
+            borderBottom: activeTab === 'analytics' ? '2px solid var(--primary)' : 'none',
+            marginBottom: '-9px'
+          }}
+        >
+          Analytics
+        </button>
+      </div>
+
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
         <div />
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -165,7 +232,40 @@ const CRMAdmin: React.FC = () => {
         </div>
       </div>
 
-      <div className="module-grid">
+      {/* Tab Content */}
+      {activeTab === 'overview' && (
+        <PipelineOverview bookings={bookings} />
+      )}
+
+      {activeTab === 'clients' && (
+        <ClientsView 
+          bookings={bookings} 
+          onSelectClient={setSelectedId}
+          selectedId={selectedId}
+        />
+      )}
+
+      {activeTab === 'automation' && (
+        <div className="module-card">
+          <h3 className="section-title">Automation Status</h3>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '16px' }}>
+            Workflow automations and rules will be displayed here.
+          </p>
+        </div>
+      )}
+
+      {activeTab === 'analytics' && (
+        <div className="module-card">
+          <h3 className="section-title">Pipeline Analytics</h3>
+          <p style={{ color: 'var(--text-secondary)', marginTop: '16px' }}>
+            Pipeline conversion metrics and analytics will be displayed here.
+          </p>
+        </div>
+      )}
+
+      {/* Original content - shown only when needed */}
+      {(activeTab === 'overview' || activeTab === 'clients') && (
+      <div className="module-grid" style={{ display: 'none' }}>
         <div className="module-card">
           <h3 className="section-title">Leads</h3>
           <div className="table-container" style={{ marginTop: 12 }}>
