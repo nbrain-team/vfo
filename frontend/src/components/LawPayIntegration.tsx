@@ -151,50 +151,6 @@ const LawPayIntegration: React.FC<LawPayIntegrationProps> = ({
     poll();
   };
 
-    try {
-      const checkout = window.LawPay.checkout({
-        publicKey: publicKey,
-        amount: amount * 100, // Convert to cents
-        description: description,
-        customer: {
-          name: clientName,
-          email: clientEmail
-        },
-        appearance: {
-          theme: 'minimal',
-          variables: {
-            colorPrimary: '#3C4630',
-            colorBackground: '#ffffff',
-            colorText: '#1E1E1E',
-            colorDanger: '#dc3545',
-            borderRadius: '8px',
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif'
-          }
-        },
-        onSuccess: (result: any) => {
-          console.log('LawPay payment successful:', result);
-          onSuccess(result.paymentId || result.id);
-        },
-        onError: (error: any) => {
-          console.error('LawPay payment error:', error);
-          setError(error.message || 'Payment failed');
-          onError(error.message || 'Payment failed');
-        },
-        onCancel: () => {
-          console.log('LawPay payment cancelled');
-          if (onCancel) onCancel();
-        }
-      });
-
-      // Mount the checkout form
-      checkout.mount('#lawpay-container');
-    } catch (err) {
-      console.error('LawPay initialization error:', err);
-      setError('Failed to initialize payment form');
-      onError('Failed to initialize payment form');
-    }
-  };
-
   if (isLoading) {
     return (
       <div style={{ textAlign: 'center', padding: '40px' }}>
