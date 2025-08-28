@@ -13,7 +13,7 @@ const PipelineOverview: React.FC<PipelineOverviewProps> = ({ bookings }) => {
     const [selectedAction, setSelectedAction] = useState<'bot' | 'advisor'>('bot');
     
     const stages = [
-        { key: 'book-consults', name: 'Book Consults', stage: 'New', filter: (b: Booking) => b.stage === 'New', color: '#3C4630' },
+        { key: 'book-consults', name: 'Booked Consults', stage: 'New', filter: (b: Booking) => b.stage === 'New', color: '#3C4630' },
         { key: 'pre-engagement', name: 'Pre-Engagement', stage: 'Booked', filter: (b: Booking) => b.stage === 'Booked' || b.stage === 'Paid', color: '#C07C3D' },
         { key: 'engaged', name: 'Engaged', stage: 'engaged', filter: (b: Booking) => b.stage === 'engaged', color: '#DCA85E' },
         { key: 'questionnaire', name: 'Questionnaire Received', stage: 'questionnaire_received', filter: (b: Booking) => b.stage === 'questionnaire_received', color: '#E9EDE4' },

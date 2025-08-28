@@ -275,7 +275,7 @@ const CRMAdmin: React.FC = () => {
             <h3 className="section-title">Quick Pipeline Actions</h3>
             <div className="stage-overview">
               {[
-                { key: 'book_consults', label: 'Book Consults', count: bookings.filter(b => b.stage === 'New').length },
+                { key: 'book_consults', label: 'Booked Consults', count: bookings.filter(b => b.stage === 'New').length },
                 { key: 'pre_engagement', label: 'Pre-Engagement', count: bookings.filter(b => b.stage === 'Booked' || b.stage === 'Paid').length },
                 { key: 'engaged', label: 'Engaged', count: 0 },
                 { key: 'questionnaire', label: 'Questionnaire Received', count: 0 },

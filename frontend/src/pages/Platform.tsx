@@ -234,7 +234,7 @@ const Platform: React.FC = () => {
                     }}></div>
                     
                     {[
-                        { name: 'Book Consults', count: kpiLeads, color: '#3C4630' },
+                        { name: 'Booked Consults', count: kpiLeads, color: '#3C4630' },
                         { name: 'Pre-Engagement', count: kpiBooked, color: '#C07C3D' },
                         { name: 'Engaged', count: kpiSigned, color: '#DCA85E' },
                         { name: 'Questionnaire Received', count: Math.floor(kpiSigned * 0.8), color: '#E9EDE4' },
