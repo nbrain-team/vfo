@@ -268,7 +268,13 @@ const CRMAdmin: React.FC = () => {
       {/* Tab Content */}
       {activeTab === 'overview' && (
         <>
-          <PipelineOverview bookings={bookings} />
+          <PipelineOverview 
+            bookings={bookings}
+            onSelectBooking={(id) => {
+              setSelectedId(id);
+              setActiveTab('clients');
+            }}
+          />
           
           {/* Pipeline Widget Duplicate - Quick Actions */}
           <div className="module-card" style={{ marginTop: '16px' }}>

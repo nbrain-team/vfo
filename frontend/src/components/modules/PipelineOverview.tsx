@@ -3,9 +3,10 @@ import { Booking, updateBooking } from '../../adminData';
 
 interface PipelineOverviewProps {
     bookings: Booking[];
+    onSelectBooking?: (id: string) => void;
 }
 
-const PipelineOverview: React.FC<PipelineOverviewProps> = ({ bookings }) => {
+const PipelineOverview: React.FC<PipelineOverviewProps> = ({ bookings, onSelectBooking }) => {
     const [draggedClient, setDraggedClient] = useState<Booking | null>(null);
     const [dragOverStage, setDragOverStage] = useState<string | null>(null);
     const [showRuleModal, setShowRuleModal] = useState(false);
@@ -213,7 +214,7 @@ const PipelineOverview: React.FC<PipelineOverviewProps> = ({ bookings }) => {
                                                 margin: '4px 0',
                                                 background: 'var(--background)',
                                                 borderRadius: '4px',
-                                                cursor: 'grab',
+                                                cursor: 'pointer',
                                                 color: 'var(--text-secondary)',
                                                 whiteSpace: 'nowrap',
                                                 overflow: 'hidden',
@@ -229,6 +230,7 @@ const PipelineOverview: React.FC<PipelineOverviewProps> = ({ bookings }) => {
                                                 e.currentTarget.style.border = '1px solid transparent';
                                                 e.currentTarget.style.background = 'var(--background)';
                                             }}
+                                            onClick={() => onSelectBooking && onSelectBooking(booking.id)}
                                             title={`Drag to move ${booking.name} to another stage`}
                                         >
                                             {booking.name}
