@@ -7,6 +7,7 @@ from app.api.agent import router as agent_router
 from app.api.chat import router as chat_router
 from app.api.google_auth import router as google_auth_router
 from app.api.test_config import router as test_config_router
+from app.api.admin_tasks import router as admin_tasks_router
 
 app = FastAPI(title="LIFTed VFO API", version="1.0.0")
 
@@ -29,6 +30,7 @@ app.include_router(agent_router, prefix="/api/agent", tags=["agent"])
 app.include_router(chat_router, prefix="/api/chat", tags=["chat"])
 app.include_router(google_auth_router, prefix="/api", tags=["google-auth"])
 app.include_router(test_config_router, prefix="/api", tags=["test"])
+app.include_router(admin_tasks_router, prefix="/api", tags=["admin"])
 
 @app.get("/")
 def read_root():
