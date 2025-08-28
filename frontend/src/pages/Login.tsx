@@ -38,6 +38,8 @@ const Login: React.FC = () => {
 
     const handleGoogleLogin = async (credentialResponse: any) => {
         try {
+            console.log('Google credential response:', credentialResponse);
+            
             // Send the Google credential to backend
             const response = await apiClient.post('/auth/google', {
                 credential: credentialResponse.credential
@@ -56,9 +58,11 @@ const Login: React.FC = () => {
             }
             
             navigate('/platform');
-        } catch (error) {
-            setMessage('Google authentication failed. Please try again.');
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.detail || error.message || 'Google authentication failed. Please try again.';
+            setMessage(`Error: ${errorMessage}`);
             console.error('Google login error:', error);
+            console.error('Error response:', error.response?.data);
         }
     };
 

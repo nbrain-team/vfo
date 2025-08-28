@@ -30,6 +30,7 @@ import MockWyomingAPT from './pages/MockWyomingAPT';
 import PublicBookCall from './pages/PublicBookCall';
 import PublicConfirm from './pages/PublicConfirm';
 import PublicSelectTime from './pages/PublicSelectTime';
+import TestGoogleAuth from './pages/TestGoogleAuth';
 import AuditAdmin from './components/modules/AuditAdmin';
 import FormbuilderAdmin from './components/modules/FormbuilderAdmin';
 import DocumentLibraryAdmin from './components/modules/DocumentLibraryAdmin';
@@ -42,6 +43,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/calendar-callback" element={<CalendarCallback />} />
+        <Route path="/test-google-auth" element={<TestGoogleAuth />} />
         {/* Public-facing page outside of the admin/sidebar layout */}
         <Route path="/wyoming-apt" element={<MockWyomingAPT />} />
         <Route path="/wyoming-apt/select" element={<PublicSelectTime />} />
