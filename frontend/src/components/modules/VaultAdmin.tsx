@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import ModuleTemplate from './ModuleTemplate';
 import { getBookings, updateBooking, getDraftingQueue, spawnDraftingTasksForSigned, DraftTask, getDocVersions, updateDocVersion, getFundingItems, updateFundingItem, getMaintenance, getAnnualReviews, updateAnnualReview } from '../../adminData';
+import LawPayIntegration from '../LawPayIntegration';
 
 const VaultAdmin: React.FC = () => {
   const bookings = useMemo(() => getBookings(), []);
@@ -19,6 +20,7 @@ const VaultAdmin: React.FC = () => {
   const [selectedMatter, setSelectedMatter] = useState<string>('');
   const [generatedDraft, setGeneratedDraft] = useState<string>('');
   const [draftPreview, setDraftPreview] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
 
   useEffect(() => {
     spawnDraftingTasksForSigned();
@@ -319,7 +321,17 @@ const VaultAdmin: React.FC = () => {
                   This document has been populated with client data from their intake forms and CRM record.
                 </p>
                 <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-                  <button className="form-button" style={{ width: 'auto' }}>
+                  <button 
+                    className="form-button" 
+                    style={{ width: 'auto' }}
+                    onClick={() => {
+                      if (selectedDocument === 'engagement-letter' && selectedMatter === 'wydapt') {
+                        setShowPayment(true);
+                      } else {
+                        alert('Document sent for e-signature!');
+                      }
+                    }}
+                  >
                     Approve & Send for E-Sign
                   </button>
                   <button className="button-outline" style={{ width: 'auto' }}>
@@ -344,6 +356,62 @@ const VaultAdmin: React.FC = () => {
               >
                 Close
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* LawPay Payment Modal for WYDAPT Engagement Letter */}
+      {showPayment && (
+        <div className="modal-overlay" onClick={() => setShowPayment(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+            <h3 className="modal-title">Payment Required - WYDAPT Engagement Letter</h3>
+            
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ padding: '16px', background: 'var(--background-secondary)', borderRadius: '8px', marginBottom: '16px' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Invoice Summary</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span>WYDAPT - Wyoming Domestic Asset Protection Trust</span>
+                  <span>$18,500</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span>Client</span>
+                  <span>{bookings.find(b => b.id === selectedClient)?.name || 'Selected Client'}</span>
+                </div>
+                <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px solid var(--border)' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold' }}>
+                  <span>Total Due</span>
+                  <span>$18,500</span>
+                </div>
+              </div>
+              
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px' }}>
+                Payment is required before the engagement letter can be sent for signature. 
+                The client will receive an invoice and payment link via email.
+              </p>
+              
+              <LawPayIntegration
+                amount={18500}
+                description="WYDAPT - Wyoming Domestic Asset Protection Trust - Engagement Letter"
+                clientName={bookings.find(b => b.id === selectedClient)?.name || 'Client'}
+                clientEmail={bookings.find(b => b.id === selectedClient)?.email || 'client@example.com'}
+                onSuccess={(paymentId) => {
+                  console.log('WYDAPT payment successful:', paymentId);
+                  setShowPayment(false);
+                  alert(`Payment successful! Reference: ${paymentId}\n\nEngagement letter has been sent for e-signature.`);
+                  // Update booking status
+                  if (selectedClient) {
+                    updateBooking(selectedClient, { stage: 'Paid' });
+                  }
+                }}
+                onError={(error) => {
+                  console.error('WYDAPT payment error:', error);
+                  alert(`Payment failed: ${error}`);
+                }}
+                onCancel={() => {
+                  setShowPayment(false);
+                }}
+              />
             </div>
           </div>
         </div>

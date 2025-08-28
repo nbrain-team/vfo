@@ -3,6 +3,7 @@ import ModuleTemplate from './ModuleTemplate';
 import { useNavigate } from 'react-router-dom';
 import EditableSection from './EditableSection';
 import { getSiteConfig, saveSiteConfig } from '../../adminData';
+import LawPayIntegration from '../LawPayIntegration';
 
 type TabKey = 'overview' | 'blog' | 'services' | 'consultations' | 'client-portal' | 'testimonials' | 'contact';
 
@@ -645,40 +646,25 @@ const AgentIQ: React.FC = () => {
                             </div>
                         </div>
                         
-                        <div style={{ 
-                            padding: '20px', 
-                            border: '2px dashed var(--border)', 
-                            borderRadius: '8px',
-                            textAlign: 'center',
-                            background: 'var(--background-secondary)'
-                        }}>
-                            <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                                LawPay integration will appear here
-                            </p>
-                            <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                                Secure payment processing powered by LawPay
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div style={{ display: 'flex', gap: 10 }}>
-                        <button 
-                            className="form-button" 
-                            style={{ width: 'auto' }}
-                            onClick={() => {
+                        <LawPayIntegration
+                            amount={selectedAppointmentType.price}
+                            description={`${selectedAppointmentType.name} - ${selectedSlot}`}
+                            clientName="Test Client"
+                            clientEmail="client@example.com"
+                            onSuccess={(paymentId) => {
+                                console.log('Payment successful:', paymentId);
                                 setScheduled(true);
                                 setShowPayment(false);
+                                alert(`Payment successful! Reference: ${paymentId}`);
                             }}
-                        >
-                            Complete Payment (Mock)
-                        </button>
-                        <button 
-                            className="button-outline" 
-                            style={{ width: 'auto' }}
-                            onClick={() => setShowPayment(false)}
-                        >
-                            Cancel
-                        </button>
+                            onError={(error) => {
+                                console.error('Payment error:', error);
+                                alert(`Payment failed: ${error}`);
+                            }}
+                            onCancel={() => {
+                                setShowPayment(false);
+                            }}
+                        />
                     </div>
                 </div>
             )}
