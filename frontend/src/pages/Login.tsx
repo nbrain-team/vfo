@@ -26,9 +26,10 @@ const Login: React.FC = () => {
             // Store user name from response, fallback to email prefix
             const userName = response.data.user_name || email.split('@')[0];
             localStorage.setItem('user_name', userName);
-            // Simple role default: 'Mike' -> Admin, else Client
-            const role = userName.toLowerCase() === 'mike' ? 'Admin' : 'Client';
+            // Store role from response
+            const role = response.data.role || 'Client';
             localStorage.setItem('role', role);
+            localStorage.setItem('user_id', response.data.user_id);
             navigate('/platform');
         } catch (error) {
             setMessage('Invalid credentials. Please try again.');
@@ -77,6 +78,19 @@ const Login: React.FC = () => {
                 <p style={{ textAlign: 'center', marginBottom: '24px', color: 'var(--text-secondary)', fontSize: '14px' }}>
                     Your AI-Powered Virtual Family Office
                 </p>
+                
+                <div style={{
+                    backgroundColor: 'var(--primary-light)',
+                    border: '1px solid var(--primary)',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    marginBottom: '20px',
+                    fontSize: '13px',
+                    color: 'var(--primary-dark)'
+                }}>
+                    <strong>For Clients:</strong> Connect with Google Account below or use email/password<br/>
+                    <strong>For Advisors:</strong> Sign in with your credentials
+                </div>
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label className="form-label">Email</label>

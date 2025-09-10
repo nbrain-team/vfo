@@ -3,11 +3,11 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from app.db import crud
-from app.schemas.user import User, UserCreate, Entity, EntityCreate, Contact, ContactCreate, Matter, MatterCreate, Intake, IntakeCreate, FieldMapping, PublicLead
+from app.schemas.user import User, UserCreate, UserUpdate, Entity, EntityCreate, Contact, ContactCreate, Matter, MatterCreate, Intake, IntakeCreate, FieldMapping, PublicLead
 from app.db.database import get_db
 from app.core.security import create_access_token, ALGORITHM, verify_password
 from app.core.config import settings
-from datetime import timedelta
+from datetime import timedelta, datetime
 from app.models.user import User as UserModel
 from typing import List
 
@@ -47,11 +47,13 @@ def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2Passw
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
-    # Include user's name in the response
+    # Include user's name and role in the response
     return {
         "access_token": access_token, 
         "token_type": "bearer",
-        "user_name": user.name if hasattr(user, 'name') and user.name else user.email.split('@')[0]
+        "user_name": user.name if hasattr(user, 'name') and user.name else user.email.split('@')[0],
+        "role": user.role if hasattr(user, 'role') else "Client",
+        "user_id": user.id
     }
 
 @router.get("/users/me", response_model=User)
@@ -67,7 +69,45 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
+    # Check if username is taken (for advisors)
+    if user.username:
+        existing_username = db.query(UserModel).filter(UserModel.username == user.username).first()
+        if existing_username:
+            raise HTTPException(status_code=400, detail="Username already taken")
     return crud.create_user(db=db, user=user)
+
+@router.get("/advisors/", response_model=List[User])
+def get_active_advisors(db: Session = Depends(get_db)):
+    """Get list of active advisors for client signup"""
+    return db.query(UserModel).filter(
+        UserModel.role == "Advisor",
+        UserModel.is_active == True
+    ).all()
+
+@router.get("/advisors/check-username/{username}")
+def check_username_availability(username: str, db: Session = Depends(get_db)):
+    """Check if username is available for advisor"""
+    existing = db.query(UserModel).filter(UserModel.username == username).first()
+    return {"available": existing is None}
+
+@router.patch("/users/{user_id}", response_model=User)
+def update_user(user_id: int, user_update: UserUpdate, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    """Update user details"""
+    # Only allow admins to update other users, or users to update themselves
+    if current_user.role != "Admin" and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized to update this user")
+    
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    update_data = user_update.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(user, key, value)
+    
+    db.commit()
+    db.refresh(user)
+    return user
 
 @router.post("/entities/", response_model=Entity)
 def create_entity(entity: EntityCreate, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
@@ -101,6 +141,22 @@ def create_matter(matter: MatterCreate, db: Session = Depends(get_db), current_u
 def list_matters(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     from app.models.crm import Matter as MatterModel
     return db.query(MatterModel).all()
+
+@router.patch("/matters/{matter_id}")
+def update_matter(matter_id: int, stage: str = None, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    """Update matter stage or other properties"""
+    from app.models.crm import Matter as MatterModel
+    matter = db.query(MatterModel).filter(MatterModel.id == matter_id).first()
+    if not matter:
+        raise HTTPException(status_code=404, detail="Matter not found")
+    
+    if stage is not None:
+        matter.stage = stage
+        matter.updated_at = datetime.utcnow()
+    
+    db.commit()
+    db.refresh(matter)
+    return matter
 
 @router.get("/conflict-check")
 def conflict_check(q: str, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
@@ -148,6 +204,54 @@ def upsert_field_mapping(mapping: FieldMapping, db: Session = Depends(get_db), c
 def get_field_mapping(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     from app.models.intake import FieldMapping as FieldMappingModel
     return db.query(FieldMappingModel).first()
+
+# --- Pipeline Analytics ---
+@router.get("/pipeline/stats")
+def get_pipeline_stats(period: str = "month", db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    """Get pipeline statistics for dashboard KPIs"""
+    from app.models.crm import Matter as MatterModel
+    from datetime import datetime, timedelta
+    
+    # Filter by period
+    now = datetime.utcnow()
+    if period == "month":
+        start_date = now - timedelta(days=30)
+    else:
+        start_date = datetime(2000, 1, 1)  # inception
+    
+    # Get matters filtered by period
+    matters = db.query(MatterModel).filter(MatterModel.created_at >= start_date).all()
+    
+    # Calculate KPIs
+    stats = {
+        "leads": len([m for m in matters if m.stage == "New"]),
+        "booked": len([m for m in matters if m.stage in ["Booked", "Paid"]]),
+        "showed": len([m for m in matters if m.stage in ["Signed", "Onboarding", "Completed"]]),
+        "signed": len([m for m in matters if m.stage in ["Signed", "Completed"]]),
+        "matters_in_process": len([m for m in matters if m.stage == "Onboarding"]),
+        "completed": len([m for m in matters if m.stage == "Completed"]),
+        "period": period
+    }
+    
+    # Calculate show up ratio
+    stats["show_up_ratio"] = (
+        round((stats["showed"] / stats["booked"]) * 100) if stats["booked"] > 0 else 0
+    )
+    
+    # Average $ per matter (mock for now)
+    stats["avg_dollar_per_matter"] = 18500 if stats["signed"] > 0 else 0
+    
+    # Total pipeline counts by stage
+    stats["pipeline_stages"] = {
+        "Booked Consults": stats["booked"],
+        "Pre-Engagement": stats["leads"],
+        "Engaged": stats["signed"],
+        "Questionnaire Received": 0,  # TODO: implement questionnaire tracking
+        "Matter in Process": stats["matters_in_process"],
+        "Matter Fulfilled": stats["completed"]
+    }
+    
+    return stats
 
 # --- Public endpoint to create CRM records from public booking ---
 @router.post("/public/lead")

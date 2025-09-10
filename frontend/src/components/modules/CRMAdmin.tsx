@@ -68,6 +68,34 @@ const CRMAdmin: React.FC = () => {
       console.warn('CRM sync failed or skipped:', e);
     }
   };
+  
+  const updateMatterStage = async (bookingId: string, newStage: Booking['stage']) => {
+    try {
+      const booking = bookings.find(b => b.id === bookingId);
+      if (!booking) return;
+      
+      // Update local state first
+      updateBooking(bookingId, { stage: newStage });
+      refreshBookings();
+      
+      // Try to update backend if we have the matter
+      // Note: In production, we'd track matter IDs with bookings
+      // For now, we'll query by contact email to find the matter
+      const contactsRes = await apiClient.get('/contacts/');
+      const contact = contactsRes.data.find((c: any) => c.email === booking.email);
+      
+      if (contact) {
+        const mattersRes = await apiClient.get('/matters/');
+        const matter = mattersRes.data.find((m: any) => m.contact_id === contact.id);
+        
+        if (matter) {
+          await apiClient.patch(`/matters/${matter.id}`, { stage: newStage });
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to update matter stage in backend:', e);
+    }
+  };
 
   const handleAdd = async () => {
     if (!newName || !newEmail) return;
@@ -91,7 +119,7 @@ const CRMAdmin: React.FC = () => {
     setShowAdd(false);
     resetAdd();
     // fire-and-forget backend persistence
-    syncLeadToBackend(b);
+    await syncLeadToBackend(b);
   };
 
   const parseCsv = (text: string): Booking[] => {

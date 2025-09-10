@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ModuleTemplate from './ModuleTemplate';
 import { getSiteConfig, saveSiteConfig } from '../../adminData';
+import apiClient from '../../apiClient';
 
 const SiteBuilderAdmin: React.FC = () => {
   const initial = getSiteConfig();
@@ -17,7 +18,49 @@ const SiteBuilderAdmin: React.FC = () => {
   const [goldEnd, setGoldEnd] = useState(initial.goldEnd || '#C07C3D');
   const [images, setImages] = useState<string[]>(initial.images || []);
   const [paywallEnabled, setPaywallEnabled] = useState(!!initial.paywallEnabled);
-  // LawPay credentials are now managed through environment variables
+  
+  // Username selection
+  const [username, setUsername] = useState('');
+  const [customUrl, setCustomUrl] = useState('');
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isAdvisor, setIsAdvisor] = useState(false);
+  
+  // Fetch current user info
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await apiClient.get('/users/me');
+        setCurrentUser(response.data);
+        setIsAdvisor(response.data.role === 'Advisor' || response.data.role === 'Admin');
+        if (response.data.username) {
+          setUsername(response.data.username);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user info:', error);
+      }
+    };
+    fetchUserInfo();
+  }, []);
+  
+  // Check username availability
+  useEffect(() => {
+    if (username.length > 2 && username !== currentUser?.username) {
+      const timer = setTimeout(() => {
+        setCheckingUsername(true);
+        apiClient.get(`/advisors/check-username/${username}`)
+          .then(response => {
+            setUsernameAvailable(response.data.available);
+            setCheckingUsername(false);
+          })
+          .catch(() => {
+            setCheckingUsername(false);
+          });
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [username, currentUser]);
 
   return (
     <ModuleTemplate
@@ -26,8 +69,69 @@ const SiteBuilderAdmin: React.FC = () => {
     >
       <div className="module-grid">
         <div className="module-card">
-          <h3 className="section-title">Brand & Media</h3>
+          <h3 className="section-title">Site Configuration</h3>
           <div style={{ display: 'grid', gap: 12 }}>
+            {isAdvisor && (
+              <>
+                <div>
+                  <label className="form-label">Username (for your public URL)</label>
+                  <input 
+                    className="form-input" 
+                    value={username} 
+                    onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                    placeholder="e.g., john-smith"
+                    style={{
+                      borderColor: username.length > 2 && username !== currentUser?.username ? (
+                        checkingUsername ? 'var(--warning)' : 
+                        usernameAvailable === false ? 'var(--danger)' : 
+                        usernameAvailable === true ? 'var(--success)' : 'var(--border)'
+                      ) : 'var(--border)'
+                    }}
+                  />
+                  <small style={{ 
+                    display: 'block', 
+                    marginTop: '4px', 
+                    color: 'var(--text-secondary)',
+                    fontSize: '12px'
+                  }}>
+                    Your public URL will be: https://liftedadvisors.com/{username || 'username'}
+                  </small>
+                  {username.length > 2 && username !== currentUser?.username && (
+                    <small style={{ 
+                      display: 'block', 
+                      marginTop: '4px', 
+                      color: checkingUsername ? 'var(--warning)' : 
+                             usernameAvailable === false ? 'var(--danger)' : 
+                             usernameAvailable === true ? 'var(--success)' : 'var(--text-secondary)',
+                      fontSize: '12px'
+                    }}>
+                      {checkingUsername ? 'Checking availability...' :
+                       usernameAvailable === false ? 'Username already taken' :
+                       usernameAvailable === true ? 'Username available!' : ''}
+                    </small>
+                  )}
+                </div>
+                <div>
+                  <label className="form-label">Custom Domain (optional)</label>
+                  <input 
+                    className="form-input" 
+                    value={customUrl} 
+                    onChange={(e) => setCustomUrl(e.target.value)}
+                    placeholder="e.g., https://wyomingassetprotectiontrust.com"
+                  />
+                  <small style={{ 
+                    display: 'block', 
+                    marginTop: '4px', 
+                    color: 'var(--text-secondary)',
+                    fontSize: '12px'
+                  }}>
+                    You can connect your own domain to redirect to your LIFTed Advisors page
+                  </small>
+                </div>
+                <hr style={{ margin: '8px 0', border: '0', borderTop: '1px solid var(--border-light)' }} />
+              </>
+            )}
+            <h4 style={{ fontSize: '16px', marginBottom: '4px' }}>Brand & Media</h4>
             <div>
               <label className="form-label">Logo path</label>
               <input className="form-input" value={logoPath} onChange={(e) => setLogoPath(e.target.value)} />
@@ -127,14 +231,34 @@ const SiteBuilderAdmin: React.FC = () => {
                 </div>
               )}
             </div>
-            <button className="form-button" style={{ width: 'auto' }} onClick={() => {
-              saveSiteConfig({ 
-                videoUrl, logoPath, logoDataUrl, headline, subhead, ctaText, ctaHref, 
-                primaryColor, goldStart, goldEnd, images, paywallEnabled
-              });
-              setPreviewKey(Date.now());
-              alert('Settings saved successfully!');
-            }}>Save All Settings</button>
+            <button 
+              className="form-button" 
+              style={{ width: 'auto' }} 
+              onClick={async () => {
+                // Save site config
+                saveSiteConfig({ 
+                  videoUrl, logoPath, logoDataUrl, headline, subhead, ctaText, ctaHref, 
+                  primaryColor, goldStart, goldEnd, images, paywallEnabled
+                });
+                
+                // Update username if advisor
+                if (isAdvisor && username && username !== currentUser?.username && usernameAvailable) {
+                  try {
+                    await apiClient.patch(`/users/${currentUser.id}`, { username });
+                    alert('Settings and username saved successfully!');
+                  } catch (error) {
+                    alert('Settings saved but failed to update username');
+                  }
+                } else {
+                  alert('Settings saved successfully!');
+                }
+                
+                setPreviewKey(Date.now());
+              }}
+              disabled={isAdvisor && username.length > 2 && username !== currentUser?.username && usernameAvailable === false}
+            >
+              Save All Settings
+            </button>
           </div>
         </div>
 
@@ -143,7 +267,13 @@ const SiteBuilderAdmin: React.FC = () => {
             <h3 className="section-title">Live Preview</h3>
             <div style={{ display: 'flex', gap: 8 }}>
               <button className="button-outline" style={{ width: 'auto' }} onClick={() => setPreviewKey(Date.now())}>Refresh</button>
-              <a href="/wyoming-apt" target="_blank" rel="noreferrer" className="button-outline" style={{ textDecoration: 'none', width: 'auto' }}>Open in New Tab</a>
+              <button 
+                className="button-outline" 
+                style={{ width: 'auto' }} 
+                onClick={() => window.open(username ? `/${username}` : '/wyoming-apt', '_blank')}
+              >
+                Preview Live Site
+              </button>
             </div>
           </div>
           <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', background: 'var(--card-bg)' }}>

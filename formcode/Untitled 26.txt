@@ -1,0 +1,63 @@
+cd /opt/render/project/src/backend
+PYTHONPATH=. python - <<'PY'
+import os
+from datetime import datetime
+from facebook_automation.models import FacebookClient  # register ORM
+from core.database import SessionLocal, User, Campaign, CampaignContact
+from core.campaign_routes import process_agreements_task
+
+db = SessionLocal()
+campaign_id = None
+contact_id = None
+try:
+    owner_email = os.getenv("GMAIL_EMAIL", "linda@adtvmedia.com")
+    user = db.query(User).filter(User.email == owner_email).first() or db.query(User).first()
+
+    name = "SMTP Agreement Test"
+    campaign = db.query(Campaign).filter(Campaign.name == name).first()
+    if not campaign:
+        campaign = Campaign(
+            user_id=user.id if user else None,
+            name=name,
+            owner_name="ADTV Test",
+            owner_email=owner_email,
+            launch_date=datetime.utcnow(),
+            event_type="virtual",
+            event_date=datetime.utcnow(),
+            city="Test City",
+            state="CA",
+        )
+        db.add(campaign); db.commit(); db.refresh(campaign)
+
+    email = "danny@nbrain.ai"
+    contact = db.query(CampaignContact).filter(
+        CampaignContact.campaign_id == campaign.id,
+        CampaignContact.email == email
+    ).first()
+    if not contact:
+        contact = CampaignContact(
+            campaign_id=campaign.id,
+            first_name="Danny",
+            last_name="deMichele",
+            email=email,
+            company="ADTV",
+            is_rsvp=True
+        )
+        db.add(contact); db.commit(); db.refresh(contact)
+
+    campaign_id = campaign.id
+    contact_id = contact.id
+    print("Using campaign:", campaign_id, "contact:", contact_id, contact.email)
+finally:
+    db.close()
+
+agreement_data = {
+    "start_date": datetime.utcnow().date().isoformat(),
+    "setup_fee": "0",
+    "monthly_fee": "0",
+    "email_subject": "Your ADTV Agreement is Ready",
+    "email_body": "Hi {{FirstName}}, please review & sign: {{AgreementLink}}",
+    "template": "standard"
+}
+process_agreements_task(campaign_id=campaign_id, agreement_data=agreement_data, contact_ids=[contact_id])
+PY

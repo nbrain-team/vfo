@@ -1,0 +1,141 @@
+# Cursor Task Brief — “Payment Fee Savings Lead Magnet”
+
+## 1) Goal
+Build a plug-in module that:
+- Gives prospects an instant estimate of their **current effective processing rate**, a **proposed effective rate**, and **cost savings ($ and %)**.
+- Offers two paths:
+  1) **Upload monthly statement** (AI parses totals automatically)
+  2) **Quick 3-question flow** (Volume, # Transactions, Total Fees)
+- Finishes with a clear CTA about a **cost-recovery program** (“eliminate ~90% of merchant card fees”) and/or book-a-call.
+
+---
+
+## 2) What to extract from statements (Upload path)
+Pull these three values from the merchant’s monthly statement:
+- **Total processing volume** (aka “Amounts Submitted/Net Sales Volume”)
+- **Total number of transactions** (from the “summary by card type” table)
+- **Total processing costs/fees** (“Fees Charged”)
+
+**Example from sample statement:**
+- Volume: \$563,237.04  
+- Fees: \$12,043.65  
+- Transactions: 1,083  
+
+---
+
+## 3) Calculations (shown to user)
+- **Current Effective Rate (%) = Fees ÷ Volume × 100**  
+- **Proposed Effective Rate (%)** by average ticket size:  
+  - \$150 avg ticket → 2.40%  
+  - \$300 avg ticket → 2.50%  
+  - \$500+ avg ticket → 2.20%  
+- **Cost Savings (\$) = (Current – Proposed) × Volume**  
+- **Change in Rate (Δ%) = Proposed – Current**
+
+Edge behavior: If savings ≤ 0 → show “already optimized” + pivot CTA to cost-recovery.
+
+---
+
+## 4) User flows & UX
+**Landing:** Headline + two options:
+- Upload Statement (Recommended)  
+- Quick Estimate (3 questions)
+
+**Upload flow:** Extract, compute, show 4 metrics, CTA.  
+**Quick flow:** Inputs (Volume, Txns, Fees), same 4 metrics, CTA.  
+
+**Messaging:**  
+- If savings > 0: “You could save \$X (Y%)”  
+- If savings ≤ 0: “Looks like you’re optimized. Want to explore cost recovery?”  
+
+---
+
+## 5) Front-end build
+Stack: React + Tailwind. Export `<PaymentFeesLeadMagnet />`.
+
+**Components:**
+- `<UploadOrEstimateSwitcher />`  
+- `<StatementUpload />`  
+- `<QuickEstimateForm />`  
+- `<ResultsCard />`  
+- `<CTAGroup />`  
+- `<Disclosure />`  
+
+Design: Clean card layout, lg rounded corners, shadows, skeleton loaders.
+
+---
+
+## 6) Data extraction API
+POST /api/fees/extract
+Body: { fileId: string }
+Response: {
+volume: number,
+transactions: number,
+fees: number,
+sources: [{page:number, text:string}]
+}
+
+
+---
+
+## 7) Calculation service
+
+POST /api/fees/calc
+Body: { volume, transactions, fees }
+Response: {
+avgTicket,
+currentEffRate,
+proposedEffRate,
+savingsDollars,
+rateDelta
+}
+
+
+Heuristic tier:
+
+
+if avgTicket >= 500 → 0.0220
+else if avgTicket >= 250 → 0.0250
+else → 0.0240
+
+
+---
+
+## 8) Result formatting
+- Percentages: 2 decimals  
+- Dollars: whole numbers (≥10), else 2 decimals  
+- Badge: Avg Ticket \$X  
+
+---
+
+## 9) Cost-recovery CTA
+“Interested in eliminating ~90% of merchant fees?”  
+- Primary CTA: Explain Cost-Recovery Program (lead capture)  
+- Secondary: Book a 15-min call  
+
+---
+
+## 10) Acceptance criteria
+- [ ] Upload parses sample statement totals correctly.  
+- [ ] Quick flow computes outputs.  
+- [ ] Shows 4 metrics every time.  
+- [ ] Handles no-savings gracefully.  
+- [ ] Renders < 2s.  
+- [ ] Copy includes assumptions + sources.  
+
+---
+
+## 11) Copy blocks
+- Header: “Find out in 30 seconds what you’re really paying.”  
+- Buttons: “Upload statement (PDF, image)” / “Answer 3 quick questions”  
+- Results header: “Your estimate”  
+- Metrics: Current effective rate, Proposed effective rate, Estimated savings, Avg Ticket  
+- CTA: “Interested in eliminating ~90% of fees? See how our cost-recovery program works.”  
+
+---
+
+## 12) Dev notes
+- Use **fees ÷ volume**, not inverted formula.  
+- Keyword-fuzzy matching for fees/volume in extractor.  
+- Use cents-safe math.  
+

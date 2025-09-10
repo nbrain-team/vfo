@@ -1,0 +1,35 @@
+Add these to App Domains: adtv.nbrain.ai, adtv-frontend.onrender.com, adtv-backend.onrender.com
+
+Add Platform → Website with Site URL: https://adtv.nbrain.ai
+
+Facebook Login → Settings:
+Enable “Client OAuth Login” and “Web OAuth Login”
+
+Valid OAuth Redirect URIs:
+https://adtv.nbrain.ai/facebook-callback
+https://adtv-frontend.onrender.com/facebook-callback
+
+App → Settings → Basic: set Privacy Policy, Terms, Data Deletion (you can use the new pages: /privacy, /terms, /data-deletion)
+
+Permissions:
+
+Keep: pages_show_list, pages_read_engagement, ads_management
+
+Add: pages_manage_metadata
+
+Optional: pages_manage_posts (only if you’ll publish), pages_manage_ads
+
+
+Make sure the user doing the login is an app admin/developer/tester until review is approved.
+
+Quick check (replace client_id if needed) – open this in a browser:
+
+https://www.facebook.com/v18.0/dialog/oauth?client_id=1094085429372964&redirect_uri=https%3A%2F%2Fadtv.nbrain.ai%2Ffacebook-callback&scope=pages_show_list,pages_read_engagement,pages_manage_metadata,ads_management
+
+If it still shows “App not active” or “Can’t Load URL”, it means:
+
+App Domains/Valid OAuth Redirect URIs don’t match exactly, or
+
+You’re using a non-admin/non-tester account while the app isn’t fully approved.
+
+Once the above is set, I’ll re-test the OAuth flow and post sync.

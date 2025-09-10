@@ -85,7 +85,8 @@ async def google_auth(credential_data: dict, db: Session = Depends(get_db)):
             data={"sub": user.email, "user_id": user.id}
         )
         
-        return {
+        # Check if user has calendar tokens
+        response_data = {
             "access_token": access_token,
             "token_type": "bearer",
             "user_name": user.name,
@@ -93,6 +94,13 @@ async def google_auth(credential_data: dict, db: Session = Depends(get_db)):
             "role": user.role or "Client",
             "picture_url": user.picture_url
         }
+        
+        # Include Google tokens if available (for calendar access)
+        if user.google_access_token:
+            response_data["google_access_token"] = user.google_access_token
+            response_data["google_refresh_token"] = user.google_refresh_token
+        
+        return response_data
         
     except HTTPException:
         raise

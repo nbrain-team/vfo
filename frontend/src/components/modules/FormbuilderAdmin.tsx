@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ModuleTemplate from './ModuleTemplate';
+import apiClient from '../../apiClient';
 
 interface FormField {
     id: string;
@@ -16,281 +17,145 @@ interface FormTemplate {
     description: string;
     fields: FormField[];
     createdAt: string;
+    mappedProcess?: string; // Maps to frontend process/engagement type
+    trackProgress?: boolean; // Whether to track completion progress
+    triggerWorkflow?: string; // Workflow automation to trigger on submission
 }
 
-const FormbuilderAdmin: React.FC = () => {
-    const [showPreview, setShowPreview] = useState(false);
-    const [previewForm, setPreviewForm] = useState<FormTemplate | null>(null);
-    const [forms, setForms] = useState<FormTemplate[]>([
-        {
-            id: 'form-paid-consult-booking',
-            name: 'Paid 30-Minute Consultation Booking',
-            description: 'Booking form for paid consultations with all required intake questions',
-            fields: [
-                { id: 'booking1', type: 'text', label: 'Full Name', required: true },
-                { id: 'booking2', type: 'email', label: 'Email Address', required: true },
-                { id: 'booking3', type: 'phone', label: 'Phone Number (for text reminders)', required: false },
-                { id: 'booking4', type: 'text', label: 'Guest Emails (comma separated)', required: false },
-                { id: 'booking5', type: 'select', label: 'How did you hear about us?', required: true, options: ['Google / Search', 'Referral', 'YouTube', 'Podcast', 'Social Media', 'Other'] },
-                { id: 'booking6', type: 'text', label: 'If Other/Referral, please specify', required: false },
-                { id: 'booking7', type: 'text', label: 'State of Residence', required: true },
-                { id: 'booking8', type: 'select', label: 'Are you a U.S. citizen?', required: true, options: ['Yes', 'No', 'Other'] },
-                { id: 'booking9', type: 'text', label: 'If Other, please specify citizenship', required: false },
-                { id: 'booking10', type: 'select', label: 'Marital Status', required: true, options: ['Single', 'Married', 'Divorced', 'Widowed', 'Domestic Partnership', 'Prefer not to say'] },
-                { id: 'booking11', type: 'checkbox', label: 'What are your priorities?', required: true, options: ['Asset protection', 'Estate planning', 'Tax efficiency', 'Legacy planning', 'Other'] },
-                { id: 'booking12', type: 'text', label: 'If Other priority, please specify', required: false },
-                { id: 'booking13', type: 'checkbox', label: 'Types of assets you have', required: true, options: ['Real estate', 'Business interests', 'Cash or cash equivalents', 'Bitcoin and Cryptocurrency holdings', 'Investments (stocks, bonds, funds)', 'Intellectual Property', 'Other'] },
-                { id: 'booking14', type: 'text', label: 'If Other assets, please specify', required: false },
-                { id: 'booking15', type: 'select', label: 'How soon are you looking to act?', required: true, options: ['Immediately', 'Within 1–2 weeks', 'Within 30 days', 'Exploring options'] },
-                { id: 'booking16', type: 'select', label: 'Total asset value range', required: true, options: ['< $500k', '$500k – $1M', '$1M – $5M', '$5M – $10M', '$10M+'] }
-            ],
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 'form-trustee-acceptance',
-            name: 'Trustee Acceptance of Contribution to Trust',
-            description: 'Form for documenting contributions to trust, holding company or subsidiary',
-            fields: [
-                { id: 'tf1', type: 'text', label: 'Name of Contributing Party', required: true },
-                { id: 'tf2', type: 'textarea', label: 'Description of Property', required: true },
-                { id: 'tf3', type: 'date', label: 'On what date will the contribution be made?', required: true },
-                { id: 'tf4', type: 'text', label: 'What is the dollar amount of the contribution?', required: true },
-                { id: 'tf5', type: 'select', label: 'Please select the type of contribution', required: true, options: ['Cash', 'Assets'] },
-                { id: 'tf6', type: 'text', label: 'What is the name of the company that the contribution is being made to?', required: false },
-                { id: 'tf7', type: 'text', label: 'What state was the company formed in?', required: false },
-                { id: 'tf8', type: 'select', label: 'Please choose the company type', required: false, options: ['LLC', 'Corporation'] },
-                { id: 'tf9', type: 'text', label: 'What is the name of the holding company?', required: false },
-                { id: 'tf10', type: 'text', label: 'What state was the holding company formed in?', required: false }
-            ],
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 'form-investment-minutes',
-            name: 'Investment Committee Meeting Minutes',
-            description: 'Questionnaire for creating formal record of Investment Advisor Committee meetings',
-            fields: [
-                { id: 'im1', type: 'date', label: 'What is the date of this meeting of the Investment Advisor Committee?', required: true },
-                { id: 'im2', type: 'text', label: 'Who are the currently serving members of the Investment Advisor Committee? (First name, Last name)', required: true },
-                { id: 'im3', type: 'select', label: 'Are there any other members?', required: true, options: ['Yes', 'No'] },
-                { id: 'im4', type: 'checkbox', label: 'How did the Investment Advisor Committee Meet?', required: true, options: ['In person', 'Phone Call', 'Video Conference'] },
-                { id: 'im5', type: 'select', label: 'Did the Investment Advisor Committee take any actions since the last meeting?', required: true, options: ['Yes', 'No'] },
-                { id: 'im6', type: 'textarea', label: 'If Yes, Please describe each activity', required: false },
-                { id: 'im7', type: 'select', label: 'Were any funds or assets transferred between Trust entities?', required: true, options: ['Yes', 'No'] },
-                { id: 'im8', type: 'textarea', label: 'If Yes, Please describe each transfer', required: false },
-                { id: 'im9', type: 'select', label: 'Are there any future contemplated activities?', required: true, options: ['Yes', 'No'] },
-                { id: 'im10', type: 'textarea', label: 'If Yes, Please describe the future activities', required: false },
-                { id: 'im11', type: 'select', label: 'Are there any other activities to memorialize?', required: true, options: ['Yes', 'No'] },
-                { id: 'im12', type: 'textarea', label: 'If Yes, Please describe the other activities', required: false }
-            ],
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 'form-asset-protection-trust',
-            name: 'Asset Protection Trust Questionnaire',
-            description: 'Comprehensive questionnaire for establishing an Asset Protection Trust',
-            fields: [
-                { id: 'apt1', type: 'text', label: 'Full Legal Name', required: true },
-                { id: 'apt2', type: 'date', label: 'Date of Birth', required: true },
-                { id: 'apt3', type: 'text', label: 'Social Security Number', required: true },
-                { id: 'apt4', type: 'text', label: 'Current Address', required: true },
-                { id: 'apt5', type: 'text', label: 'City, State, Zip', required: true },
-                { id: 'apt6', type: 'email', label: 'Email Address', required: true },
-                { id: 'apt7', type: 'phone', label: 'Phone Number', required: true },
-                { id: 'apt8', type: 'select', label: 'Marital Status', required: true, options: ['Single', 'Married', 'Divorced', 'Widowed'] },
-                { id: 'apt9', type: 'text', label: 'Spouse Full Name (if applicable)', required: false },
-                { id: 'apt10', type: 'textarea', label: 'List all children and their ages', required: false },
-                { id: 'apt11', type: 'textarea', label: 'Assets to be placed in trust', required: true },
-                { id: 'apt12', type: 'text', label: 'Estimated total value of assets', required: true },
-                { id: 'apt13', type: 'textarea', label: 'Beneficiaries and their relationship to you', required: true },
-                { id: 'apt14', type: 'text', label: 'Trustee Name', required: true },
-                { id: 'apt15', type: 'text', label: 'Successor Trustee Name', required: false }
-            ],
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 'form-durable-poa',
-            name: 'Durable Power of Attorney Questionnaire',
-            description: 'Form for establishing Durable Power of Attorney',
-            fields: [
-                { id: 'poa1', type: 'text', label: 'Your Full Legal Name (Principal)', required: true },
-                { id: 'poa2', type: 'text', label: 'Your Current Address', required: true },
-                { id: 'poa3', type: 'date', label: 'Your Date of Birth', required: true },
-                { id: 'poa4', type: 'text', label: 'Agent Full Name', required: true },
-                { id: 'poa5', type: 'text', label: 'Agent Address', required: true },
-                { id: 'poa6', type: 'phone', label: 'Agent Phone Number', required: true },
-                { id: 'poa7', type: 'text', label: 'Agent Relationship to You', required: true },
-                { id: 'poa8', type: 'text', label: 'Successor Agent Full Name', required: false },
-                { id: 'poa9', type: 'text', label: 'Successor Agent Address', required: false },
-                { id: 'poa10', type: 'checkbox', label: 'Powers Granted', required: true, options: ['Financial Transactions', 'Real Estate', 'Banking', 'Investments', 'Tax Matters', 'Legal Matters', 'Insurance', 'Government Benefits'] },
-                { id: 'poa11', type: 'select', label: 'When should this POA take effect?', required: true, options: ['Immediately', 'Upon my incapacity'] },
-                { id: 'poa12', type: 'textarea', label: 'Special Instructions or Limitations', required: false }
-            ],
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 'form-healthcare-poa',
-            name: 'Health Care Power of Attorney Questionnaire',
-            description: 'Form for establishing Health Care Power of Attorney',
-            fields: [
-                { id: 'hpoa1', type: 'text', label: 'Your Full Legal Name', required: true },
-                { id: 'hpoa2', type: 'date', label: 'Your Date of Birth', required: true },
-                { id: 'hpoa3', type: 'text', label: 'Health Care Agent Full Name', required: true },
-                { id: 'hpoa4', type: 'text', label: 'Agent Relationship to You', required: true },
-                { id: 'hpoa5', type: 'phone', label: 'Agent Phone Number', required: true },
-                { id: 'hpoa6', type: 'text', label: 'Agent Address', required: true },
-                { id: 'hpoa7', type: 'text', label: 'First Alternate Agent Name', required: false },
-                { id: 'hpoa8', type: 'phone', label: 'First Alternate Phone', required: false },
-                { id: 'hpoa9', type: 'text', label: 'Second Alternate Agent Name', required: false },
-                { id: 'hpoa10', type: 'phone', label: 'Second Alternate Phone', required: false },
-                { id: 'hpoa11', type: 'checkbox', label: 'Medical Treatment Preferences', required: true, options: ['Life Support', 'Artificial Nutrition', 'Pain Management', 'Organ Donation', 'Autopsy'] },
-                { id: 'hpoa12', type: 'textarea', label: 'Special Medical Instructions', required: false },
-                { id: 'hpoa13', type: 'textarea', label: 'Religious or Personal Beliefs Affecting Care', required: false }
-            ],
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 'form-trust-distribution',
-            name: 'Is Your Trust Making a Distribution Questionnaire',
-            description: 'Questionnaire to determine if trust should make a distribution',
-            fields: [
-                { id: 'td1', type: 'text', label: 'Trust Name', required: true },
-                { id: 'td2', type: 'text', label: 'Trustee Name', required: true },
-                { id: 'td3', type: 'text', label: 'Beneficiary Name', required: true },
-                { id: 'td4', type: 'text', label: 'Requested Distribution Amount', required: true },
-                { id: 'td5', type: 'date', label: 'Date of Request', required: true },
-                { id: 'td6', type: 'select', label: 'Purpose of Distribution', required: true, options: ['Education', 'Medical', 'Housing', 'Living Expenses', 'Business Investment', 'Other'] },
-                { id: 'td7', type: 'textarea', label: 'Detailed Purpose Description', required: true },
-                { id: 'td8', type: 'select', label: 'Is this distribution mandatory or discretionary?', required: true, options: ['Mandatory', 'Discretionary'] },
-                { id: 'td9', type: 'text', label: 'Current Trust Balance', required: true },
-                { id: 'td10', type: 'select', label: 'Will this distribution affect other beneficiaries?', required: true, options: ['Yes', 'No'] },
-                { id: 'td11', type: 'textarea', label: 'If yes, explain how', required: false },
-                { id: 'td12', type: 'select', label: 'Are there any tax implications?', required: true, options: ['Yes', 'No', 'Unknown'] }
-            ],
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 'form-distribution-request',
-            name: 'Trust Distribution Request Form',
-            description: 'Formal request form for trust distributions',
-            fields: [
-                { id: 'dr1', type: 'text', label: 'Beneficiary Name', required: true },
-                { id: 'dr2', type: 'text', label: 'Trust Name', required: true },
-                { id: 'dr3', type: 'date', label: 'Date of Request', required: true },
-                { id: 'dr4', type: 'text', label: 'Amount Requested', required: true },
-                { id: 'dr5', type: 'select', label: 'Type of Distribution', required: true, options: ['Cash', 'Asset Transfer', 'Both'] },
-                { id: 'dr6', type: 'select', label: 'Reason for Distribution', required: true, options: ['Education', 'Medical Expenses', 'Housing', 'Living Expenses', 'Emergency', 'Other'] },
-                { id: 'dr7', type: 'textarea', label: 'Detailed Explanation of Need', required: true },
-                { id: 'dr8', type: 'textarea', label: 'Supporting Documentation Attached', required: false },
-                { id: 'dr9', type: 'select', label: 'Urgency Level', required: true, options: ['Immediate', 'Within 30 days', 'Within 60 days', 'No urgency'] },
-                { id: 'dr10', type: 'text', label: 'Bank Account for Deposit (if cash)', required: false },
-                { id: 'dr11', type: 'text', label: 'Contact Phone Number', required: true },
-                { id: 'dr12', type: 'email', label: 'Contact Email', required: true }
-            ],
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 'form-special-contribution',
-            name: 'Special Contribution and Distribution Meeting Minutes',
-            description: 'Meeting minutes for special contributions and distributions',
-            fields: [
-                { id: 'sc1', type: 'date', label: 'Meeting Date', required: true },
-                { id: 'sc2', type: 'text', label: 'Meeting Location/Platform', required: true },
-                { id: 'sc3', type: 'textarea', label: 'Attendees (Names and Roles)', required: true },
-                { id: 'sc4', type: 'select', label: 'Meeting Type', required: true, options: ['Special Contribution', 'Special Distribution', 'Both'] },
-                { id: 'sc5', type: 'textarea', label: 'Agenda Items', required: true },
-                { id: 'sc6', type: 'textarea', label: 'Contributions Discussed (Amount, Source, Purpose)', required: false },
-                { id: 'sc7', type: 'textarea', label: 'Distributions Discussed (Amount, Recipient, Purpose)', required: false },
-                { id: 'sc8', type: 'textarea', label: 'Resolutions Passed', required: true },
-                { id: 'sc9', type: 'select', label: 'Vote Results', required: true, options: ['Unanimous', 'Majority', 'No Consensus'] },
-                { id: 'sc10', type: 'textarea', label: 'Action Items and Responsible Parties', required: true },
-                { id: 'sc11', type: 'date', label: 'Next Meeting Date', required: false },
-                { id: 'sc12', type: 'text', label: 'Minutes Prepared By', required: true }
-            ],
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 'form-investment-advisor',
-            name: 'Investment Advisor Committee Establishment',
-            description: 'Form to establish Investment Advisor Committee',
-            fields: [
-                { id: 'iac1', type: 'text', label: 'Trust Name', required: true },
-                { id: 'iac2', type: 'date', label: 'Committee Establishment Date', required: true },
-                { id: 'iac3', type: 'text', label: 'Committee Chairperson Name', required: true },
-                { id: 'iac4', type: 'textarea', label: 'Committee Members (Names and Qualifications)', required: true },
-                { id: 'iac5', type: 'textarea', label: 'Committee Purpose and Objectives', required: true },
-                { id: 'iac6', type: 'select', label: 'Meeting Frequency', required: true, options: ['Monthly', 'Quarterly', 'Semi-Annually', 'Annually', 'As Needed'] },
-                { id: 'iac7', type: 'textarea', label: 'Investment Authority Granted', required: true },
-                { id: 'iac8', type: 'textarea', label: 'Investment Restrictions', required: false },
-                { id: 'iac9', type: 'text', label: 'Quorum Requirements', required: true },
-                { id: 'iac10', type: 'select', label: 'Voting Requirements', required: true, options: ['Simple Majority', 'Super Majority', 'Unanimous'] },
-                { id: 'iac11', type: 'textarea', label: 'Reporting Requirements', required: true },
-                { id: 'iac12', type: 'textarea', label: 'Committee Compensation (if any)', required: false }
-            ],
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 'form-life-legacy-planning',
-            name: 'Life & Legacy Planning Questionnaire',
-            description: 'Comprehensive questionnaire for life and legacy planning',
-            fields: [
-                { id: 'llp1', type: 'text', label: 'Full Legal Name', required: true },
-                { id: 'llp2', type: 'date', label: 'Date of Birth', required: true },
-                { id: 'llp3', type: 'select', label: 'Marital Status', required: true, options: ['Single', 'Married', 'Divorced', 'Widowed', 'Domestic Partnership'] },
-                { id: 'llp4', type: 'text', label: 'Spouse/Partner Full Name', required: false },
-                { id: 'llp5', type: 'textarea', label: 'Children Names and Ages', required: false },
-                { id: 'llp6', type: 'textarea', label: 'Primary Life Goals', required: true },
-                { id: 'llp7', type: 'textarea', label: 'Legacy Vision', required: true },
-                { id: 'llp8', type: 'checkbox', label: 'Estate Planning Priorities', required: true, options: ['Asset Protection', 'Tax Minimization', 'Family Wealth Transfer', 'Charitable Giving', 'Business Succession', 'Special Needs Planning'] },
-                { id: 'llp9', type: 'textarea', label: 'Current Estate Plan (if any)', required: false },
-                { id: 'llp10', type: 'textarea', label: 'Key Assets and Values', required: true },
-                { id: 'llp11', type: 'textarea', label: 'Specific Concerns or Questions', required: false },
-                { id: 'llp12', type: 'checkbox', label: 'Documents Needed', required: true, options: ['Will', 'Trust', 'Power of Attorney', 'Healthcare Directive', 'Business Agreements', 'Asset Protection Structure'] },
-                { id: 'llp13', type: 'select', label: 'Planning Timeline', required: true, options: ['Immediate', '1-3 months', '3-6 months', '6-12 months', 'Long-term'] },
-                { id: 'llp14', type: 'textarea', label: 'Family Dynamics to Consider', required: false },
-                { id: 'llp15', type: 'textarea', label: 'Charitable Intentions', required: false }
-            ],
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 'form-wealth-credit-liquidity',
-            name: 'Wealth Credit & Liquidity Assessment',
-            description: 'Assessment form for wealth, credit, and liquidity planning',
-            fields: [
-                { id: 'wcl1', type: 'text', label: 'Full Name', required: true },
-                { id: 'wcl2', type: 'email', label: 'Email', required: true },
-                { id: 'wcl3', type: 'phone', label: 'Phone', required: true },
-                { id: 'wcl4', type: 'select', label: 'Net Worth Range', required: true, options: ['< $1M', '$1M - $5M', '$5M - $10M', '$10M - $25M', '$25M - $50M', '$50M+'] },
-                { id: 'wcl5', type: 'select', label: 'Annual Income Range', required: true, options: ['< $250k', '$250k - $500k', '$500k - $1M', '$1M - $2.5M', '$2.5M+'] },
-                { id: 'wcl6', type: 'checkbox', label: 'Asset Types', required: true, options: ['Real Estate', 'Stocks/Bonds', 'Business Interests', 'Cash/Cash Equivalents', 'Alternative Investments', 'Cryptocurrency', 'Collectibles/Art'] },
-                { id: 'wcl7', type: 'textarea', label: 'Current Liquidity Needs', required: true },
-                { id: 'wcl8', type: 'select', label: 'Credit Score Range', required: true, options: ['< 650', '650-700', '700-750', '750-800', '800+'] },
-                { id: 'wcl9', type: 'textarea', label: 'Current Debt Obligations', required: true },
-                { id: 'wcl10', type: 'textarea', label: 'Future Capital Needs', required: true },
-                { id: 'wcl11', type: 'checkbox', label: 'Financial Goals', required: true, options: ['Increase Liquidity', 'Optimize Credit', 'Reduce Tax Burden', 'Asset Protection', 'Business Expansion', 'Estate Planning'] },
-                { id: 'wcl12', type: 'textarea', label: 'Risk Tolerance Description', required: true },
-                { id: 'wcl13', type: 'select', label: 'Time Horizon', required: true, options: ['< 1 year', '1-3 years', '3-5 years', '5-10 years', '10+ years'] },
-                { id: 'wcl14', type: 'textarea', label: 'Specific Challenges or Opportunities', required: false }
-            ],
-            createdAt: new Date().toISOString()
-        }
-    ]);
-    
+interface FormSubmission {
+    id: string;
+    formId: string;
+    clientId: string;
+    clientName: string;
+    data: Record<string, any>;
+    submittedAt: string;
+    status: 'pending' | 'processed' | 'completed';
+    progressSteps?: string[];
+    completedSteps?: string[];
+}
+
+const FormbuilderAdminNew: React.FC = () => {
+    const [activeTab, setActiveTab] = useState<'forms' | 'submissions' | 'mapping'>('forms');
+    const [forms, setForms] = useState<FormTemplate[]>([]);
+    const [submissions, setSubmissions] = useState<FormSubmission[]>([]);
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [editingForm, setEditingForm] = useState<FormTemplate | null>(null);
+    const [showMappingModal, setShowMappingModal] = useState(false);
+    const [selectedForm, setSelectedForm] = useState<FormTemplate | null>(null);
+    const [showPreview, setShowPreview] = useState(false);
+    
+    // Form creation/editing state
     const [formName, setFormName] = useState('');
     const [formDescription, setFormDescription] = useState('');
     const [formFields, setFormFields] = useState<FormField[]>([]);
-
+    const [editingForm, setEditingForm] = useState<FormTemplate | null>(null);
+    
+    // Mapping state
+    const [mappedProcess, setMappedProcess] = useState('');
+    const [trackProgress, setTrackProgress] = useState(false);
+    const [triggerWorkflow, setTriggerWorkflow] = useState('');
+    
+    const processes = [
+        { value: 'consultation', label: 'Initial Consultation' },
+        { value: 'engagement', label: 'Client Engagement' },
+        { value: 'questionnaire', label: 'Matter Questionnaire' },
+        { value: 'onboarding', label: 'Client Onboarding' },
+        { value: 'document', label: 'Document Collection' },
+        { value: 'custom', label: 'Custom Process' }
+    ];
+    
+    const workflows = [
+        { value: 'auto-create-matter', label: 'Auto-create Matter in CRM' },
+        { value: 'send-engagement', label: 'Send Engagement Letter' },
+        { value: 'notify-advisor', label: 'Notify Advisor' },
+        { value: 'add-to-nurture', label: 'Add to Nurture Sequence' },
+        { value: 'schedule-followup', label: 'Schedule Follow-up' }
+    ];
+    
     const fieldTypes = [
         { value: 'text', label: 'Text Input' },
         { value: 'email', label: 'Email' },
         { value: 'phone', label: 'Phone' },
-        { value: 'select', label: 'Dropdown' },
-        { value: 'checkbox', label: 'Checkbox' },
         { value: 'textarea', label: 'Text Area' },
+        { value: 'select', label: 'Dropdown' },
+        { value: 'checkbox', label: 'Checkboxes' },
         { value: 'date', label: 'Date Picker' }
     ];
-
+    
+    // Load initial data
+    useEffect(() => {
+        loadForms();
+        loadSubmissions();
+    }, []);
+    
+    const loadForms = async () => {
+        // In production, load from backend
+        const mockForms: FormTemplate[] = [
+            {
+                id: 'form-1',
+                name: 'Client Consultation Booking',
+                description: 'Initial consultation booking form',
+                fields: [
+                    { id: 'f1', type: 'text', label: 'Full Name', required: true },
+                    { id: 'f2', type: 'email', label: 'Email', required: true },
+                    { id: 'f3', type: 'phone', label: 'Phone', required: false },
+                    { id: 'f4', type: 'select', label: 'Consultation Type', required: true, options: ['Asset Protection', 'Estate Planning', 'Tax Strategy'] }
+                ],
+                createdAt: new Date().toISOString(),
+                mappedProcess: 'consultation',
+                trackProgress: true,
+                triggerWorkflow: 'auto-create-matter'
+            }
+        ];
+        setForms(mockForms);
+    };
+    
+    const loadSubmissions = async () => {
+        // In production, load from backend
+        const mockSubmissions: FormSubmission[] = [
+            {
+                id: 'sub-1',
+                formId: 'form-1',
+                clientId: 'client-123',
+                clientName: 'John Doe',
+                data: { name: 'John Doe', email: 'john@example.com' },
+                submittedAt: new Date().toISOString(),
+                status: 'processed',
+                progressSteps: ['Form Submitted', 'Reviewed', 'Matter Created', 'Engagement Sent'],
+                completedSteps: ['Form Submitted', 'Reviewed', 'Matter Created']
+            }
+        ];
+        setSubmissions(mockSubmissions);
+    };
+    
+    const saveForm = () => {
+        const newForm: FormTemplate = {
+            id: editingForm?.id || `form-${Date.now()}`,
+            name: formName,
+            description: formDescription,
+            fields: formFields,
+            createdAt: editingForm?.createdAt || new Date().toISOString(),
+            mappedProcess: editingForm?.mappedProcess,
+            trackProgress: editingForm?.trackProgress,
+            triggerWorkflow: editingForm?.triggerWorkflow
+        };
+        
+        if (editingForm) {
+            setForms(forms.map(f => f.id === editingForm.id ? newForm : f));
+        } else {
+            setForms([...forms, newForm]);
+        }
+        
+        resetFormModal();
+    };
+    
+    const resetFormModal = () => {
+        setShowCreateModal(false);
+        setEditingForm(null);
+        setFormName('');
+        setFormDescription('');
+        setFormFields([]);
+    };
+    
     const addField = () => {
         const newField: FormField = {
             id: `field-${Date.now()}`,
@@ -300,116 +165,258 @@ const FormbuilderAdmin: React.FC = () => {
         };
         setFormFields([...formFields, newField]);
     };
-
+    
     const updateField = (index: number, updates: Partial<FormField>) => {
         const updated = [...formFields];
         updated[index] = { ...updated[index], ...updates };
         setFormFields(updated);
     };
-
+    
     const removeField = (index: number) => {
         setFormFields(formFields.filter((_, i) => i !== index));
     };
-
-    const saveForm = () => {
-        if (!formName) return;
-        
-        const newForm: FormTemplate = {
-            id: editingForm?.id || `form-${Date.now()}`,
-            name: formName,
-            description: formDescription,
-            fields: formFields,
-            createdAt: editingForm?.createdAt || new Date().toISOString()
-        };
-
-        if (editingForm) {
-            setForms(forms.map(f => f.id === editingForm.id ? newForm : f));
-        } else {
-            setForms([...forms, newForm]);
+    
+    const saveMapping = () => {
+        if (selectedForm) {
+            const updated = {
+                ...selectedForm,
+                mappedProcess,
+                trackProgress,
+                triggerWorkflow
+            };
+            setForms(forms.map(f => f.id === selectedForm.id ? updated : f));
+            
+            // In production, save to backend
+            console.log('Saving form mapping:', updated);
         }
-
-        closeModal();
+        setShowMappingModal(false);
+        setSelectedForm(null);
     };
-
+    
+    const deleteForm = (formId: string) => {
+        if (confirm('Are you sure you want to delete this form?')) {
+            setForms(forms.filter(f => f.id !== formId));
+        }
+    };
+    
     const openEditModal = (form: FormTemplate) => {
         setEditingForm(form);
         setFormName(form.name);
         setFormDescription(form.description);
-        setFormFields([...form.fields]);
+        setFormFields(form.fields);
         setShowCreateModal(true);
     };
-
-    const closeModal = () => {
-        setShowCreateModal(false);
-        setEditingForm(null);
-        setFormName('');
-        setFormDescription('');
-        setFormFields([]);
-    };
-
-    const deleteForm = (id: string) => {
-        if (window.confirm('Are you sure you want to delete this form?')) {
-            setForms(forms.filter(f => f.id !== id));
-        }
-    };
-
-    const handlePreview = (form: FormTemplate) => {
-        setPreviewForm(form);
-        setShowPreview(true);
+    
+    const openMappingModal = (form: FormTemplate) => {
+        setSelectedForm(form);
+        setMappedProcess(form.mappedProcess || '');
+        setTrackProgress(form.trackProgress || false);
+        setTriggerWorkflow(form.triggerWorkflow || '');
+        setShowMappingModal(true);
     };
 
     return (
         <ModuleTemplate
-            title="Formbuilder"
-            description="Create custom forms with drag and drop question types"
+            title="Form Builder"
+            description="Create forms, map to processes, and track submissions with progress."
         >
-            <div style={{ marginBottom: '20px' }}>
-                <button 
-                    className="form-button" 
-                    style={{ width: 'auto' }}
-                    onClick={() => setShowCreateModal(true)}
-                >
-                    + Create New Form
-                </button>
-            </div>
-
-            <div className="module-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-                {forms.map(form => (
-                    <div key={form.id} className="module-card">
-                        <h3 className="section-title" style={{ fontSize: '16px' }}>{form.name}</h3>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '12px' }}>
-                            {form.description}
-                        </p>
-                        <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
-                            {form.fields.length} fields • Created {new Date(form.createdAt).toLocaleDateString()}
+            <div className="module-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <h3 className="section-title">Form Management</h3>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button 
+                            className={activeTab === 'forms' ? 'form-button' : 'button-outline'}
+                            style={{ width: 'auto' }} 
+                            onClick={() => setActiveTab('forms')}
+                        >
+                            Forms
+                        </button>
+                        <button 
+                            className={activeTab === 'submissions' ? 'form-button' : 'button-outline'}
+                            style={{ width: 'auto' }} 
+                            onClick={() => setActiveTab('submissions')}
+                        >
+                            Submissions
+                        </button>
+                        <button 
+                            className={activeTab === 'mapping' ? 'form-button' : 'button-outline'}
+                            style={{ width: 'auto' }} 
+                            onClick={() => setActiveTab('mapping')}
+                        >
+                            Process Mapping
+                        </button>
+                    </div>
+                </div>
+                
+                {activeTab === 'forms' && (
+                    <>
+                        <button 
+                            className="form-button" 
+                            style={{ width: 'auto', marginBottom: '16px' }} 
+                            onClick={() => setShowCreateModal(true)}
+                        >
+                            + Create New Form
+                        </button>
+                        
+                        <div className="module-grid">
+                            {forms.map(form => (
+                                <div key={form.id} className="module-card">
+                                    <h4 style={{ fontSize: '16px', marginBottom: '8px' }}>{form.name}</h4>
+                                    <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                                        {form.description}
+                                    </p>
+                                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                                        {form.fields.length} fields
+                                    </p>
+                                    
+                                    {form.mappedProcess && (
+                                        <div style={{ 
+                                            marginTop: '12px', 
+                                            padding: '8px', 
+                                            background: 'var(--primary-light)', 
+                                            borderRadius: '6px',
+                                            fontSize: '12px'
+                                        }}>
+                                            <strong>Mapped to:</strong> {processes.find(p => p.value === form.mappedProcess)?.label}<br/>
+                                            {form.trackProgress && <span>✓ Progress tracking enabled</span>}
+                                        </div>
+                                    )}
+                                    
+                                    <div style={{ marginTop: '16px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                        <button 
+                                            className="button-outline" 
+                                            style={{ width: 'auto' }}
+                                            onClick={() => openEditModal(form)}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button 
+                                            className="button-outline" 
+                                            style={{ width: 'auto' }}
+                                            onClick={() => openMappingModal(form)}
+                                        >
+                                            Map Process
+                                        </button>
+                                        <button 
+                                            className="button-outline" 
+                                            style={{ width: 'auto' }}
+                                            onClick={() => {
+                                                setSelectedForm(form);
+                                                setShowPreview(true);
+                                            }}
+                                        >
+                                            Preview
+                                        </button>
+                                        <button 
+                                            className="button-outline" 
+                                            style={{ width: 'auto' }}
+                                            onClick={() => deleteForm(form.id)}
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                            <button 
-                                className="button-outline" 
-                                style={{ width: 'auto' }}
-                                onClick={() => openEditModal(form)}
-                            >
-                                Edit
-                            </button>
-                            <button 
-                                className="button-outline" 
-                                style={{ width: 'auto' }}
-                                onClick={() => handlePreview(form)}
-                            >
-                                Preview
-                            </button>
-                            <button 
-                                className="button-outline" 
-                                style={{ width: 'auto' }}
-                                onClick={() => deleteForm(form.id)}
-                            >
-                                Delete
-                            </button>
+                    </>
+                )}
+                
+                {activeTab === 'submissions' && (
+                    <div style={{ marginTop: '20px' }}>
+                        <h4 style={{ marginBottom: '16px' }}>Recent Form Submissions</h4>
+                        <div className="table-container">
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Form</th>
+                                        <th>Client</th>
+                                        <th>Submitted</th>
+                                        <th>Status</th>
+                                        <th>Progress</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {submissions.length === 0 && (
+                                        <tr>
+                                            <td colSpan={6} style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                                                No submissions yet
+                                            </td>
+                                        </tr>
+                                    )}
+                                    {submissions.map(sub => (
+                                        <tr key={sub.id}>
+                                            <td>{forms.find(f => f.id === sub.formId)?.name || 'Unknown'}</td>
+                                            <td>{sub.clientName}</td>
+                                            <td>{new Date(sub.submittedAt).toLocaleDateString()}</td>
+                                            <td>
+                                                <span className={`status-badge ${sub.status === 'completed' ? 'success' : sub.status === 'processed' ? 'active' : 'pending'}`}>
+                                                    {sub.status}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {sub.progressSteps && (
+                                                    <div style={{ fontSize: '12px' }}>
+                                                        {sub.completedSteps?.length || 0} of {sub.progressSteps.length} steps
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <button className="button-outline" style={{ width: 'auto' }}>
+                                                    View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                ))}
+                )}
+                
+                {activeTab === 'mapping' && (
+                    <div style={{ marginTop: '20px' }}>
+                        <h4 style={{ marginBottom: '16px' }}>Process Mapping Configuration</h4>
+                        <p style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>
+                            Map forms to frontend processes and configure automation workflows
+                        </p>
+                        <div className="table-container">
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Form</th>
+                                        <th>Mapped Process</th>
+                                        <th>Progress Tracking</th>
+                                        <th>Workflow</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {forms.map(form => (
+                                        <tr key={form.id}>
+                                            <td>{form.name}</td>
+                                            <td>{processes.find(p => p.value === form.mappedProcess)?.label || 'Not mapped'}</td>
+                                            <td>{form.trackProgress ? '✓ Enabled' : '—'}</td>
+                                            <td>{workflows.find(w => w.value === form.triggerWorkflow)?.label || 'None'}</td>
+                                            <td>
+                                                <button 
+                                                    className="button-outline" 
+                                                    style={{ width: 'auto' }}
+                                                    onClick={() => openMappingModal(form)}
+                                                >
+                                                    Configure
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
             </div>
-
+            
+            {/* Create/Edit Form Modal */}
             {showCreateModal && (
                 <div style={{ 
                     position: 'fixed', 
@@ -420,15 +427,25 @@ const FormbuilderAdmin: React.FC = () => {
                     justifyContent: 'center', 
                     zIndex: 50 
                 }}
-                onClick={() => { setShowCreateModal(false); setEditingForm(null); }}
+                onClick={resetFormModal}
                 >
-                    <div className="module-card" style={{ width: '90%', maxWidth: '800px', maxHeight: '90vh', overflow: 'auto', background: '#ffffff' }} onClick={(e) => e.stopPropagation()}>
+                    <div 
+                        className="module-card" 
+                        style={{ 
+                            width: '90%', 
+                            maxWidth: '800px', 
+                            maxHeight: '90vh', 
+                            overflow: 'auto', 
+                            background: '#ffffff' 
+                        }} 
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                             <h2 className="section-title" style={{ margin: 0 }}>
                                 {editingForm ? 'Edit Form' : 'Create New Form'}
                             </h2>
                             <button 
-                                onClick={() => { setShowCreateModal(false); setEditingForm(null); }}
+                                onClick={resetFormModal}
                                 style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--text-secondary)' }}
                             >
                                 ×
@@ -562,145 +579,113 @@ const FormbuilderAdmin: React.FC = () => {
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                             <button 
                                 className="button-outline" 
-                                style={{ width: 'auto' }}
-                                onClick={closeModal}
+                                onClick={resetFormModal}
                             >
                                 Cancel
                             </button>
                             <button 
                                 className="form-button" 
-                                style={{ width: 'auto' }}
                                 onClick={saveForm}
                                 disabled={!formName || formFields.length === 0}
                             >
-                                {editingForm ? 'Save Changes' : 'Create Form'}
+                                {editingForm ? 'Update Form' : 'Create Form'}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
-
-            {/* Preview Modal */}
-            {showPreview && previewForm && (
-                <div className="modal-overlay" onClick={() => setShowPreview(false)}>
-                    <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                            <h3 className="section-title">Form Preview</h3>
-                            <button 
-                                className="button-outline" 
-                                onClick={() => setShowPreview(false)}
-                                style={{ width: 'auto', fontSize: '20px', padding: '4px 12px' }}
+            
+            {/* Mapping Modal */}
+            {showMappingModal && selectedForm && (
+                <div style={{ 
+                    position: 'fixed', 
+                    inset: 0, 
+                    background: 'rgba(0,0,0,0.5)', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    zIndex: 50 
+                }}
+                onClick={() => setShowMappingModal(false)}
+                >
+                    <div 
+                        className="module-card" 
+                        style={{ 
+                            width: '90%', 
+                            maxWidth: '600px', 
+                            background: '#ffffff' 
+                        }} 
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h2 className="section-title" style={{ marginBottom: '20px' }}>
+                            Map Form to Process
+                        </h2>
+                        
+                        <p style={{ marginBottom: '20px', color: 'var(--text-secondary)' }}>
+                            Configure how "{selectedForm.name}" integrates with your workflow
+                        </p>
+                        
+                        <div style={{ marginBottom: '20px' }}>
+                            <label className="form-label">Frontend Process</label>
+                            <select 
+                                className="form-input" 
+                                value={mappedProcess}
+                                onChange={(e) => setMappedProcess(e.target.value)}
                             >
-                                ×
-                            </button>
+                                <option value="">Select a process...</option>
+                                {processes.map(p => (
+                                    <option key={p.value} value={p.value}>{p.label}</option>
+                                ))}
+                            </select>
+                            <small style={{ display: 'block', marginTop: '4px', color: 'var(--text-secondary)' }}>
+                                Maps this form to a specific stage in the client journey
+                            </small>
                         </div>
                         
-                        <div style={{ 
-                            border: '1px solid var(--border-light)', 
-                            borderRadius: '8px', 
-                            padding: '24px',
-                            backgroundColor: 'var(--background-primary)'
-                        }}>
-                            <h2 style={{ fontSize: '24px', marginBottom: '8px' }}>{previewForm.name}</h2>
-                            {previewForm.description && (
-                                <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>
-                                    {previewForm.description}
-                                </p>
-                            )}
-                            
-                            <form onSubmit={(e) => e.preventDefault()}>
-                                {previewForm.fields.map((field, idx) => (
-                                    <div key={field.id} style={{ marginBottom: '20px' }}>
-                                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
-                                            {field.label}
-                                            {field.required && <span style={{ color: 'var(--danger)' }}> *</span>}
-                                        </label>
-                                        
-                                        {field.type === 'text' && (
-                                            <input 
-                                                type="text" 
-                                                className="form-input" 
-                                                placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
-                                            />
-                                        )}
-                                        
-                                        {field.type === 'email' && (
-                                            <input 
-                                                type="email" 
-                                                className="form-input" 
-                                                placeholder={field.placeholder || 'email@example.com'}
-                                            />
-                                        )}
-                                        
-                                        {field.type === 'phone' && (
-                                            <input 
-                                                type="tel" 
-                                                className="form-input" 
-                                                placeholder={field.placeholder || '(555) 123-4567'}
-                                            />
-                                        )}
-                                        
-                                        {field.type === 'date' && (
-                                            <input 
-                                                type="date" 
-                                                className="form-input"
-                                            />
-                                        )}
-                                        
-                                        {field.type === 'textarea' && (
-                                            <textarea 
-                                                className="form-input" 
-                                                rows={4}
-                                                placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}`}
-                                            />
-                                        )}
-                                        
-                                        {field.type === 'select' && (
-                                            <select className="form-input">
-                                                <option value="">Select an option</option>
-                                                {field.options?.map((opt, optIdx) => (
-                                                    <option key={optIdx} value={opt}>{opt}</option>
-                                                ))}
-                                            </select>
-                                        )}
-                                        
-                                        {field.type === 'checkbox' && (
-                                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                                {(field.options && field.options.length > 0 ? field.options : ['Option 1']).map((opt, i) => (
-                                                    <label key={i} className="button-outline" style={{ padding: '6px 10px' }}>
-                                                        <input type="checkbox" /> {opt}
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <input 
+                                    type="checkbox"
+                                    checked={trackProgress}
+                                    onChange={(e) => setTrackProgress(e.target.checked)}
+                                />
+                                Track submission progress
+                            </label>
+                            <small style={{ display: 'block', marginTop: '4px', marginLeft: '24px', color: 'var(--text-secondary)' }}>
+                                Shows completion status in client dashboard
+                            </small>
+                        </div>
+                        
+                        <div style={{ marginBottom: '20px' }}>
+                            <label className="form-label">Trigger Workflow</label>
+                            <select 
+                                className="form-input" 
+                                value={triggerWorkflow}
+                                onChange={(e) => setTriggerWorkflow(e.target.value)}
+                            >
+                                <option value="">No automation...</option>
+                                {workflows.map(w => (
+                                    <option key={w.value} value={w.value}>{w.label}</option>
                                 ))}
-                                
-                                <div style={{ 
-                                    marginTop: '32px', 
-                                    paddingTop: '24px', 
-                                    borderTop: '1px solid var(--border-light)',
-                                    display: 'flex',
-                                    justifyContent: 'flex-end',
-                                    gap: '12px'
-                                }}>
-                                    <button 
-                                        type="button"
-                                        className="button-outline" 
-                                        style={{ width: 'auto' }}
-                                        onClick={() => setShowPreview(false)}
-                                    >
-                                        Close Preview
-                                    </button>
-                                    <button 
-                                        type="submit"
-                                        className="form-button" 
-                                        style={{ width: 'auto' }}
-                                    >
-                                        Submit Form
-                                    </button>
-                                </div>
-                            </form>
+                            </select>
+                            <small style={{ display: 'block', marginTop: '4px', color: 'var(--text-secondary)' }}>
+                                Automatically runs when form is submitted
+                            </small>
+                        </div>
+                        
+                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                            <button 
+                                className="button-outline" 
+                                onClick={() => setShowMappingModal(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                className="form-button" 
+                                onClick={saveMapping}
+                            >
+                                Save Mapping
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -709,4 +694,4 @@ const FormbuilderAdmin: React.FC = () => {
     );
 };
 
-export default FormbuilderAdmin;
+export default FormbuilderAdminNew;

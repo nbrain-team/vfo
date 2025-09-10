@@ -512,6 +512,141 @@ const DocumentLibraryAdmin: React.FC = () => {
             placeholders: editFormData.placeholders.filter((_, i) => i !== index)
         });
     };
+    
+    const getDocumentPreview = (doc: Document) => {
+        // Generate a meaningful preview based on document type
+        switch (doc.type) {
+            case 'trust_document':
+                return (
+                    <div style={{ 
+                        background: 'white', 
+                        border: '1px solid var(--border-light)', 
+                        borderRadius: '8px', 
+                        padding: '32px',
+                        fontFamily: 'Georgia, serif',
+                        lineHeight: '1.8'
+                    }}>
+                        <h3 style={{ textAlign: 'center', marginBottom: '24px', fontSize: '20px' }}>
+                            {doc.title.toUpperCase()}
+                        </h3>
+                        <p style={{ marginBottom: '16px' }}>
+                            This Agreement is entered into as of <strong>{doc.placeholders?.includes('{{effective_date}}') ? '{{effective_date}}' : '[Date]'}</strong>, 
+                            by and between <strong>{doc.placeholders?.includes('{{grantor_name}}') ? '{{grantor_name}}' : '[Grantor Name]'}</strong> ("Grantor") 
+                            and <strong>{doc.placeholders?.includes('{{trustee_name}}') ? '{{trustee_name}}' : '[Trustee Name]'}</strong> ("Trustee").
+                        </p>
+                        <p style={{ marginBottom: '16px' }}>
+                            <strong>WHEREAS</strong>, the Grantor desires to create a trust for the purposes set forth herein; and
+                        </p>
+                        <p style={{ marginBottom: '16px' }}>
+                            <strong>WHEREAS</strong>, the Trustee is willing to accept the responsibilities of serving as trustee;
+                        </p>
+                        <p style={{ marginBottom: '16px' }}>
+                            <strong>NOW, THEREFORE</strong>, in consideration of the mutual covenants and agreements contained herein...
+                        </p>
+                        <div style={{ marginTop: '32px', borderTop: '1px solid var(--border-light)', paddingTop: '16px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                            <em>This is a preview. The full document contains additional sections including trust purposes, trustee powers, distributions, and governing law.</em>
+                        </div>
+                    </div>
+                );
+                
+            case 'operating_agreement':
+                return (
+                    <div style={{ 
+                        background: 'white', 
+                        border: '1px solid var(--border-light)', 
+                        borderRadius: '8px', 
+                        padding: '32px',
+                        fontFamily: 'Georgia, serif',
+                        lineHeight: '1.8'
+                    }}>
+                        <h3 style={{ textAlign: 'center', marginBottom: '24px', fontSize: '20px' }}>
+                            LIMITED LIABILITY COMPANY OPERATING AGREEMENT
+                        </h3>
+                        <h4 style={{ textAlign: 'center', marginBottom: '24px', fontSize: '16px' }}>
+                            {doc.placeholders?.includes('{{company_name}}') ? '{{company_name}}' : '[Company Name]'}, LLC
+                        </h4>
+                        <p style={{ marginBottom: '16px' }}>
+                            This Operating Agreement is entered into as of <strong>{doc.placeholders?.includes('{{effective_date}}') ? '{{effective_date}}' : '[Date]'}</strong>.
+                        </p>
+                        <h5 style={{ marginTop: '24px', marginBottom: '12px' }}>ARTICLE I - ORGANIZATION</h5>
+                        <p style={{ marginBottom: '16px' }}>
+                            1.1 <strong>Formation</strong>. The Members have formed a limited liability company under the laws of the State of Wyoming.
+                        </p>
+                        <p style={{ marginBottom: '16px' }}>
+                            1.2 <strong>Name</strong>. The name of the Company shall be {doc.placeholders?.includes('{{company_name}}') ? '{{company_name}}' : '[Company Name]'}, LLC.
+                        </p>
+                        <p style={{ marginBottom: '16px' }}>
+                            1.3 <strong>Principal Office</strong>. The principal office shall be located at {doc.placeholders?.includes('{{address}}') ? '{{address}}' : '[Address]'}.
+                        </p>
+                        <div style={{ marginTop: '32px', borderTop: '1px solid var(--border-light)', paddingTop: '16px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                            <em>This is a preview. The full agreement includes management structure, capital contributions, distributions, and other provisions.</em>
+                        </div>
+                    </div>
+                );
+                
+            case 'meeting_minutes':
+                return (
+                    <div style={{ 
+                        background: 'white', 
+                        border: '1px solid var(--border-light)', 
+                        borderRadius: '8px', 
+                        padding: '32px',
+                        lineHeight: '1.8'
+                    }}>
+                        <h3 style={{ textAlign: 'center', marginBottom: '24px', fontSize: '18px' }}>
+                            {doc.title}
+                        </h3>
+                        <p style={{ marginBottom: '16px' }}>
+                            <strong>Date:</strong> {doc.placeholders?.includes('{{meeting_date}}') ? '{{meeting_date}}' : '[Meeting Date]'}<br/>
+                            <strong>Time:</strong> [Time]<br/>
+                            <strong>Location:</strong> {doc.placeholders?.includes('{{address}}') ? '{{address}}' : '[Location]'}
+                        </p>
+                        <p style={{ marginBottom: '16px' }}>
+                            <strong>Members Present:</strong><br/>
+                            {doc.placeholders?.includes('{{member_names}}') ? '{{member_names}}' : '[List of Members]'}
+                        </p>
+                        <h5 style={{ marginTop: '24px', marginBottom: '12px' }}>RESOLUTIONS</h5>
+                        <p style={{ marginBottom: '16px' }}>
+                            The following resolutions were unanimously adopted:
+                        </p>
+                        <ol style={{ marginLeft: '20px' }}>
+                            <li style={{ marginBottom: '8px' }}>Appointment of officers and managers</li>
+                            <li style={{ marginBottom: '8px' }}>Adoption of operating agreement</li>
+                            <li style={{ marginBottom: '8px' }}>Authorization of bank accounts</li>
+                        </ol>
+                        <div style={{ marginTop: '32px', borderTop: '1px solid var(--border-light)', paddingTop: '16px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                            <em>This is a preview. The full minutes include detailed resolutions and signatures.</em>
+                        </div>
+                    </div>
+                );
+                
+            default:
+                return (
+                    <div style={{ 
+                        background: 'var(--gray-light)', 
+                        padding: '40px', 
+                        borderRadius: '6px',
+                        minHeight: '300px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--text-secondary)',
+                        textAlign: 'center'
+                    }}>
+                        <div style={{ fontSize: '64px', marginBottom: '16px' }}>📄</div>
+                        <h4 style={{ fontSize: '18px', marginBottom: '8px' }}>{doc.title}</h4>
+                        <p style={{ fontSize: '14px', marginBottom: '16px' }}>{doc.description}</p>
+                        {doc.fileSize && (
+                            <p style={{ fontSize: '12px' }}>File size: {doc.fileSize}</p>
+                        )}
+                        <p style={{ fontSize: '12px', marginTop: '24px' }}>
+                            <em>Full preview available after implementation</em>
+                        </p>
+                    </div>
+                );
+        }
+    };
 
     const getTypeColor = (type: Document['type']) => {
         switch(type) {
@@ -793,24 +928,7 @@ const DocumentLibraryAdmin: React.FC = () => {
                                 </div>
                             )}
                             
-                            <div style={{ 
-                                background: 'var(--gray-light)', 
-                                padding: '20px', 
-                                borderRadius: '6px',
-                                minHeight: '200px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'var(--text-secondary)'
-                            }}>
-                                <div style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '48px', marginBottom: '12px' }}>📄</div>
-                                    <p>Document preview will be displayed here</p>
-                                    {previewDocument.fileSize && (
-                                        <p style={{ fontSize: '12px', marginTop: '8px' }}>File size: {previewDocument.fileSize}</p>
-                                    )}
-                                </div>
-                            </div>
+                            {getDocumentPreview(previewDocument)}
                             
                             <div style={{ 
                                 marginTop: '24px', 

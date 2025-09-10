@@ -1,0 +1,49 @@
+Render / Cursor Connection items.
+
+---
+
+Render API: rnd_nNUfLRHBtcjTL3HFDZRujuZ4EBO4
+export RENDER_API_KEY=rnd_nNUfLRHBtcjTL3HFDZRujuZ4EBO4
+---
+
+Add to render.yaml file: 
+
+previews:
+  generation: automatic
+
+services:
+  - type: web
+    name: my-service-name
+    runtime: node # or python, ruby, etc.
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeployTrigger: checksPass
+
+
+
+---
+nBrain 2025 Service id's
+
+Front End Service ID: srv-d1e7rf3e5dus73b4f4mg
+Backend Service ID: srv-d1e7rf3e5dus73b4f4m0
+Database service id: dpg-d1g44qnfte5s7387lqt0-a
+
+
+----
+
+MCP Code For Render: 
+
+{
+  "mcpServers": {
+    "render": {
+      "url": "https://mcp.render.com/mcp",
+      "headers": { "Authorization": "Bearer YOUR_RENDER_API_KEY" }
+    }
+  }
+}
+
+
+
+-----
+

@@ -16,17 +16,24 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=True)  # Nullable for Google-only users
     name = Column(String, nullable=True)
-    role = Column(String, default="Client")
+    role = Column(String, default="Client")  # "Admin", "Advisor", "Client"
     google_id = Column(String, unique=True, nullable=True)
     picture_url = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     google_access_token = Column(String, nullable=True)
     google_refresh_token = Column(String, nullable=True)
+    # For advisors
+    username = Column(String, unique=True, nullable=True)  # For public URL
+    # For clients - link to their advisor
+    advisor_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     
     entities = relationship("Entity",
                              secondary=user_entity_association,
                              back_populates="users")
+    
+    # Advisor relationship - an advisor can have many clients
+    clients = relationship("User", backref="advisor", foreign_keys=[advisor_id])
 
 class Entity(Base):
     __tablename__ = "entities"

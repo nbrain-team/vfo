@@ -1,0 +1,22 @@
+Campaign Details
+Campaign Name: Boston In-Person August 2025
+Event Type: In-Person
+Associate Producer: Kalena Conley
+Associate Email: kalena@adtvmedia.com
+Associate Phone: 619-374-7405
+City: Boston
+State: MA
+Video Link: -
+Event Link: -
+Launch Date: 8/26/2025
+Event Date 1: 9/2/2025
+Event Time 1: 11:00
+Event Date 2 (Optional): 9/3/2025
+Event Time 2 (Optional): 10:00
+Hotel Name: TBD
+Hotel Address: TBD
+Calendly Link: -
+Locations To Scrape: Boston, MA
+Manchester, MA
+Quincy, MA
+Woburn, MA

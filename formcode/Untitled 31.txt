@@ -1,0 +1,73 @@
+{
+  "rules": [
+    {
+      "name": "GLOBAL: Final Development & Deployment Instructions",
+      "description": "Always follow these rules for all tasks involving Render deployment, environment variables, UX consistency, testing, debugging, and platform-wide changes.",
+      "content": [
+        "Start your first response for the primary task with exactly: \"I confirm I understand the rules\".",
+        "Never change core architecture or workflows without explicit approval.",
+        "Project is deployed on Render. `.env` file in root has exact environment settings — do NOT add or edit duplicates. Use it to test connections and leverage connected services.",
+        "After edits, check related modules/dependencies for required changes.",
+        "Test all error fixes before redeploying via terminal whenever possible using the env document in your root terminal and Render settings provided whenever possible.",
+        "No fallback options or major LLM/model changes without approval.",
+        "Always keep visual, layout, and styling consistency across the entire site. Use global/external CSS or shared style files instead of inline styles. Maintain consistent fonts, font sizes, alignment, spacing, padding, margins, and color schemes site-wide.",
+        "Review recent chat to avoid repeating solved issues.",
+        "Use Render shell and local `.env` for real DB/API testing before deployment.",
+        "Double-check changes for possible breakage; watch for case sensitivity and DB table updates.",
+        "Enhance my instructions when possible, but never contradict them.",
+        "Read and reference `Platform-Details.txt` in root for platform insights.",
+        "When files are edited and ready to test — upload and deploy and commit to GitHub without me asking."
+      ]
+    },
+    {
+      "name": "Render Deployment & Environment Settings",
+      "description": "Rules for using the `.env` file, Render deployment, and environment configuration without creating conflicts.",
+      "content": [
+        "Start your first response for the primary task with exactly: \"I confirm I understand the rules\".",
+        "Never change core architecture or workflows without explicit approval.",
+        "Do NOT add or modify existing environment settings in `.env` unless instructed. This file contains exact Render environment variables.",
+        "Use `.env` for testing connections and confirming settings.",
+        "Leverage connected services/functions already available when implementing new features.",
+        "Always check for other modules that might require updates after environment changes."
+      ]
+    },
+    {
+      "name": "Testing & Debugging on Render",
+      "description": "Rules for terminal-based testing, Render shell usage, and pre-deployment checks.",
+      "content": [
+        "Start your first response for the primary task with exactly: \"I confirm I understand the rules\".",
+        "Never change core architecture or workflows without explicit approval.",
+        "Use terminal commands whenever possible for testing.",
+        "If I must test, provide a ready-to-run Render shell command.",
+        "Scan the platform before implementing to reuse existing components and avoid duplicates.",
+        "When possible, test errors through Render shell with scripts before deployment to save time.",
+        "Use local `.env` for real DB/API testing."
+      ]
+    },
+    {
+      "name": "UX & Design Consistency",
+      "description": "Rules for maintaining visual and UX consistency across modules and pages.",
+      "content": [
+        "Start your first response for the primary task with exactly: \"I confirm I understand the rules\".",
+        "Never change core architecture or workflows without explicit approval.",
+        "Always match the style, layout, and theme of existing pages and modules.",
+        "Use only external/global CSS files, shared style components, or framework theme variables for styling — avoid inline styles unless absolutely necessary.",
+        "Maintain consistent fonts, font sizes, alignment, spacing, padding, margins, colors, and UI element proportions across all pages.",
+        "Ensure clean, thoughtful UX design and proper placement of modules.",
+        "Enhance my instructions if there’s a proven UX improvement — but never contradict them."
+      ]
+    },
+    {
+      "name": "Error Prevention & Deep Validation",
+      "description": "Rules for double-checking work and avoiding common breakages.",
+      "content": [
+        "Start your first response for the primary task with exactly: \"I confirm I understand the rules\".",
+        "Never change core architecture or workflows without explicit approval.",
+        "You have no token limits — use them to double-check and validate all changes.",
+        "Look for potential breakages such as startup file changes requiring DB updates or case sensitivity issues in naming.",
+        "Read `Platform-Details.txt` for insights on connected systems.",
+        "Review recent chat history to avoid repeating past mistakes."
+      ]
+    }
+  ]
+}

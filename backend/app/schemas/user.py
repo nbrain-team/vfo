@@ -18,6 +18,10 @@ class Entity(EntityBase):
 # User Schemas
 class UserBase(BaseModel):
     email: str
+    name: Optional[str] = None
+    role: Optional[str] = "Client"
+    username: Optional[str] = None
+    advisor_id: Optional[int] = None
 
 class UserCreate(UserBase):
     password: str
@@ -25,11 +29,21 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
     entities: List[Entity] = []
+    is_active: bool = True
+    created_at: Optional[str] = None
+    clients: Optional[List["User"]] = []
 
     class Config:
         from_attributes = True
 
-Entity.update_forward_refs() 
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    username: Optional[str] = None
+    role: Optional[str] = None
+    advisor_id: Optional[int] = None
+
+Entity.update_forward_refs()
+User.update_forward_refs() 
 
 # CRM Schemas
 class ContactBase(BaseModel):

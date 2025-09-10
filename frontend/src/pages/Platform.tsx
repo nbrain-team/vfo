@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar, PolarAngleAxis, BarChart, Bar, Cell } from 'recharts';
 import { getBookings } from '../adminData';
+import apiClient from '../apiClient';
 
 // Liberation Journey Stages
 const JOURNEY_STAGES = ['Obscured', 'Awakening', 'Stabilizing', 'Liberating', 'Regenerative'];
@@ -20,6 +21,8 @@ const Platform: React.FC = () => {
     
     // KPI time period toggle
     const [kpiPeriod, setKpiPeriod] = useState<'month' | 'inception'>('month');
+    const [pipelineStats, setPipelineStats] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
     
     // Module scores with traffic light indicators
     const moduleScores = [
@@ -69,7 +72,7 @@ const Platform: React.FC = () => {
         }
     };
 
-    // Admin KPIs from mock bookings
+    // Admin KPIs from mock bookings and backend
     const [bookingsState, setBookingsState] = useState(getBookings());
     useEffect(() => {
         const handler = () => setBookingsState(getBookings());
@@ -77,6 +80,21 @@ const Platform: React.FC = () => {
         return () => window.removeEventListener('bookings-updated', handler as EventListener);
     }, []);
     const bookings = useMemo(() => bookingsState, [bookingsState]);
+    
+    // Fetch pipeline stats from backend
+    useEffect(() => {
+        const fetchPipelineStats = async () => {
+            try {
+                const response = await apiClient.get(`/pipeline/stats?period=${kpiPeriod}`);
+                setPipelineStats(response.data);
+                setLoading(false);
+            } catch (error) {
+                console.error('Failed to fetch pipeline stats:', error);
+                setLoading(false);
+            }
+        };
+        fetchPipelineStats();
+    }, [kpiPeriod]);
     
     // Calculate KPIs based on period
     const now = Date.now();
@@ -88,16 +106,16 @@ const Platform: React.FC = () => {
           })
         : bookings;
     
-    // KPI calculations
-    const kpiLeads = filteredBookings.filter(b => b.stage === 'New').length;
-    const kpiBooked = filteredBookings.filter(b => b.stage === 'Booked' || b.stage === 'Paid').length;
-    const kpiShowed = filteredBookings.filter(b => ['Signed', 'Onboarding', 'Completed'].includes(b.stage)).length;
-    const kpiSigned = filteredBookings.filter(b => b.stage === 'Signed' || b.stage === 'Completed').length;
-    const kpiMattersInProcess = filteredBookings.filter(b => b.stage === 'Onboarding').length;
+    // KPI calculations - use backend data if available, fallback to mock
+    const kpiLeads = pipelineStats?.leads ?? filteredBookings.filter(b => b.stage === 'New').length;
+    const kpiBooked = pipelineStats?.booked ?? filteredBookings.filter(b => b.stage === 'Booked' || b.stage === 'Paid').length;
+    const kpiShowed = pipelineStats?.showed ?? filteredBookings.filter(b => ['Signed', 'Onboarding', 'Completed'].includes(b.stage)).length;
+    const kpiSigned = pipelineStats?.signed ?? filteredBookings.filter(b => b.stage === 'Signed' || b.stage === 'Completed').length;
+    const kpiMattersInProcess = pipelineStats?.matters_in_process ?? filteredBookings.filter(b => b.stage === 'Onboarding').length;
     
     // Calculate show up ratio and average $ per matter
-    const showUpRatio = kpiBooked > 0 ? Math.min(100, Math.round((kpiShowed / kpiBooked) * 100)) : 0;
-    const avgDollarPerMatter = kpiSigned > 0 ? 18500 : 0; // $18,500 per WYDAPT matter
+    const showUpRatio = pipelineStats?.show_up_ratio ?? (kpiBooked > 0 ? Math.min(100, Math.round((kpiShowed / kpiBooked) * 100)) : 0);
+    const avgDollarPerMatter = pipelineStats?.avg_dollar_per_matter ?? (kpiSigned > 0 ? 18500 : 0); // $18,500 per WYDAPT matter
     
     const kpiTotalLeads = bookings.length;
     const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
@@ -242,12 +260,12 @@ const Platform: React.FC = () => {
                     }}></div>
                     
                     {[
-                        { name: 'Booked Consults', count: bookings.filter(b => b.stage === 'Booked' || b.stage === 'Paid').length, color: '#3C4630' },
-                        { name: 'Pre-Engagement', count: bookings.filter(b => b.stage === 'New').length, color: '#C07C3D' },
-                        { name: 'Engaged', count: bookings.filter(b => b.stage === 'Signed').length, color: '#DCA85E' },
-                        { name: 'Questionnaire Received', count: 0, color: '#E9EDE4' },
-                        { name: 'Matter in Process', count: bookings.filter(b => b.stage === 'Onboarding').length, color: '#22c55e' },
-                        { name: 'Matter Fulfilled', count: bookings.filter(b => b.stage === 'Completed').length, color: '#44ffff' }
+                        { name: 'Booked Consults', count: pipelineStats?.pipeline_stages?.['Booked Consults'] ?? bookings.filter(b => b.stage === 'Booked' || b.stage === 'Paid').length, color: '#3C4630' },
+                        { name: 'Pre-Engagement', count: pipelineStats?.pipeline_stages?.['Pre-Engagement'] ?? bookings.filter(b => b.stage === 'New').length, color: '#C07C3D' },
+                        { name: 'Engaged', count: pipelineStats?.pipeline_stages?.['Engaged'] ?? bookings.filter(b => b.stage === 'Signed').length, color: '#DCA85E' },
+                        { name: 'Questionnaire Received', count: pipelineStats?.pipeline_stages?.['Questionnaire Received'] ?? 0, color: '#E9EDE4' },
+                        { name: 'Matter in Process', count: pipelineStats?.pipeline_stages?.['Matter in Process'] ?? bookings.filter(b => b.stage === 'Onboarding').length, color: '#22c55e' },
+                        { name: 'Matter Fulfilled', count: pipelineStats?.pipeline_stages?.['Matter Fulfilled'] ?? bookings.filter(b => b.stage === 'Completed').length, color: '#44ffff' }
                     ].map((stage, index) => (
                         <div key={stage.name} style={{ 
                             display: 'flex', 

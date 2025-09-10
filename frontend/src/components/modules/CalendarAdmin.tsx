@@ -15,12 +15,23 @@ const CalendarAdmin: React.FC = () => {
       seedMockDataIfEmpty();
       setBookings(getBookings());
     }
-    // Try to sync with Google Calendar on load
-    if (googleCalendarService.hasCalendarAccess()) {
-      syncGoogleCalendar();
-    }
+    // Auto-sync with Google Calendar on component load
+    syncOnLoad();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  
+  const syncOnLoad = async () => {
+    // Check if we have tokens from login
+    const googleAccessToken = localStorage.getItem('google_access_token');
+    if (googleAccessToken) {
+      googleCalendarService.setAccessToken(googleAccessToken);
+    }
+    
+    // Try to sync if we have access
+    if (googleCalendarService.hasCalendarAccess()) {
+      await syncGoogleCalendar();
+    }
+  };
 
   const syncGoogleCalendar = async () => {
     setIsSyncing(true);

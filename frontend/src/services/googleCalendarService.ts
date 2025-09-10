@@ -26,7 +26,17 @@ class GoogleCalendarService {
   private calendarId: string = 'primary';
 
   constructor() {
-    this.accessToken = localStorage.getItem('google_access_token');
+    // Check for token on initialization and periodically
+    this.refreshAccessToken();
+    // Refresh token from storage every 5 seconds to catch login updates
+    setInterval(() => this.refreshAccessToken(), 5000);
+  }
+  
+  private refreshAccessToken() {
+    const token = localStorage.getItem('google_access_token');
+    if (token && token !== this.accessToken) {
+      this.accessToken = token;
+    }
   }
 
   setAccessToken(token: string) {
