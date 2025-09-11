@@ -88,8 +88,12 @@ const Login: React.FC = () => {
                     fontSize: '13px',
                     color: 'var(--primary-dark)'
                 }}>
-                    <strong>For Clients:</strong> Connect with Google Account below or use email/password<br/>
-                    <strong>For Advisors:</strong> Sign in with your credentials
+                    <div style={{ marginBottom: 8 }}>
+                        <strong>Clients</strong>: Connect with Google or use email/password. After sign-in, you’ll select your advisor if not already linked.
+                    </div>
+                    <div>
+                        <strong>LIFTed Advisors</strong>: Sign in with credentials. New? <Link to="/register" className="form-link">Create an account</Link>
+                    </div>
                 </div>
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">

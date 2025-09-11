@@ -55,7 +55,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     <h1>LIFTed VFO</h1>
                 </div>
                 <nav className="sidebar-nav-group">
-                    {modules.map(module => {
+                    {modules.filter(module => {
+                        // Client view restrictions per changes7.docx
+                        if (role === 'Client') {
+                            const allowed = ['Dashboard', 'Vault'];
+                            return allowed.includes(module.name);
+                        }
+                        return true;
+                    }).map(module => {
                         if (module.isSection) {
                             return (
                                 <div key={module.name} className="sidebar-section-header">

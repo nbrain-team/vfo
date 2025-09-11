@@ -65,6 +65,20 @@ const PublicBlog: React.FC = () => {
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
             <h1 style={{ textAlign: 'center', marginBottom: '40px' }}>Blog</h1>
+            {/* Featured Posts Section */}
+            {allPosts.filter(p => (p as any).featured).length > 0 && (
+                <section style={{ marginBottom: '32px' }}>
+                    <h2 style={{ marginBottom: '12px' }}>Featured Posts</h2>
+                    <div style={{ display: 'grid', gap: '24px', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
+                        {allPosts.filter(p => (p as any).featured).slice(0, 6).map(fp => (
+                            <article key={fp.id} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 20, cursor: 'pointer' }} onClick={() => navigate(`/blog/${fp.id}`)}>
+                                <h3 style={{ marginBottom: 8 }}>{fp.title}</h3>
+                                <p style={{ color: 'var(--text-secondary)' }}>{fp.excerpt.substring(0, 280)}</p>
+                            </article>
+                        ))}
+                    </div>
+                </section>
+            )}
             <div style={{ display: 'grid', gap: '32px', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))' }}>
                 {allPosts.map(post => (
                     <article 

@@ -77,6 +77,19 @@ const MockWyomingAPT: React.FC = () => {
                     </div>
                 </section>
 
+                {/* Featured Posts section pulled from site config if present */}
+                <section className="public-section">
+                    <h2>Featured Posts</h2>
+                    <div className="public-grid">
+                        {/* This is a placeholder; the actual featured list is rendered on /blog */}
+                        <div className="public-card">
+                            <h3>Visit our Blog</h3>
+                            <p>Read featured insights and recent updates.</p>
+                            <a className="btn-outline" href="/blog" style={{ textDecoration: 'none' }}>Go to Blog</a>
+                        </div>
+                    </div>
+                </section>
+
                 <section className="public-section" id="testimonials">
                     <h2>What Clients Say</h2>
                     <div className="public-grid">

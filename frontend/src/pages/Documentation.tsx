@@ -89,7 +89,7 @@ const Documentation: React.FC = () => {
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                     <h1 style={{ fontSize: '36px', margin: 0, color: 'var(--primary)' }}>
-                        AgentIQ VFO Platform - Technical Documentation
+                        LIFTed VFO Platform - Technical Documentation
                     </h1>
                     <div style={{ textAlign: 'right' }}>
                         <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Last Updated</div>
@@ -174,7 +174,7 @@ const Documentation: React.FC = () => {
                         Executive Summary
                     </h2>
                     <p style={{ lineHeight: '1.8', color: 'var(--text)' }}>
-                        AgentIQ VFO (Virtual Family Office) is a cutting-edge, AI-powered wealth management platform that revolutionizes how high-net-worth individuals and families manage their financial ecosystem. The platform has been significantly enhanced with advanced automation, drag-and-drop pipeline management, real-time documentation, and comprehensive workflow systems specifically designed for WYDAPT (Wyoming Directed Asset Protection Trust) matters.
+                        LIFTed VFO (Virtual Family Office) is a cutting-edge, AI-powered wealth management platform that revolutionizes how high-net-worth individuals and families manage their financial ecosystem. The platform has been significantly enhanced with advanced automation, drag-and-drop pipeline management, real-time documentation, and comprehensive workflow systems specifically designed for WYDAPT (Wyoming Directed Asset Protection Trust) matters.
                     </p>
                 </section>
 
@@ -252,7 +252,7 @@ const Documentation: React.FC = () => {
 
                         {/* CRM Module */}
                         <div style={{ background: 'var(--background-secondary)', padding: '20px', borderRadius: '8px' }}>
-                            <h3 style={{ marginBottom: '12px' }}>👥 LIFTed Advisor Pipeline (CRM)</h3>
+                            <h3 style={{ marginBottom: '12px' }}>👥 LIFTed Advisor Pipeline (FinancialIQ/CRM)</h3>
                             <p><strong>Purpose:</strong> Complete client lifecycle management with drag-and-drop</p>
                             <h4>Key Features:</h4>
                             <ul>
@@ -391,9 +391,11 @@ const Documentation: React.FC = () => {
                         <h3 style={{ marginTop: '20px' }}>Key Endpoints</h3>
                         <div style={{ fontFamily: 'monospace', fontSize: '13px' }}>
                             <div style={{ marginBottom: '12px' }}>
-                                <strong>POST /auth/register</strong> - User registration<br/>
-                                <strong>POST /auth/login</strong> - User login<br/>
+                                <strong>POST /users/</strong> - User registration<br/>
+                                <strong>POST /token</strong> - User login<br/>
                                 <strong>POST /auth/google</strong> - Google OAuth login<br/>
+                                <strong>GET /advisors/</strong> - List active advisors<br/>
+                                <strong>GET /advisors/check-username/{'{username}'}</strong> - Check username availability<br/>
                             </div>
                             <div style={{ marginBottom: '12px' }}>
                                 <strong>GET /contacts/</strong> - List all contacts<br/>
@@ -539,6 +541,26 @@ documents
                             GOOGLE_CLIENT_SECRET<br/>
                             GOOGLE_PROJECT_ID<br/>
                         </div>
+                    </div>
+                </section>
+
+                {/* Dual Mode Storage: Vault vs Vectorization */}
+                <section style={{ marginBottom: '40px' }}>
+                    <h2 style={{ fontSize: '28px', marginBottom: '16px', borderBottom: '2px solid var(--border)', paddingBottom: '8px' }}>
+                        Vault and Vector Storage Modes
+                    </h2>
+                    <div style={{ background: 'var(--background-secondary)', padding: '20px', borderRadius: '8px' }}>
+                        <p style={{ lineHeight: 1.8 }}>
+                            Documents and data default to encrypted storage in the Vault. For AI retrieval use cases, advisors can opt-in to vectorize specific items. Options include:
+                        </p>
+                        <ul>
+                            <li><strong>Vault only</strong>: Encrypted at rest; not included in vector search.</li>
+                            <li><strong>Vectorize</strong>: Extract embeddings for semantic search while retaining original in Vault.</li>
+                            <li><strong>Vectorize and Vault</strong>: Both modes enabled for maximum utility.</li>
+                        </ul>
+                        <p style={{ lineHeight: 1.8 }}>
+                            Roadmap includes encrypted two-way client messaging powered by Matrix/Element protocol, enabling secure chat threads linked to Vault artifacts and AI assistants.
+                        </p>
                     </div>
                 </section>
 

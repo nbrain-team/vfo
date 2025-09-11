@@ -21,6 +21,7 @@ interface BlogPost {
     excerpt: string;
     createdAt: string;
     published: boolean;
+    featured?: boolean;
 }
 
 interface PortalAction {
@@ -71,6 +72,7 @@ const AgentIQ: React.FC = () => {
     const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
     const [blogTitle, setBlogTitle] = useState('');
     const [blogContent, setBlogContent] = useState('');
+    const [blogFeatured, setBlogFeatured] = useState(false);
     const [showSeoGenerator, setShowSeoGenerator] = useState(false);
     const [transcript, setTranscript] = useState('');
     
@@ -323,13 +325,15 @@ const AgentIQ: React.FC = () => {
             content: blogContent,
             excerpt: blogContent.substring(0, 150) + '...',
             createdAt: new Date().toISOString(),
-            published: true
+            published: true,
+            featured: blogFeatured
         };
         
         if (editingPost) {
             post.title = blogTitle;
             post.content = blogContent;
             post.excerpt = blogContent.substring(0, 150) + '...';
+            post.featured = blogFeatured;
         }
         
         const updatedPosts = editingPost 
@@ -344,6 +348,7 @@ const AgentIQ: React.FC = () => {
         setEditingPost(null);
         setBlogTitle('');
         setBlogContent('');
+        setBlogFeatured(false);
     };
     
     const handleDeleteBlog = (postId: string) => {
@@ -540,6 +545,16 @@ const AgentIQ: React.FC = () => {
                             </p>
                         </div>
                         
+                        <div style={{ marginBottom: '12px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <input
+                                    type="checkbox"
+                                    checked={blogFeatured}
+                                    onChange={(e) => setBlogFeatured(e.target.checked)}
+                                />
+                                Feature this post on home page
+                            </label>
+                        </div>
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                             <button
                                 className="button-outline"
@@ -548,6 +563,7 @@ const AgentIQ: React.FC = () => {
                                     setEditingPost(null);
                                     setBlogTitle('');
                                     setBlogContent('');
+                                    setBlogFeatured(false);
                                 }}
                             >
                                 Cancel
@@ -927,7 +943,8 @@ const AgentIQ: React.FC = () => {
     const [contactAddress, setContactAddress] = useState(siteConfig.contactAddress || '1621 Central Avenue #8866, Cheyenne, WY 82001');
     
     // Testimonials state
-    const [editableTestimonials, setEditableTestimonials] = useState(siteConfig.testimonials || testimonials);
+    type Testimonial = { name: string; quote: string };
+    const [editableTestimonials, setEditableTestimonials] = useState<Testimonial[]>(Array.isArray(siteConfig.testimonials) ? siteConfig.testimonials : testimonials);
     
     const renderConsultations = () => (
         <>
@@ -1514,7 +1531,7 @@ const AgentIQ: React.FC = () => {
                     <>
                         <h3 className="section-title">What Our Clients Say</h3>
                         <div className="module-card-row" style={{ marginTop: 12 }}>
-                            {editableTestimonials.map((t, i) => (
+                            {editableTestimonials.map((t: Testimonial, i: number) => (
                                 <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 16, background: 'var(--bg)' }}>
                                     <div style={{ fontWeight: 600, marginBottom: 6 }}>{t.name}</div>
                                     <div style={{ color: 'var(--text-secondary)' }}>"{t.quote}"</div>

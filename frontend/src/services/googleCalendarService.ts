@@ -165,13 +165,15 @@ class GoogleCalendarService {
 
   // Request calendar access (redirect to Google OAuth)
   async requestCalendarAccess(): Promise<void> {
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
-    
+    // Use Vite env for backend base URL
+    const base = (import.meta as any).env?.VITE_API_BASE_URL || '';
+    const backendUrl = `${base}`;
+
     try {
       const response = await axios.post(`${backendUrl}/api/auth/google/calendar-access`, {
         user_email: localStorage.getItem('user_email'),
       });
-      
+
       if (response.data.auth_url) {
         window.location.href = response.data.auth_url;
       }
