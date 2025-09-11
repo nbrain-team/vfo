@@ -610,7 +610,7 @@ npm run dev
                     color: 'var(--text-secondary)'
                 }}>
                     <p>
-                        AgentIQ VFO Platform Documentation • Version 2.0.0 • {new Date().getFullYear()}
+                        LIFTed VFO Platform Documentation • Version 2.0.0 • {new Date().getFullYear()}
                     </p>
                     <p style={{ fontSize: '12px', marginTop: '8px' }}>
                         This documentation updates in real-time as changes are made to the platform
