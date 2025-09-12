@@ -32,8 +32,14 @@ class User(Base):
                              secondary=user_entity_association,
                              back_populates="users")
     
-    # Advisor relationship - an advisor can have many clients
-    clients = relationship("User", backref="advisor", foreign_keys=[advisor_id])
+    # Self-referential relationship: many clients -> one advisor
+    # Define the many-to-one side with remote_side so SQLAlchemy can resolve it
+    advisor = relationship(
+        "User",
+        remote_side=[id],
+        foreign_keys=[advisor_id],
+        backref="clients"
+    )
 
 class Entity(Base):
     __tablename__ = "entities"
