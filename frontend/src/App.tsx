@@ -36,6 +36,7 @@ import AuditAdmin from './components/modules/AuditAdmin';
 import FormbuilderAdmin from './components/modules/FormbuilderAdmin';
 import DocumentLibraryAdmin from './components/modules/DocumentLibraryAdmin';
 import CalendarCallback from './pages/CalendarCallback';
+import SuperAdmin from './pages/SuperAdmin';
 
 function App() {
   return (
@@ -162,6 +163,11 @@ function App() {
           <Route path="/docs" element={
             <MainLayout>
               <Documentation />
+            </MainLayout>
+          } />
+          <Route path="/superadmin" element={
+            <MainLayout>
+              <SuperAdmin />
             </MainLayout>
           } />
         </Route>

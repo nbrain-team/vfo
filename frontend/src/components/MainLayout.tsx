@@ -42,7 +42,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         navigate('/login');
     };
 
-    const role = (localStorage.getItem('role') || 'Admin') as 'Admin'|'Staff'|'Client';
+    const role = (localStorage.getItem('role') || 'Admin') as 'SuperAdmin'|'Admin'|'Staff'|'Client';
 
     return (
         <div className="main-layout">
@@ -59,6 +59,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                         // Client view restrictions per changes7.docx
                         if (role === 'Client') {
                             const allowed = ['Dashboard', 'Vault'];
+                            return allowed.includes(module.name);
+                        }
+                        // SuperAdmin sees only Super Admin nav item(s)
+                        if (role === 'SuperAdmin') {
+                            const allowed = ['Dashboard'];
                             return allowed.includes(module.name);
                         }
                         return true;
@@ -84,6 +89,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     })}
                 </nav>
                 <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid var(--border)' }}>
+                    {role === 'SuperAdmin' && (
+                        <NavLink
+                            to="/superadmin"
+                            className={({ isActive }) =>
+                                `sidebar-nav-item ${isActive ? 'active' : ''}`
+                            }
+                        >
+                            <span className="sidebar-nav-label">Super Admin</span>
+                        </NavLink>
+                    )}
                     <a
                         href="/wyoming-apt"
                         target="_blank"
