@@ -268,7 +268,7 @@ const SiteBuilderAdmin: React.FC<SiteBuilderProps> = ({ embedded = false }) => {
               <button 
                 className="button-outline" 
                 style={{ width: 'auto' }} 
-                onClick={() => window.open(username ? `/${username}` : '/wyoming-apt', '_blank')}
+                onClick={() => window.open('/wyoming-apt', '_blank')}
               >
                 Preview Live Site
               </button>

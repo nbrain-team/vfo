@@ -11,6 +11,7 @@ interface Module {
 const modules: Module[] = [
     { name: 'Dashboard', path: '/platform', icon: '📊︎' },
     { name: 'Calendar', path: '/admin/calendar', icon: '🗓︎' },
+    { name: 'advisorIQ', path: '/agent', icon: '🤖︎' },
     { name: 'Formbuilder', path: '/admin/formbuilder', icon: '📝' },
     { name: 'Document Library', path: '/admin/documents', icon: '📚' },
     { name: 'Vault', path: '/admin/vault', icon: '🔒' },
@@ -18,7 +19,6 @@ const modules: Module[] = [
     { name: 'CRM', path: '/admin/crm', icon: '📇︎' },
     { name: 'Audit Trail', path: '/admin/audit', icon: '🧾' },
     { name: 'Modules', path: '#', icon: '📦', isSection: true },
-    { name: 'advisorIQ', path: '/agent', icon: '🤖︎' },
     { name: 'legalIQ', path: '/legal', icon: '⚖︎' },
     { name: 'insuranceIQ', path: '/insurance', icon: '🛡︎' },
     { name: 'financialIQ', path: '/wealth', icon: '💰︎' },
