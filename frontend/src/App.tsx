@@ -38,6 +38,11 @@ import DocumentLibraryAdmin from './components/modules/DocumentLibraryAdmin';
 import CalendarCallback from './pages/CalendarCallback';
 import SuperAdmin from './pages/SuperAdmin';
 import ClientDashboard from './pages/ClientDashboard';
+import ClientAdvisor from './pages/client/ClientAdvisor';
+import ClientMatters from './pages/client/ClientMatters';
+import ClientVault from './pages/client/ClientVault';
+import ClientQuestionnaires from './pages/client/ClientQuestionnaires';
+import ClientBook from './pages/client/ClientBook';
 
 function App() {
   return (
@@ -170,6 +175,32 @@ function App() {
           <Route path="/docs" element={
             <MainLayout>
               {localStorage.getItem('role') === 'SuperAdmin' ? <Documentation /> : <Navigate to="/platform" />}
+            </MainLayout>
+          } />
+          {/* Client routes */}
+          <Route path="/client/advisor" element={
+            <MainLayout>
+              <ClientAdvisor />
+            </MainLayout>
+          } />
+          <Route path="/client/matters" element={
+            <MainLayout>
+              <ClientMatters />
+            </MainLayout>
+          } />
+          <Route path="/client/vault" element={
+            <MainLayout>
+              <ClientVault />
+            </MainLayout>
+          } />
+          <Route path="/client/questionnaires" element={
+            <MainLayout>
+              <ClientQuestionnaires />
+            </MainLayout>
+          } />
+          <Route path="/client/book" element={
+            <MainLayout>
+              <ClientBook />
             </MainLayout>
           } />
           <Route path="/superadmin" element={

@@ -19,12 +19,11 @@ const modules: Module[] = [
     { name: 'CRM', path: '/admin/crm', icon: '📇︎' },
     { name: 'Audit Trail', path: '/admin/audit', icon: '🧾' },
     { name: 'Modules', path: '#', icon: '📦', isSection: true },
-    { name: 'legalIQ', path: '/legal', icon: '⚖︎' },
-    { name: 'insuranceIQ', path: '/insurance', icon: '🛡︎' },
-    { name: 'financialIQ', path: '/wealth', icon: '💰︎' },
-    { name: 'valuesIQ', path: '/values', icon: '🎯︎' },
-    { name: 'healthIQ', path: '/health', icon: '🏥︎' },
-    { name: 'vCTO', path: '/vcto', icon: '🚀︎' },
+    { name: 'My Advisor', path: '/client/advisor', icon: '👤' },
+    { name: 'Matters in Process', path: '/client/matters', icon: '📂' },
+    { name: 'My Vault', path: '/client/vault', icon: '🔐' },
+    { name: 'My Questionnaires', path: '/client/questionnaires', icon: '📝' },
+    { name: 'Book a Consult', path: '/client/book', icon: '📅' },
 ];
 
 interface MainLayoutProps {
@@ -57,7 +56,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     {modules.filter(module => {
                         // Client view restrictions per changes7.docx
                         if (role === 'Client') {
-                            const allowed = ['Dashboard'];
+                            const allowed = ['Dashboard', 'My Advisor', 'Matters in Process', 'My Vault', 'My Questionnaires', 'Book a Consult', 'Audit Trail'];
                             return allowed.includes(module.name);
                         }
                         // SuperAdmin sees only Super Admin nav item(s)

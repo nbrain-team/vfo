@@ -10,6 +10,7 @@ from app.core.config import settings
 from datetime import timedelta, datetime
 from app.models.user import User as UserModel
 from app.models.crm import Contact as ContactModel, Matter as MatterModel
+from app.models.intake import Intake as IntakeModel
 from typing import List
 
 
@@ -394,3 +395,44 @@ def client_request_appointment(
     db.commit()
     db.refresh(matter)
     return {"ok": True, "matter_id": matter.id}
+
+@router.get("/clients/my-advisor")
+def get_my_advisor(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    if current_user.role != "Client":
+        raise HTTPException(status_code=403, detail="Clients only")
+    if not current_user.advisor_id:
+        raise HTTPException(status_code=400, detail="Client is not linked to an advisor")
+    advisor = db.query(UserModel).filter(UserModel.id == current_user.advisor_id).first()
+    if not advisor:
+        raise HTTPException(status_code=404, detail="Advisor not found")
+    return {
+        "id": advisor.id,
+        "name": advisor.name,
+        "email": advisor.email,
+        "username": getattr(advisor, "username", None),
+    }
+
+@router.get("/clients/me/intakes")
+def list_my_intakes(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    if current_user.role != "Client":
+        raise HTTPException(status_code=403, detail="Clients only")
+    # Find contacts for this client by email
+    contacts = db.query(ContactModel).filter(ContactModel.email == current_user.email).all()
+    contact_ids = [c.id for c in contacts]
+    # Find matters for these contacts
+    matters = db.query(MatterModel).filter(MatterModel.contact_id.in_(contact_ids)).all() if contact_ids else []
+    matter_ids = [m.id for m in matters]
+    # Return intakes for those matters
+    q = db.query(IntakeModel)
+    if matter_ids:
+        q = q.filter(IntakeModel.matter_id.in_(matter_ids))
+    return [
+        {
+            "id": i.id,
+            "matter_id": i.matter_id,
+            "name": i.name,
+            "status": i.status,
+            "created_at": None,
+        }
+        for i in q.all()
+    ]
