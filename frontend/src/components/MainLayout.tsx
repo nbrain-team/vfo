@@ -98,14 +98,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                             <span className="sidebar-nav-label">Super Admin</span>
                         </NavLink>
                     )}
-                    <a
-                        href="/wyoming-apt"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="sidebar-nav-item"
-                    >
-                        <span className="sidebar-nav-label">Public Site</span>
-                    </a>
+                    {role !== 'SuperAdmin' && (
+                        <a
+                            href="/wyoming-apt"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="sidebar-nav-item"
+                        >
+                            <span className="sidebar-nav-label">Public Site</span>
+                        </a>
+                    )}
                     <NavLink
                         to="/docs"
                         className={({ isActive }) =>
