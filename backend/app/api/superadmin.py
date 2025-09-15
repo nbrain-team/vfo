@@ -116,6 +116,31 @@ def delete_advisor(
     return {"ok": True}
 
 
+class LinkClientPayload(BaseModel):
+    client_email: str
+    advisor_email: str
+
+@router.post("/link-client")
+def link_client_to_advisor(
+    payload: LinkClientPayload,
+    db: Session = Depends(get_db),
+    _: UserModel = Depends(require_superadmin)
+):
+    client = get_user_by_email(db, payload.client_email)
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+    advisor = get_user_by_email(db, payload.advisor_email)
+    if not advisor:
+        raise HTTPException(status_code=404, detail="Advisor not found")
+    if advisor.role not in ("Advisor", "Admin"):
+        raise HTTPException(status_code=400, detail="Advisor email is not an advisor/admin user")
+    client.advisor_id = advisor.id
+    db.add(client)
+    db.commit()
+    db.refresh(client)
+    return {"ok": True, "client_id": client.id, "advisor_id": advisor.id}
+
+
 @router.patch("/advisors/{user_id}")
 def update_advisor(
     user_id: int,
