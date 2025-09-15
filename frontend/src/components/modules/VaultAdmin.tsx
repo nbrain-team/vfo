@@ -54,20 +54,46 @@ const VaultAdmin: React.FC = () => {
     <ModuleTemplate title="Client Vault" description="Per-lead documents (mock).">
       <div className="module-grid">
         <div className="module-card">
-          <h3 className="section-title">Select Lead</h3>
+          <h3 className="section-title">Select Client</h3>
           <select className="form-input" value={selectedId || ''} onChange={(e) => setSelectedId(e.target.value)}>
             <option value="">Select...</option>
             {bookings.map(b => (
               <option key={b.id} value={b.id}>{b.name} — {b.email}</option>
             ))}
           </select>
-          <button className="form-button" style={{ width: 'auto', marginTop: 12 }} onClick={addMockDoc} disabled={!selected}>Add Mock Signed Doc</button>
-          <button className="form-button" style={{ width: 'auto', marginTop: 12 }} onClick={() => setShowGeneration(true)}>Generate Document</button>
         </div>
 
         <div className="module-card">
           <h3 className="section-title">Documents</h3>
-          {!selected && <div style={{ color: 'var(--text-secondary)' }}>Select a lead to view documents.</div>}
+          {/* Actions scoped to selected client */}
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            <button 
+              className="button-outline" 
+              style={{ width: 'auto' }}
+              disabled={!selected}
+              onClick={() => {
+                if (!selected) return;
+                // Upload flow placeholder; could wire to backend upload later.
+                addMockDoc();
+              }}
+            >
+              Upload Document
+            </button>
+            <button 
+              className="form-button" 
+              style={{ width: 'auto' }}
+              disabled={!selected}
+              onClick={() => {
+                if (!selected) return;
+                // Preselect the client in the generator and open modal
+                setSelectedClient(selected.id);
+                setShowGeneration(true);
+              }}
+            >
+              Generate Document
+            </button>
+          </div>
+          {!selected && <div style={{ color: 'var(--text-secondary)', marginTop: 12 }}>Select a client to view documents.</div>}
           {selected && (
             <div className="table-container" style={{ marginTop: 12 }}>
               <table className="data-table">
@@ -256,7 +282,7 @@ const VaultAdmin: React.FC = () => {
               <label className="form-label">Select Client</label>
               <select 
                 className="form-input" 
-                value={selectedClient} 
+                value={selectedClient || selectedId || ''}
                 onChange={(e) => setSelectedClient(e.target.value)}
               >
                 <option value="">Select a client...</option>
@@ -333,10 +359,11 @@ const VaultAdmin: React.FC = () => {
                     className="button-outline" 
                     style={{ width: 'auto' }}
                     onClick={() => {
-                      // Save a new draft version
-                      if (selectedClient) {
-                        addDocVersion({ id: `ver-${Date.now()}`, bookingId: selectedClient, name: `${selectedDocument || 'Document'} (Draft)`, content: draftEditable || generatedDraft, status: 'Draft', createdAt: new Date().toISOString() });
-                        setVersions(getDocVersions(selectedClient));
+                      // Save a new draft version to the selected client
+                      const targetId = selectedClient || selectedId;
+                      if (targetId) {
+                        addDocVersion({ id: `ver-${Date.now()}`, bookingId: targetId, name: `${selectedDocument || 'Document'} (Draft)`, content: draftEditable || generatedDraft, status: 'Draft', createdAt: new Date().toISOString() });
+                        setVersions(getDocVersions(targetId));
                         alert('Draft saved.');
                       }
                     }}
