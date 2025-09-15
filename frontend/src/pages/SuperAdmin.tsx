@@ -26,6 +26,8 @@ const SuperAdmin: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [query, setQuery] = useState('');
+  const [showCreate, setShowCreate] = useState(false);
+  const [newAdvisor, setNewAdvisor] = useState({ name: '', email: '', username: '', password: '' });
 
   const fetchData = async () => {
     setLoading(true);
@@ -117,6 +119,7 @@ const SuperAdmin: React.FC = () => {
             className="form-input"
             style={{ maxWidth: 280 }}
           />
+          <button className="form-button" style={{ width: 'auto' }} onClick={() => setShowCreate(true)}>+ Create Advisor</button>
         </div>
         <div className="table-wrapper">
           <table className="table">
@@ -174,7 +177,18 @@ const SuperAdmin: React.FC = () => {
                     {savingId === row.id ? (
                       <span>Saving...</span>
                     ) : (
-                      <button className="button-outline" onClick={() => updateAdvisor(row, {})}>Refresh</button>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button className="button-outline" onClick={() => updateAdvisor(row, {})}>Refresh</button>
+                        <button className="button-outline" style={{ color: 'var(--danger)' }} onClick={async () => {
+                          if (!confirm('Delete this advisor?')) return;
+                          try {
+                            await apiClient.delete(`/superadmin/advisors/${row.id}`);
+                            await fetchData();
+                          } catch (e: any) {
+                            alert(e?.response?.data?.detail || 'Delete failed');
+                          }
+                        }}>Delete</button>
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -183,6 +197,52 @@ const SuperAdmin: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {showCreate && (
+        <div className="modal-overlay" onClick={() => setShowCreate(false)}>
+          <div className="modal-container" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520, width: '90%' }}>
+            <h3>Create Advisor</h3>
+            <div style={{ display: 'grid', gap: 12 }}>
+              <div>
+                <label className="form-label">Name</label>
+                <input className="form-input" value={newAdvisor.name} onChange={(e) => setNewAdvisor({ ...newAdvisor, name: e.target.value })} />
+              </div>
+              <div>
+                <label className="form-label">Email</label>
+                <input className="form-input" value={newAdvisor.email} onChange={(e) => setNewAdvisor({ ...newAdvisor, email: e.target.value })} />
+              </div>
+              <div>
+                <label className="form-label">Username (optional)</label>
+                <input className="form-input" value={newAdvisor.username} onChange={(e) => setNewAdvisor({ ...newAdvisor, username: e.target.value })} />
+              </div>
+              <div>
+                <label className="form-label">Temporary Password</label>
+                <input className="form-input" type="password" value={newAdvisor.password} onChange={(e) => setNewAdvisor({ ...newAdvisor, password: e.target.value })} />
+              </div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <button className="button-outline" style={{ width: 'auto' }} onClick={() => setShowCreate(false)}>Cancel</button>
+                <button className="form-button" style={{ width: 'auto' }} onClick={async () => {
+                  try {
+                    if (!newAdvisor.email || !newAdvisor.password) { alert('Email and password required'); return; }
+                    await apiClient.post('/superadmin/advisors', {
+                      email: newAdvisor.email,
+                      name: newAdvisor.name || null,
+                      username: newAdvisor.username || null,
+                      password: newAdvisor.password,
+                      role: 'Advisor'
+                    });
+                    setShowCreate(false);
+                    setNewAdvisor({ name: '', email: '', username: '', password: '' });
+                    await fetchData();
+                  } catch (e: any) {
+                    alert(e?.response?.data?.detail || 'Create failed');
+                  }
+                }}>Create</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

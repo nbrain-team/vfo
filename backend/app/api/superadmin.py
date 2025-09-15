@@ -5,6 +5,8 @@ from typing import Optional
 from app.db.database import get_db
 from app.models.user import User as UserModel
 from app.api.api import get_current_user
+from app.db.crud import get_user_by_email
+from app.core.security import get_password_hash
 
 router = APIRouter(prefix="/superadmin", tags=["superadmin"])
 
@@ -61,6 +63,57 @@ class AdvisorUpdate(BaseModel):
     username: Optional[str] = None
     is_active: Optional[bool] = None
     role: Optional[str] = None  # allow changing between Advisor/Admin if needed
+class AdvisorCreate(BaseModel):
+    email: str
+    name: Optional[str] = None
+    password: str
+    username: Optional[str] = None
+    role: Optional[str] = "Advisor"
+
+@router.post("/advisors")
+def create_advisor(
+    payload: AdvisorCreate,
+    db: Session = Depends(get_db),
+    _: UserModel = Depends(require_superadmin)
+):
+    existing = get_user_by_email(db, payload.email)
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    user = UserModel(
+        email=payload.email,
+        name=payload.name,
+        role=payload.role or "Advisor",
+        username=payload.username,
+        hashed_password=get_password_hash(payload.password),
+        is_active=True,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return {
+        "id": user.id,
+        "email": user.email,
+        "name": user.name,
+        "username": getattr(user, "username", None),
+        "role": user.role,
+        "is_active": user.is_active,
+        "created_at": user.created_at,
+    }
+
+@router.delete("/advisors/{user_id}")
+def delete_advisor(
+    user_id: int,
+    db: Session = Depends(get_db),
+    _: UserModel = Depends(require_superadmin)
+):
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.role not in ("Advisor", "Admin"):
+        raise HTTPException(status_code=400, detail="Can only delete Advisor/Admin users here")
+    db.delete(user)
+    db.commit()
+    return {"ok": True}
 
 
 @router.patch("/advisors/{user_id}")
