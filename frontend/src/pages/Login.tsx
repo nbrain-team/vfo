@@ -30,7 +30,7 @@ const Login: React.FC = () => {
             const role = response.data.role || 'Client';
             localStorage.setItem('role', role);
             localStorage.setItem('user_id', response.data.user_id);
-            navigate('/platform');
+            navigate((role === 'SuperAdmin') ? '/superadmin' : '/platform');
         } catch (error) {
             setMessage('Invalid credentials. Please try again.');
             console.error(error);
@@ -58,7 +58,7 @@ const Login: React.FC = () => {
                 localStorage.setItem('google_refresh_token', response.data.google_refresh_token);
             }
             
-            navigate('/platform');
+            navigate((response.data.role === 'SuperAdmin') ? '/superadmin' : '/platform');
         } catch (error: any) {
             const errorMessage = error.response?.data?.detail || error.message || 'Google authentication failed. Please try again.';
             setMessage(`Error: ${errorMessage}`);

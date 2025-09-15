@@ -171,7 +171,7 @@ function App() {
             </MainLayout>
           } />
         </Route>
-        <Route path="/" element={<Navigate to="/platform" />} />
+        <Route path="/" element={<Navigate to={(localStorage.getItem('role') === 'SuperAdmin') ? '/superadmin' : '/platform'} />} />
       </Routes>
     </Router>
   );
