@@ -169,7 +169,7 @@ function App() {
           } />
           <Route path="/docs" element={
             <MainLayout>
-              <Documentation />
+              {localStorage.getItem('role') === 'SuperAdmin' ? <Documentation /> : <Navigate to="/platform" />}
             </MainLayout>
           } />
           <Route path="/superadmin" element={

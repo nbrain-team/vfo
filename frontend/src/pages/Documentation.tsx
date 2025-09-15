@@ -13,68 +13,47 @@ const Documentation: React.FC = () => {
 
     const recentChanges = [
         {
-            date: 'December 2024',
-            category: 'Platform Enhancements',
+            date: 'September 15, 2025',
+            category: 'Roles & Routing',
             changes: [
-                'Removed Welcome page from public access - users now go directly to dashboard after login',
-                'Added 6 KPI boxes on dashboard: Leads, Booked, Show up Ratio, Signed, Avg $ per Matter, Matters In Process with 30-day/inception toggles',
-                'Created pipeline widget between KPIs and Daily Brief showing all stages from Book Consults to Matter Fulfilled',
-                'Renamed "Onboarding Pipeline" to "LIFTed Advisor Pipeline" with new tabbed interface',
-                'Updated CRM columns: Position→Candidate Type, Status→Pipeline stages, Manager→Advisor, added progress bars',
-                'Embedded Google Calendar in CRM client details view with full sync functionality',
-                'Fixed Site Builder "Enable payments for booked consults" save functionality',
-                'Added LawPay account credentials management (Merchant ID and Public Key fields)'
+                'Added Super Admin dashboard and routed /platform to Super Admin metrics when role is SuperAdmin',
+                'Removed Public Site link and Documentation link for non-SuperAdmin users',
+                'Sidebar cleaned for Client role to only show Dashboard',
             ]
         },
         {
-            date: 'December 2024',
-            category: 'AdvisorIQ & Public Site',
+            date: 'September 15, 2025',
+            category: 'Advisor Analytics',
             changes: [
-                'Made all AdvisorIQ sections editable with hover edit buttons that save directly to public site',
-                'Blog widget now fully functional with add/edit/delete posts and SEO content generation from transcripts',
-                'Renamed "Consult" to "Consultations" with Google Calendar sync',
-                'Added appointment types: Free 30-min, Paid 30-min ($375), Paid 60-min ($750)',
-                'Integrated mock LawPay payment flow for paid consultations',
-                'Made Client Portal, Testimonials, and Contact sections editable and synced to public site',
-                'Duplicated current booking form with all questions in FormBuilder and mapped to public site'
+                'Implemented advisor-scoped pipeline metrics in backend /api/pipeline/stats with advisor-aware scoping',
+                'Ensured matters.advisor_id column creation at startup for scoping reliability',
             ]
         },
         {
-            date: 'December 2024',
-            category: 'Forms & Documents',
+            date: 'September 15, 2025',
+            category: 'AdvisorIQ & Site Preview',
             changes: [
-                'Added comprehensive "Paid 30-Minute Consultation Booking" form with all required fields',
-                'Added "Life & Legacy Planning Questionnaire" with 50+ fields',
-                'Added "Wealth Credit & Liquidity Assessment" form template',
-                'Enhanced Document Library with "Life & Legacy Planning Summary" document template',
-                'Added document generation workflow in Vault: select client, document, matter, generate draft, approve/send',
-                'Implemented mail-merge placeholders for all document templates'
+                'Embedded Site Builder as “Site Settings” tab inside AdvisorIQ',
+                'Adjusted CSP to allow same-origin iframe previews; updated preview to open the public route',
+                'Moved AdvisorIQ link above Formbuilder in sidebar',
             ]
         },
         {
-            date: 'December 2024',
-            category: 'Workflow Automation',
+            date: 'September 15, 2025',
+            category: 'Client Experience',
             changes: [
-                'Built comprehensive WYDAPT workflow automations with add rule functions',
-                'Added pre-configured WYDAPT Matter Workflow with 8-step process',
-                'Implemented quick rule buttons for common WYDAPT automations',
-                'Enhanced automation status tab in CRM showing active workflows and configured rules',
-                'Added stage-based automation triggers: Signed→Payment Instructions, Payment→Questionnaire, etc.',
-                'Email templates now include public site header banner automatically',
-                'Added merge tags with click-to-insert functionality for email templates'
+                'ClientDashboard now loads real documents via /api/entities/{entity_id}/documents/',
+                'Added Upload Document (multipart) and Request Appointment actions',
+                'Added /api/clients/request-appointment to create matters linked to client advisor',
+                'Added /api/clients/me/matters and “What’s Next” timeline for clients',
+                'Greeting for me@chrisjsnook.com shows “Good Morning, Chris Snook”',
             ]
         },
         {
-            date: 'December 2024',
-            category: 'Advanced Features',
+            date: 'September 15, 2025',
+            category: 'Security & Policies',
             changes: [
-                'Mapped LegalIQ to Vault for searching completed documents with analytics',
-                'Enhanced Audit module with real-time system actions, searchable by client/matter/timestamp',
-                'Added CSV export functionality to Audit logs',
-                'Fixed CRM buttons: Add Lead Form opens FormBuilder, Add Service Type shows pricing',
-                'Added pipeline widget duplicate to CRM overview tab with quick actions',
-                'Implemented drag-and-drop functionality in pipeline with bot/advisor action rules',
-                'Added visual pipeline with clickable stages for quick actions'
+                'Updated CSP (frame-src self) and removed frame-ancestors meta to support embedded preview',
             ]
         }
     ];

@@ -108,14 +108,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                             <span className="sidebar-nav-label">Public Site</span>
                         </a>
                     )}
-                    <NavLink
-                        to="/docs"
-                        className={({ isActive }) =>
-                            `sidebar-nav-item ${isActive ? 'active' : ''}`
-                        }
-                    >
-                        <span className="sidebar-nav-label">Documentation</span>
-                    </NavLink>
+                    {role === 'SuperAdmin' && (
+                        <NavLink
+                            to="/docs"
+                            className={({ isActive }) =>
+                                `sidebar-nav-item ${isActive ? 'active' : ''}`
+                            }
+                        >
+                            <span className="sidebar-nav-label">Documentation</span>
+                        </NavLink>
+                    )}
                     <NavLink
                         to="/profile"
                         className={({ isActive }) =>
