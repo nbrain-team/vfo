@@ -40,3 +40,22 @@ def run_advisor_fields_migration(x_admin_token: str | None = Header(default=None
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Migration failed: {e}")
 
+
+@router.post("/migrations/entity-extensions")
+def run_entity_extensions_migration(x_admin_token: str | None = Header(default=None)):
+    expected = os.getenv("ADMIN_TASKS_TOKEN", "")
+    if not expected:
+        raise HTTPException(status_code=500, detail="ADMIN_TASKS_TOKEN not configured")
+    if not x_admin_token or x_admin_token != expected:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("ALTER TABLE entities ADD COLUMN IF NOT EXISTS practice_area VARCHAR"))
+            conn.execute(text("ALTER TABLE entities ADD COLUMN IF NOT EXISTS contact_email VARCHAR"))
+            conn.execute(text("ALTER TABLE entities ADD COLUMN IF NOT EXISTS contact_phone VARCHAR"))
+            conn.execute(text("ALTER TABLE entities ADD COLUMN IF NOT EXISTS external_id VARCHAR"))
+            conn.commit()
+        return {"ok": True, "message": "Entity extension columns ensured"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Migration failed: {e}")
