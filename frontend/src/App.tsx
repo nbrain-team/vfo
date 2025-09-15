@@ -58,7 +58,13 @@ function App() {
 
           <Route path="/platform" element={
             <MainLayout>
-              {(localStorage.getItem('role') === 'Client') ? <ClientDashboard /> : <Platform />}
+              {localStorage.getItem('role') === 'Client' ? (
+                <ClientDashboard />
+              ) : localStorage.getItem('role') === 'SuperAdmin' ? (
+                <SuperAdmin />
+              ) : (
+                <Platform />
+              )}
             </MainLayout>
           } />
           <Route path="/admin/calendar" element={
