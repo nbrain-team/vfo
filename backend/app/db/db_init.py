@@ -18,5 +18,7 @@ def init_db():
             # Ensure new User advisor fields exist as well
             conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR UNIQUE"))
             conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS advisor_id INTEGER REFERENCES users(id)"))
+            # Ensure CRM advisor link exists
+            conn.execute(text("ALTER TABLE matters ADD COLUMN IF NOT EXISTS advisor_id INTEGER REFERENCES users(id)"))
         except Exception:
             pass

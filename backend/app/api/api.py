@@ -207,8 +207,18 @@ def get_field_mapping(db: Session = Depends(get_db), current_user: UserModel = D
 
 # --- Pipeline Analytics ---
 @router.get("/pipeline/stats")
-def get_pipeline_stats(period: str = "month", db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    """Get pipeline statistics for dashboard KPIs"""
+def get_pipeline_stats(
+    period: str = "month",
+    advisor_id: int | None = None,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    """Get advisor-scoped pipeline statistics for dashboard KPIs.
+
+    Defaults to the current advisor when an Advisor is logged in. For Clients,
+    it will scope to their advisor. SuperAdmin/Admin may pass advisor_id to
+    scope to a specific advisor; otherwise returns aggregate across all advisors.
+    """
     from app.models.crm import Matter as MatterModel
     from datetime import datetime, timedelta
     
@@ -219,8 +229,23 @@ def get_pipeline_stats(period: str = "month", db: Session = Depends(get_db), cur
     else:
         start_date = datetime(2000, 1, 1)  # inception
     
-    # Get matters filtered by period
-    matters = db.query(MatterModel).filter(MatterModel.created_at >= start_date).all()
+    # Determine effective advisor scope
+    effective_advisor_id: int | None = None
+    try:
+        if getattr(current_user, "role", None) == "Advisor":
+            effective_advisor_id = current_user.id
+        elif getattr(current_user, "role", None) == "Client" and getattr(current_user, "advisor_id", None):
+            effective_advisor_id = current_user.advisor_id
+        elif advisor_id is not None:
+            effective_advisor_id = advisor_id
+    except Exception:
+        effective_advisor_id = advisor_id
+
+    # Build query
+    q = db.query(MatterModel).filter(MatterModel.created_at >= start_date)
+    if effective_advisor_id is not None:
+        q = q.filter(MatterModel.advisor_id == effective_advisor_id)
+    matters = q.all()
     
     # Calculate KPIs
     stats = {
