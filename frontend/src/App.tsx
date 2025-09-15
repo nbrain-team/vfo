@@ -37,6 +37,7 @@ import FormbuilderAdmin from './components/modules/FormbuilderAdmin';
 import DocumentLibraryAdmin from './components/modules/DocumentLibraryAdmin';
 import CalendarCallback from './pages/CalendarCallback';
 import SuperAdmin from './pages/SuperAdmin';
+import ClientDashboard from './pages/ClientDashboard';
 
 function App() {
   return (
@@ -57,7 +58,7 @@ function App() {
 
           <Route path="/platform" element={
             <MainLayout>
-              <Platform />
+              {(localStorage.getItem('role') === 'Client') ? <ClientDashboard /> : <Platform />}
             </MainLayout>
           } />
           <Route path="/admin/calendar" element={
