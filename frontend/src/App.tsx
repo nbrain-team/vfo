@@ -99,7 +99,7 @@ function App() {
           } />
           <Route path="/admin/vault" element={
             <MainLayout>
-              <VaultAdmin />
+              {localStorage.getItem('role') === 'Client' ? <Navigate to="/platform" /> : <VaultAdmin />}
             </MainLayout>
           } />
           <Route path="/admin/nurture" element={

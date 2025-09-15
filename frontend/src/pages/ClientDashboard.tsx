@@ -14,6 +14,7 @@ const ClientDashboard: React.FC = () => {
   const userName = useMemo(() => localStorage.getItem('user_name') || 'Client', []);
   const [entityId, setEntityId] = useState<number | null>(null);
   const [documents, setDocuments] = useState<any[]>([]);
+  const [matters, setMatters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -31,6 +32,9 @@ const ClientDashboard: React.FC = () => {
           const docsRes = await apiClient.get(`/legal/entities/${eid}/documents/`.replace('/legal', '')); // baseURL already includes /api
           setDocuments(docsRes.data || []);
         }
+        // Load my matters for next steps
+        const mattersRes = await apiClient.get('/clients/me/matters');
+        setMatters(mattersRes.data || []);
       } catch (e: any) {
         setError(e?.response?.data?.detail || 'Failed to load your documents');
       } finally {
@@ -116,6 +120,25 @@ const ClientDashboard: React.FC = () => {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="chart-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <h3 style={{ margin: 0 }}>What’s Next</h3>
+        </div>
+        {matters.length === 0 && (
+          <div style={{ color: 'var(--text-secondary)' }}>No active items. Use “Request Appointment” to get started.</div>
+        )}
+        {matters.length > 0 && (
+          <ul style={{ listStyle: 'none', padding: 0 }}>
+            {matters.map((m: any) => (
+              <li key={m.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--border-light)' }}>
+                <div style={{ fontWeight: 500 }}>{m.title}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Status: {m.stage || 'New'}</div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

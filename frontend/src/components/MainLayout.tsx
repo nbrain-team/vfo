@@ -57,7 +57,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     {modules.filter(module => {
                         // Client view restrictions per changes7.docx
                         if (role === 'Client') {
-                            const allowed = ['Dashboard', 'Vault'];
+                            const allowed = ['Dashboard'];
                             return allowed.includes(module.name);
                         }
                         // SuperAdmin sees only Super Admin nav item(s)

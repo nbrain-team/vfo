@@ -158,6 +158,22 @@ def list_matters(db: Session = Depends(get_db), current_user: UserModel = Depend
     from app.models.crm import Matter as MatterModel
     return db.query(MatterModel).all()
 
+@router.get("/clients/me/matters", response_model=List[Matter])
+def list_my_matters(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    """Return matters linked to the current client (via advisor_id or contact email)."""
+    from app.models.crm import Matter as MatterModel, Contact as ContactModel
+    if current_user.role != "Client":
+        raise HTTPException(status_code=403, detail="Clients only")
+    # Prefer email linkage via Contact
+    contacts = db.query(ContactModel).filter(ContactModel.email == current_user.email).all()
+    contact_ids = [c.id for c in contacts]
+    q = db.query(MatterModel)
+    if contact_ids:
+        q = q.filter(MatterModel.contact_id.in_(contact_ids))
+    if current_user.advisor_id:
+        q = q.filter(MatterModel.advisor_id == current_user.advisor_id)
+    return q.all()
+
 @router.patch("/matters/{matter_id}")
 def update_matter(matter_id: int, stage: str = None, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     """Update matter stage or other properties"""
