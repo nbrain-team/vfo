@@ -9,6 +9,7 @@ from app.core.security import create_access_token, ALGORITHM, verify_password
 from app.core.config import settings
 from datetime import timedelta, datetime
 from app.models.user import User as UserModel
+from app.models.crm import Contact as ContactModel, Matter as MatterModel
 from typing import List
 
 
@@ -59,6 +60,21 @@ def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2Passw
 @router.get("/users/me", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+@router.get("/users/me/default-entity")
+def get_or_create_default_entity(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    entity = None
+    if current_user.entities:
+        entity = current_user.entities[0]
+    if not entity:
+        # Create a default entity for the user
+        entity = crud.create_entity(db=db, entity=EntityCreate(name=current_user.name or current_user.email.split('@')[0]))
+        # Link entity to user
+        current_user.entities.append(entity)
+        db.add(current_user)
+        db.commit()
+        db.refresh(current_user)
+    return {"entity_id": entity.id}
 
 @router.get("/entities/", response_model=List[Entity])
 async def read_entities_for_user(current_user: User = Depends(get_current_user)):
@@ -328,3 +344,37 @@ def public_lead_submit(payload: PublicLead, db: Session = Depends(get_db)):
         "matter_id": matter.id,
         "intake_id": intake.id,
     }
+
+# --- Client appointment request ---
+@router.post("/clients/request-appointment")
+def client_request_appointment(
+    desired_time: str | None = None,
+    notes: str | None = None,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    """Client requests an appointment. Creates a Contact and Matter linked to the client's advisor."""
+    if current_user.role != "Client":
+        raise HTTPException(status_code=403, detail="Only clients can request appointments")
+    if not current_user.advisor_id:
+        raise HTTPException(status_code=400, detail="Client is not linked to an advisor")
+
+    # Upsert contact by client email
+    contact = db.query(ContactModel).filter(ContactModel.email == current_user.email).first()
+    if not contact:
+        contact = ContactModel(name=current_user.name or current_user.email, email=current_user.email, phone=None)
+        db.add(contact)
+        db.flush()
+
+    # Create a matter linked to advisor
+    matter = MatterModel(
+        title=f"Consultation Request - {current_user.email}",
+        pipeline="Client Portal",
+        stage="New",
+        contact_id=contact.id,
+        advisor_id=current_user.advisor_id
+    )
+    db.add(matter)
+    db.commit()
+    db.refresh(matter)
+    return {"ok": True, "matter_id": matter.id}

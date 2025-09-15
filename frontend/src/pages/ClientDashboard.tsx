@@ -1,4 +1,5 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import apiClient from '../apiClient';
 
 interface ClientDoc {
   id: string;
@@ -11,13 +12,60 @@ interface ClientDoc {
 
 const ClientDashboard: React.FC = () => {
   const userName = useMemo(() => localStorage.getItem('user_name') || 'Client', []);
+  const [entityId, setEntityId] = useState<number | null>(null);
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
-  const docs: ClientDoc[] = [
-    { id: 'c-1', title: 'Engagement Agreement - WAPA', description: 'Your signed engagement agreement', category: 'Engagement', requiresSignature: true, lastModified: '2024-01-21' },
-    { id: 'c-2', title: 'PTC Operating Agreement - Single Grantor', description: 'Operating agreement for your Private Trust Company', category: 'Trust', requiresSignature: true, lastModified: '2024-01-21' },
-    { id: 'c-3', title: 'DDC Distribution Request Form', description: 'Form to request a discretionary distribution', category: 'Other', requiresSignature: true, lastModified: '2024-01-21' },
-    { id: 'c-4', title: 'Organizational Meeting Minutes', description: 'Minutes from organizational meeting', category: 'Meetings', requiresSignature: true, lastModified: '2024-01-21' },
-  ];
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Ensure a default entity exists for this user and get its id
+        const ent = await apiClient.get('/users/me/default-entity');
+        const eid = ent.data?.entity_id;
+        setEntityId(eid);
+        if (eid) {
+          const docsRes = await apiClient.get(`/legal/entities/${eid}/documents/`.replace('/legal', '')); // baseURL already includes /api
+          setDocuments(docsRes.data || []);
+        }
+      } catch (e: any) {
+        setError(e?.response?.data?.detail || 'Failed to load your documents');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const handleUpload = async (file: File) => {
+    if (!entityId) return;
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      form.append('name', file.name);
+      form.append('document_type', 'Client Upload');
+      await apiClient.post(`/entities/${entityId}/documents/`, form, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const docsRes = await apiClient.get(`/entities/${entityId}/documents/`);
+      setDocuments(docsRes.data || []);
+    } catch (e: any) {
+      alert(e?.response?.data?.detail || 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const requestAppointment = async () => {
+    try {
+      await apiClient.post('/clients/request-appointment', {});
+      alert('Your request has been sent to your advisor.');
+    } catch (e: any) {
+      alert(e?.response?.data?.detail || 'Request failed');
+    }
+  };
 
   return (
     <div className="page-container">
@@ -27,34 +75,44 @@ const ClientDashboard: React.FC = () => {
       <div className="chart-card" style={{ marginBottom: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <h3 style={{ margin: 0 }}>Your Documents</h3>
-          <a className="button-outline" href="#" onClick={(e) => { e.preventDefault(); alert('Vault link coming soon'); }} style={{ width: 'auto', textDecoration: 'none' }}>Open Vault</a>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <label className="button-outline" style={{ width: 'auto', cursor: 'pointer' }}>
+              {uploading ? 'Uploading...' : 'Upload Document'}
+              <input type="file" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(f); }} />
+            </label>
+            <button className="form-button" style={{ width: 'auto' }} onClick={requestAppointment}>Request Appointment</button>
+          </div>
         </div>
         <div className="table-wrapper">
           <table className="table">
             <thead>
               <tr>
                 <th>Title</th>
-                <th>Category</th>
-                <th>Requires eSign</th>
-                <th>Last Modified</th>
+                <th>Type</th>
+                <th>Uploaded</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {docs.map(doc => (
+              {loading && (
+                <tr><td colSpan={4}>Loading...</td></tr>
+              )}
+              {error && !loading && (
+                <tr><td colSpan={4} style={{ color: 'var(--danger)' }}>{error}</td></tr>
+              )}
+              {!loading && !error && documents.map((doc: any) => (
                 <tr key={doc.id}>
+                  <td>{doc.name}</td>
+                  <td>{doc.document_type || '-'}</td>
+                  <td>{new Date(doc.upload_date || Date.now()).toLocaleString()}</td>
                   <td>
-                    <div style={{ fontWeight: 500 }}>{doc.title}</div>
-                    <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{doc.description}</div>
-                  </td>
-                  <td>{doc.category}</td>
-                  <td>{doc.requiresSignature ? 'Yes' : 'No'}</td>
-                  <td>{doc.lastModified}</td>
-                  <td>
-                    <button className="button-outline" style={{ width: 'auto' }} onClick={() => alert('Preview coming soon')}>Preview</button>
+                    <a className="button-outline" href="#" onClick={(e) => { e.preventDefault(); alert('Download coming soon'); }} style={{ width: 'auto', textDecoration: 'none' }}>Download</a>
                   </td>
                 </tr>
               ))}
+              {!loading && !error && documents.length === 0 && (
+                <tr><td colSpan={4} style={{ color: 'var(--text-secondary)' }}>No documents yet.</td></tr>
+              )}
             </tbody>
           </table>
         </div>
