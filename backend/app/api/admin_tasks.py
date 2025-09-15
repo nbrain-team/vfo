@@ -59,3 +59,20 @@ def run_entity_extensions_migration(x_admin_token: str | None = Header(default=N
         return {"ok": True, "message": "Entity extension columns ensured"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Migration failed: {e}")
+
+
+@router.post("/migrations/crm-advisor-link")
+def run_crm_advisor_link_migration(x_admin_token: str | None = Header(default=None)):
+    expected = os.getenv("ADMIN_TASKS_TOKEN", "")
+    if not expected:
+        raise HTTPException(status_code=500, detail="ADMIN_TASKS_TOKEN not configured")
+    if not x_admin_token or x_admin_token != expected:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("ALTER TABLE matters ADD COLUMN IF NOT EXISTS advisor_id INTEGER REFERENCES users(id)"))
+            conn.commit()
+        return {"ok": True, "message": "Matters.advisor_id ensured"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Migration failed: {e}")

@@ -26,6 +26,7 @@ class Matter(Base):
     pipeline = Column(String, index=True, nullable=True)
     stage = Column(String, index=True, nullable=True)
     contact_id = Column(Integer, ForeignKey("contacts.id"), nullable=False)
+    advisor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
 
