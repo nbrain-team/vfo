@@ -1,31 +1,46 @@
 import React from 'react';
+import { getSiteConfig } from '../adminData';
 import '../public.css';
 
 const MockWyomingAPT: React.FC = () => {
+    const cfg = getSiteConfig();
+    const logoSrc = (cfg as any).logoDataUrl || (cfg as any).logoPath || '/wy-apt-logo.png';
+    const phone = (cfg as any).contactPhone || '(307) 463-3600';
+    const ctaText = (cfg as any).ctaText || 'Book a Call';
+    const ctaHref = (cfg as any).ctaHref || '/wyoming-apt/select';
+    const headline = (cfg as any).headline || 'Wyoming Asset Protection Trusts';
+    const subhead = (cfg as any).subhead || 'Shield your wealth with proven structures under Wyoming law.';
+    const videoUrl = (cfg as any).videoUrl || 'https://drive.google.com/file/d/1otkNyA5S8AaIv_QW0J2sjtIFCqpf9P5K/preview';
+
+    const services: { title: string; subtitle: string }[] = ((cfg as any).services || []).map((s: any) => ({ title: s.title, subtitle: s.subtitle }));
     return (
         <div className="public-site">
             <div className="public-container">
                 <header className="public-header">
                     <div className="public-logo">
-                        <img src="/wy-apt-logo.png" alt="Firm Logo" />
+                        <img src={logoSrc} alt="Firm Logo" />
                         <div>
-                            <div style={{ fontWeight: 700, color: 'var(--brand-forest)' }}>Wyoming Asset Protection</div>
-                            <div style={{ fontSize: 12, color: 'var(--brand-slate)' }}>by Matt Meuli</div>
+                            <div style={{ fontWeight: 700, color: 'var(--brand-forest)' }}>{(cfg as any).advisorName || 'Advisor'}</div>
+                            <div style={{ fontSize: 12, color: 'var(--brand-slate)' }}>by {(cfg as any).advisorName || 'Advisor'}</div>
                         </div>
                     </div>
-                    <div className="public-cta">
-                        <a className="btn-primary" href="tel:+13074633600" style={{ textDecoration: 'none' }}>Call: (307) 463-3600</a>
-                        <a className="btn-gradient" href="/wyoming-apt/select" style={{ textDecoration: 'none' }}>Book an Appointment</a>
-                    </div>
+                    <nav className="public-nav" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                        <a className="btn-link" href="#top" style={{ textDecoration: 'none' }}>Home</a>
+                        <a className="btn-link" href="#services" style={{ textDecoration: 'none' }}>Services</a>
+                        <a className="btn-link" href="/blog" style={{ textDecoration: 'none' }}>Blog</a>
+                        <a className="btn-link" href="#contact" style={{ textDecoration: 'none' }}>Contact</a>
+                        <div className="public-cta" style={{ display: 'flex', gap: 8 }}>
+                            <a className="btn-primary" href={`tel:${phone.replace(/[^\d+]/g, '')}`} style={{ textDecoration: 'none' }}>Call: {phone}</a>
+                            <a className="btn-gradient" href={ctaHref} style={{ textDecoration: 'none' }}>{ctaText}</a>
+                        </div>
+                    </nav>
                 </header>
 
                 <section className="public-hero">
-                    <h1>Get Expert Asset Protection Advice</h1>
-                    <p>
-                        During your consult, we’ll review your risk exposure, recommend the right trust structure or entity setup, and outline next steps to secure your wealth.
-                    </p>
+                    <h1>{headline}</h1>
+                    <p>{subhead}</p>
                     <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                        <a className="btn-gradient" href="/wyoming-apt/select" style={{ textDecoration: 'none' }}>Book a Call</a>
+                        <a className="btn-gradient" href={ctaHref} style={{ textDecoration: 'none' }}>{ctaText}</a>
                         <a className="btn-outline" href="#testimonials" style={{ textDecoration: 'none' }}>See Client Stories</a>
                     </div>
                 </section>
@@ -33,7 +48,7 @@ const MockWyomingAPT: React.FC = () => {
                 <section className="public-section" style={{ padding: 0, overflow: 'hidden' }}>
                     <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#000' }}>
                         <iframe
-                            src="https://drive.google.com/file/d/1otkNyA5S8AaIv_QW0J2sjtIFCqpf9P5K/preview"
+                            src={videoUrl}
                             title="Intro Video"
                             allow="autoplay; fullscreen"
                             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
@@ -41,7 +56,7 @@ const MockWyomingAPT: React.FC = () => {
                     </div>
                 </section>
 
-                <section className="public-section">
+                <section className="public-section" id="services">
                     <h2>Why Work With Matt Meuli?</h2>
                     <div className="public-grid">
                         <div className="public-card">
@@ -62,18 +77,16 @@ const MockWyomingAPT: React.FC = () => {
                 <section className="public-section">
                     <h2>Our Core Services</h2>
                     <div className="public-grid">
-                        <div className="public-card">
-                            <h3>Wyoming Asset Protection Trusts</h3>
-                            <p>DAPTs designed for real protection while maintaining access and control.</p>
-                        </div>
-                        <div className="public-card">
-                            <h3>Private Family Trust Companies</h3>
-                            <p>Serve as trustee, enhance privacy, and centralize family asset management.</p>
-                        </div>
-                        <div className="public-card">
-                            <h3>Trust Support & Maintenance</h3>
-                            <p>Year-one guidance, distributions, minutes, and ongoing annual maintenance.</p>
-                        </div>
+                        {(services.length > 0 ? services : [
+                            { title: 'Wyoming Asset Protection Trusts', subtitle: 'DAPTs designed for real protection while maintaining access and control.' },
+                            { title: 'Private Family Trust Companies', subtitle: 'Serve as trustee, enhance privacy, and centralize family asset management.' },
+                            { title: 'Trust Support & Maintenance', subtitle: 'Year-one guidance, distributions, minutes, and ongoing annual maintenance.' }
+                        ]).map((svc, i) => (
+                            <div className="public-card" key={i}>
+                                <h3>{svc.title}</h3>
+                                <p>{svc.subtitle}</p>
+                            </div>
+                        ))}
                     </div>
                 </section>
 
@@ -108,11 +121,11 @@ const MockWyomingAPT: React.FC = () => {
                     </div>
                 </section>
 
-                <section className="public-section">
+                <section className="public-section" id="contact">
                     <h2>Contact</h2>
-                    <p><strong>Phone:</strong> (307) 463-3600</p>
-                    <p><strong>Email:</strong> hello@wyomingassetprotectiontrust.com</p>
-                    <p><strong>Address:</strong> 1621 Central Avenue #8866, Cheyenne, WY 82001</p>
+                    <p><strong>Phone:</strong> {phone}</p>
+                    <p><strong>Email:</strong> {(cfg as any).contactEmail || 'hello@example.com'}</p>
+                    <p><strong>Address:</strong> {(cfg as any).contactAddress || '1621 Central Avenue #8866, Cheyenne, WY 82001'}</p>
                 </section>
 
                 <footer className="public-footer">

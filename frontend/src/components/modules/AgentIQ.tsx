@@ -3,9 +3,10 @@ import ModuleTemplate from './ModuleTemplate';
 import { useNavigate } from 'react-router-dom';
 import EditableSection from './EditableSection';
 import { getSiteConfig, saveSiteConfig } from '../../adminData';
+import SiteBuilderAdmin from './SiteBuilderAdmin';
 import LawPayIntegration from '../LawPayIntegration';
 
-type TabKey = 'overview' | 'blog' | 'services' | 'consultations' | 'client-portal' | 'testimonials' | 'contact' | 'consult';
+type TabKey = 'overview' | 'blog' | 'services' | 'consultations' | 'client-portal' | 'testimonials' | 'contact' | 'consult' | 'site-settings';
 
 interface ServiceItem {
     id: string;
@@ -1598,7 +1599,8 @@ const AgentIQ: React.FC = () => {
                     { key: 'consultations', label: '◻︎ Consultations' },
                     { key: 'client-portal', label: '◻︎ Client Portal' },
                     { key: 'testimonials', label: '◻︎ Testimonials' },
-                    { key: 'contact', label: '◻︎ Contact' }
+                    { key: 'contact', label: '◻︎ Contact' },
+                    { key: 'site-settings', label: '◻︎ Site Settings' }
                 ] as { key: TabKey; label: string }[]).map(tab => (
                     <button
                         key={tab.key}
@@ -1618,6 +1620,14 @@ const AgentIQ: React.FC = () => {
             {activeTab === 'client-portal' && renderClientPortal()}
             {activeTab === 'testimonials' && renderTestimonials()}
             {activeTab === 'contact' && renderContact()}
+            {activeTab === 'site-settings' && (
+                <div className="module-card">
+                    <h3 className="section-title">Site Builder</h3>
+                    <div style={{ marginTop: 12 }}>
+                        <SiteBuilderAdmin embedded={true} />
+                    </div>
+                </div>
+            )}
         </ModuleTemplate>
     );
 };

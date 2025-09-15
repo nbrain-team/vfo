@@ -3,7 +3,9 @@ import ModuleTemplate from './ModuleTemplate';
 import { getSiteConfig, saveSiteConfig } from '../../adminData';
 import apiClient from '../../apiClient';
 
-const SiteBuilderAdmin: React.FC = () => {
+interface SiteBuilderProps { embedded?: boolean }
+
+const SiteBuilderAdmin: React.FC<SiteBuilderProps> = ({ embedded = false }) => {
   const initial = getSiteConfig();
   const [previewKey, setPreviewKey] = useState<number>(Date.now());
   const [videoUrl, setVideoUrl] = useState(initial.videoUrl || 'https://drive.google.com/file/d/1otkNyA5S8AaIv_QW0J2sjtIFCqpf9P5K/preview');
@@ -62,11 +64,7 @@ const SiteBuilderAdmin: React.FC = () => {
     }
   }, [username, currentUser]);
 
-  return (
-    <ModuleTemplate
-      title="Site Builder"
-      description="Configure your public page theme and blocks (mock)."
-    >
+  const content = (
       <div className="module-grid">
         <div className="module-card">
           <h3 className="section-title">Site Configuration</h3>
@@ -303,6 +301,18 @@ const SiteBuilderAdmin: React.FC = () => {
           </div>
         </div>
       </div>
+  );
+
+  if (embedded) {
+    return content;
+  }
+
+  return (
+    <ModuleTemplate
+      title="Site Builder"
+      description="Configure your public page theme and blocks (mock)."
+    >
+      {content}
     </ModuleTemplate>
   );
 };

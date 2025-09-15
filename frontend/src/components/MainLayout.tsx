@@ -11,7 +11,6 @@ interface Module {
 const modules: Module[] = [
     { name: 'Dashboard', path: '/platform', icon: '📊︎' },
     { name: 'Calendar', path: '/admin/calendar', icon: '🗓︎' },
-    { name: 'Sitebuilder', path: '/admin/site', icon: '🌐︎' },
     { name: 'Formbuilder', path: '/admin/formbuilder', icon: '📝' },
     { name: 'Document Library', path: '/admin/documents', icon: '📚' },
     { name: 'Vault', path: '/admin/vault', icon: '🔒' },

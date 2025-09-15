@@ -400,7 +400,7 @@ const Platform: React.FC = () => {
 
                 <div className="module-card">
                     <h3 className="section-title">Current Site Preview</h3>
-                    <div style={{ marginTop: 12, position: 'relative', cursor: 'pointer' }} onClick={() => window.location.href = '/admin/sitebuilder'}>
+                    <div style={{ marginTop: 12, position: 'relative', cursor: 'pointer' }} onClick={() => window.location.href = '/agent'}>
                         <div style={{ 
                             width: '100%', 
                             height: '200px', 
