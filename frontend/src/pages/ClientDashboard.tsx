@@ -11,7 +11,11 @@ interface ClientDoc {
 }
 
 const ClientDashboard: React.FC = () => {
-  const userName = useMemo(() => localStorage.getItem('user_name') || 'Client', []);
+  const userName = useMemo(() => {
+    const email = localStorage.getItem('user_email');
+    if (email === 'me@chrisjsnook.com') return 'Chris Snook';
+    return localStorage.getItem('user_name') || 'Client';
+  }, []);
   const [entityId, setEntityId] = useState<number | null>(null);
   const [documents, setDocuments] = useState<any[]>([]);
   const [matters, setMatters] = useState<any[]>([]);
