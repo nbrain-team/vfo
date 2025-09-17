@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:16-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -9,4 +9,6 @@ RUN npm install
 
 COPY . .
 
-CMD ["npm", "start"] 
+ENV HOST=0.0.0.0
+ENV PORT=3000
+CMD ["sh","-lc","exec npm start -- --host ${HOST} --port ${PORT}"]
