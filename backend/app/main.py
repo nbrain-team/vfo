@@ -21,6 +21,7 @@ app.add_middleware(
         "http://localhost:5174",
         "https://agentiq-vfo-frontend.onrender.com",
         "https://liftedvfo-frontend.onrender.com",
+        "https://app.liftedvfo.io",
     ],
     allow_credentials=True,
     allow_methods=["*"],
