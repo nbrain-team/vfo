@@ -5,6 +5,12 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
+    allowedHosts: [
+      'app.liftedvfo.io',
+      'liftedvfo-frontend.onrender.com',
+      'agentiq-vfo-frontend.onrender.com',
+      'localhost'
+    ],
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
@@ -17,6 +23,8 @@ export default defineConfig({
     port: 8080,
     strictPort: true,
     allowedHosts: [
+        'app.liftedvfo.io',
+        'liftedvfo-frontend.onrender.com',
         'agentiq-vfo-frontend.onrender.com'
     ]
   }
