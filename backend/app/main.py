@@ -16,6 +16,7 @@ import uuid
 import sentry_sdk
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from sqlalchemy import text
+from app.core.logging_config import configure_logging
 from starlette.middleware.base import BaseHTTPMiddleware
 import uuid
 
@@ -26,6 +27,9 @@ SENTRY_DSN = os.getenv("SENTRY_DSN")
 if SENTRY_DSN:
     sentry_sdk.init(dsn=SENTRY_DSN, traces_sample_rate=0.05)
     app.add_middleware(SentryAsgiMiddleware)
+
+# Configure global logging redaction
+configure_logging()
 
 # Configure CORS
 allowed_origins = [
