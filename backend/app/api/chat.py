@@ -93,10 +93,18 @@ async def upload_and_index_document(
         if content_type not in ALLOWED_TYPES:
             raise HTTPException(status_code=415, detail="Unsupported Media Type")
 
-        # Read file content with size guard (for current processing design)
-        file_content = await file.read()
-        if len(file_content) > MAX_BYTES:
-            raise HTTPException(status_code=413, detail="File too large")
+        # Read file content with streaming size guard
+        total = 0
+        buf = bytearray()
+        while True:
+            chunk = await file.read(1024 * 1024)
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > MAX_BYTES:
+                raise HTTPException(status_code=413, detail="File too large")
+            buf.extend(chunk)
+        file_content = bytes(buf)
         file_name = file.filename
         file_type = file_name.split('.')[-1] if '.' in file_name else 'txt'
         
@@ -151,8 +159,23 @@ async def analyze_document(
     Analyze a document using GPT-4o.
     """
     try:
-        # Read file content
-        file_content = await file.read()
+        # Validate content type
+        content_type = (file.content_type or "").lower()
+        if content_type not in ALLOWED_TYPES:
+            raise HTTPException(status_code=415, detail="Unsupported Media Type")
+
+        # Read file content with streaming size guard
+        total = 0
+        buf = bytearray()
+        while True:
+            chunk = await file.read(1024 * 1024)
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > MAX_BYTES:
+                raise HTTPException(status_code=413, detail="File too large")
+            buf.extend(chunk)
+        file_content = bytes(buf)
         file_name = file.filename
         file_type = file_name.split('.')[-1] if '.' in file_name else 'txt'
         
