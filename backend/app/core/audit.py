@@ -6,10 +6,30 @@ from fastapi import Request, HTTPException
 from ipaddress import ip_network, ip_address
 
 logger = logging.getLogger("audit")
+_SENSITIVE_KEYS = {"email", "phone", "ssn", "password", "token", "access_token", "refresh_token"}
+
+def _mask_value(value: str) -> str:
+    if not value:
+        return value
+    if "@" in value:
+        # mask email
+        name, _, domain = value.partition("@"); name_mask = name[:1] + "***" if name else "***"
+        return f"{name_mask}@{domain}"
+    if len(value) > 6:
+        return value[:2] + "***" + value[-2:]
+    return "***"
 
 def log_admin_action(request: Request, user, action: str, detail: dict | None = None) -> None:
     try:
         request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+        detail = detail or {}
+        # mask sensitive fields in detail
+        redacted_detail = {}
+        for k, v in detail.items():
+            if isinstance(v, str) and k.lower() in _SENSITIVE_KEYS:
+                redacted_detail[k] = _mask_value(v)
+            else:
+                redacted_detail[k] = v
         record = {
             "type": "admin_action",
             "request_id": request_id,
@@ -20,7 +40,7 @@ def log_admin_action(request: Request, user, action: str, detail: dict | None = 
             "user_email": getattr(user, "email", None),
             "role": getattr(user, "role", None),
             "action": action,
-            "detail": detail or {},
+            "detail": redacted_detail,
         }
         logger.info(json.dumps(record))
     except Exception:
