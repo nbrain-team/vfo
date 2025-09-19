@@ -26,6 +26,10 @@ class User(Base):
     # Encrypted tokens (scaffold)
     google_refresh_token_enc = Column(String, nullable=True)
     google_refresh_token_iv = Column(String, nullable=True)
+    # 2FA fields
+    twofa_enabled = Column(Boolean, default=False)
+    twofa_secret_enc = Column(String, nullable=True)
+    twofa_secret_iv = Column(String, nullable=True)
     # For advisors
     username = Column(String, unique=True, nullable=True)  # For public URL
     # For clients - link to their advisor

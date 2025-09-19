@@ -79,6 +79,7 @@ def login_for_access_token(response: Response, request: Request, db: Session = D
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    # If 2FA enabled, require a second factor in future (stubbed for now)
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
