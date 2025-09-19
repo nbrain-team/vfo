@@ -10,6 +10,8 @@ from app.api.google_auth import router as google_auth_router
 from app.api.test_config import router as test_config_router
 from app.api.admin_tasks import router as admin_tasks_router
 from app.api.superadmin import router as superadmin_router
+from starlette.middleware.base import BaseHTTPMiddleware
+import uuid
 
 app = FastAPI(title="LIFTed VFO API", version="1.0.0")
 
@@ -31,6 +33,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Request ID middleware for structured logs
+class RequestIDMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = request_id
+        return response
+
+app.add_middleware(RequestIDMiddleware)
+
 @app.on_event("startup")
 def on_startup():
     init_db()
@@ -47,3 +59,12 @@ app.include_router(superadmin_router, prefix="/api", tags=["superadmin"])
 @app.get("/")
 def read_root():
     return {"message": "Welcome to LIFTed VFO API"} 
+
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
+@app.get("/readyz")
+def readyz():
+    # Could add simple DB connectivity check here in the future
+    return {"status": "ready"}

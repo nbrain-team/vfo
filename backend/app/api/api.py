@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
@@ -16,6 +16,23 @@ from typing import List
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
+
+# Simple in-memory rate limiting state (per-process best effort)
+from collections import defaultdict, deque
+from time import time
+_ip_attempts = defaultdict(lambda: deque(maxlen=100))
+_user_attempts = defaultdict(lambda: deque(maxlen=100))
+
+def _allow_attempt(key: str, bucket: defaultdict, limit: int = 10, window_seconds: int = 900) -> bool:
+    now = time()
+    dq = bucket[key]
+    # drop old
+    while dq and now - dq[0] > window_seconds:
+        dq.popleft()
+    if len(dq) >= limit:
+        return False
+    dq.append(now)
+    return True
 
 # Dependency
 def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
@@ -37,9 +54,20 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
     return user
 
 @router.post("/token")
-def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
+def login_for_access_token(request: Request, db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
+    # Brute force protection: 10 wrong attempts per 15 minutes per IP and per username
+    client_ip = request.client.host if request.client else "unknown"
+    username = form_data.username or "unknown"
     user = crud.get_user_by_email(db, email=form_data.username)
     if not user or not verify_password(form_data.password, user.hashed_password):
+        # record failed attempt
+        _allow_attempt(client_ip, _ip_attempts)  # push timestamp regardless
+        _allow_attempt(username, _user_attempts)
+        # check limits
+        ip_ok = _allow_attempt(client_ip, _ip_attempts)
+        user_ok = _allow_attempt(username, _user_attempts)
+        if not ip_ok or not user_ok:
+            raise HTTPException(status_code=429, detail="Too many login attempts. Try again later.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
