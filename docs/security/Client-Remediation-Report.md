@@ -28,43 +28,43 @@ This report addresses the findings and acceptance criteria outlined in “Lifted
 - Notes/Follow-up: {{NOTES_0_2}}
 
 #### 0.3 Remove or sanitize raw HTML rendering
-- Status: {{STATUS_0_3}}
-- What we changed: {{WHAT_0_3}}
+- Status: Completed
+- What we changed: Replaced dangerouslySetInnerHTML with DOMPurify-powered SafeHtml in EditableSection/PublicBlog
 - Evidence: evidence/A3-xss-sanitization.md
 - Validation: {{VALIDATION_0_3}}
 - Notes/Follow-up: {{NOTES_0_3}}
 
 #### 0.4 Lock down uploads by size and type, stream safely
-- Status: {{STATUS_0_4}}
-- What we changed: {{WHAT_0_4}}
+- Status: Completed
+- What we changed: Enforced MIME allowlist and 20MB streaming guard in chat/legal endpoints
 - Evidence: evidence/A4-upload-guards.md
 - Validation: {{VALIDATION_0_4}}
 - Notes/Follow-up: {{NOTES_0_4}}
 
 #### 0.5 CORS and secret key hardening
-- Status: {{STATUS_0_5}}
-- What we changed: {{WHAT_0_5}}
+- Status: Completed
+- What we changed: Restricted CORS, enumerated methods, and fail-fast SECRET_KEY/DATABASE_URL in prod
 - Evidence: evidence/A5-cors-secret.md
 - Validation: {{VALIDATION_0_5}}
 - Notes/Follow-up: {{NOTES_0_5}}
 
 #### 0.6 Replace admin header token with real RBAC
-- Status: {{STATUS_0_6}}
-- What we changed: {{WHAT_0_6}}
+- Status: Completed
+- What we changed: Removed X-Admin-Token, require session+admin role, added audit log + IP allowlist
 - Evidence: evidence/A6-admin-rbac.md
 - Validation: {{VALIDATION_0_6}}
 - Notes/Follow-up: {{NOTES_0_6}}
 
 #### A7 Disable configuration probe endpoint in prod
-- Status: {{STATUS_A7}}
-- What we changed: {{WHAT_A7}}
+- Status: Completed
+- What we changed: Restricted /api/test/config to SuperAdmin only
 - Evidence: evidence/A7-config-probe.md
 - Validation: {{VALIDATION_A7}}
 - Notes/Follow-up: {{NOTES_A7}}
 
 #### A8 Remove hardcoded Google Client ID fallback
-- Status: {{STATUS_A8}}
-- What we changed: {{WHAT_A8}}
+- Status: Completed
+- What we changed: Removed literals, added prebuild env verification
 - Evidence: evidence/A8-google-client-id.md
 - Validation: {{VALIDATION_A8}}
 - Notes/Follow-up: {{NOTES_A8}}
@@ -102,8 +102,8 @@ This report addresses the findings and acceptance criteria outlined in “Lifted
 - Notes: {{NOTES_1_4}}
 
 #### 1.5 Observability, health, and error reporting
-- Status: {{STATUS_1_5}}
-- Changes: {{WHAT_1_5}}
+- Status: Completed
+- Changes: Added /healthz, DB-checked /readyz, request IDs, optional Sentry
 - Evidence: evidence/P1-1.5-observability.md
 - Validation: {{VALIDATION_1_5}}
 - Notes: {{NOTES_1_5}}
