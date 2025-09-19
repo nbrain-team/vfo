@@ -7,6 +7,9 @@ from app.models.user import User as UserModel
 from app.api.api import get_current_user
 from app.db.crud import get_user_by_email
 from app.core.security import get_password_hash
+from app.core.security import encrypt_secret
+import base64
+import pyotp
 
 router = APIRouter(prefix="/superadmin", tags=["superadmin"])
 
@@ -99,6 +102,23 @@ def create_advisor(
         "is_active": user.is_active,
         "created_at": user.created_at,
     }
+
+
+@router.post("/2fa/setup")
+def setup_2fa(db: Session = Depends(get_db), current_user: UserModel = Depends(require_superadmin)):
+    # Generate TOTP secret for current superadmin and return provisioning URI
+    secret = pyotp.random_base32()
+    from app.core.audit import log_admin_action
+    # Store encrypted secret scaffold (not persisted for superadmin here; per-user admin enrollment can follow)
+    ciphertext, iv = encrypt_secret(secret)
+    current_user.twofa_enabled = True
+    current_user.twofa_secret_enc = base64.b64encode(ciphertext).decode("utf-8")
+    current_user.twofa_secret_iv = base64.b64encode(iv).decode("utf-8")
+    db.add(current_user)
+    db.commit()
+    uri = pyotp.totp.TOTP(secret).provisioning_uri(name=current_user.email, issuer_name="LIFTed VFO")
+    log_admin_action(None, current_user, "2fa.setup", {})
+    return {"otpauth_uri": uri}
 
 @router.delete("/advisors/{user_id}")
 def delete_advisor(

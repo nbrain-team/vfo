@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Response, Form
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from app.db import crud
 from app.schemas.user import User, UserCreate, UserUpdate, Entity, EntityCreate, Contact, ContactCreate, Matter, MatterCreate, Intake, IntakeCreate, FieldMapping, PublicLead
 from app.db.database import get_db
-from app.core.security import create_access_token, ALGORITHM, verify_password
+from app.core.security import create_access_token, ALGORITHM, verify_password, decrypt_secret
+import pyotp
 from app.core.config import settings
 from datetime import timedelta, datetime
 from app.models.user import User as UserModel
@@ -59,7 +60,13 @@ def get_current_user(request: Request, db: Session = Depends(get_db), token: str
     return user
 
 @router.post("/token")
-def login_for_access_token(response: Response, request: Request, db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
+def login_for_access_token(
+    response: Response,
+    request: Request,
+    db: Session = Depends(get_db),
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    otp: str | None = Form(default=None),
+):
     # Brute force protection: 10 wrong attempts per 15 minutes per IP and per username
     client_ip = request.client.host if request.client else "unknown"
     username = form_data.username or "unknown"
@@ -79,7 +86,25 @@ def login_for_access_token(response: Response, request: Request, db: Session = D
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    # If 2FA enabled, require a second factor in future (stubbed for now)
+    # Enforce TOTP when enabled for admin/superadmin
+    try:
+        if getattr(user, "twofa_enabled", False):
+            if not otp:
+                raise HTTPException(status_code=401, detail="TOTP required")
+            # decrypt secret and verify
+            secret_enc = getattr(user, "twofa_secret_enc", None)
+            secret_iv = getattr(user, "twofa_secret_iv", None)
+            if not secret_enc or not secret_iv:
+                raise HTTPException(status_code=500, detail="2FA misconfigured")
+            import base64
+            secret = decrypt_secret(base64.b64decode(secret_enc), base64.b64decode(secret_iv))
+            totp = pyotp.TOTP(secret)
+            if not totp.verify(otp, valid_window=1):
+                raise HTTPException(status_code=401, detail="Invalid TOTP code")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=500, detail="2FA verification error")
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
