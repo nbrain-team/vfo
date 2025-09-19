@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import apiClient from '../apiClient';
 
 const Profile: React.FC = () => {
     const storedUserName = localStorage.getItem('user_name') || 'User';
@@ -99,6 +100,25 @@ privacy@liftedvfo.com
         { name: 'NY Life', status: 'Connected', icon: '🛡️' },
         { name: 'Plaid', status: 'Connected', icon: '🔗' }
     ];
+
+    const [qr, setQr] = useState<string | null>(null);
+    const [secMsg, setSecMsg] = useState<string | null>(null);
+
+    const setup2FA = async () => {
+        try {
+            const res = await apiClient.post('/superadmin/2fa/setup');
+            const uri = res.data?.otpauth_uri as string;
+            if (uri) {
+                const qrUrl = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(uri)}`;
+                setQr(qrUrl);
+                setSecMsg('Scan the QR code with your authenticator app, then login using your 2FA code.');
+            } else {
+                setSecMsg('Unable to generate 2FA enrollment.');
+            }
+        } catch (e: any) {
+            setSecMsg(e?.response?.data?.detail || 'Failed to start 2FA setup');
+        }
+    };
 
     const renderPersonalInfo = () => (
         <div className="chart-card">
@@ -209,6 +229,21 @@ privacy@liftedvfo.com
                     Save Changes
                 </button>
                 <button 
+                    onClick={setup2FA}
+                    style={{
+                        padding: '10px 20px',
+                        background: 'transparent',
+                        color: 'var(--primary)',
+                        border: '1px solid var(--primary)',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        marginRight: '12px'
+                    }}
+                >
+                    Setup Admin 2FA (TOTP)
+                </button>
+                <button 
                     onClick={() => {
                         setUserName(storedUserName);
                         setEmail('user@example.com');
@@ -226,6 +261,14 @@ privacy@liftedvfo.com
                 >
                     Cancel
                 </button>
+                {qr && (
+                    <div style={{ marginTop: 16 }}>
+                        <img src={qr} alt="2FA QR" />
+                    </div>
+                )}
+                {secMsg && (
+                    <p style={{ marginTop: 8 }}>{secMsg}</p>
+                )}
             </div>
         </div>
     );

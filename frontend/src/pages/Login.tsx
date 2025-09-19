@@ -8,6 +8,8 @@ const Login: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
+    const [otp, setOtp] = useState('');
+    const [needOtp, setNeedOtp] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -15,6 +17,7 @@ const Login: React.FC = () => {
         const params = new URLSearchParams();
         params.append('username', email);
         params.append('password', password);
+        if (otp) params.append('otp', otp);
 
         try {
             const response = await apiClient.post('/token', params, {
@@ -30,8 +33,17 @@ const Login: React.FC = () => {
             localStorage.setItem('role', role);
             localStorage.setItem('user_id', response.data.user_id);
             navigate((role === 'SuperAdmin') ? '/superadmin' : '/platform');
-        } catch (error) {
-            setMessage('Invalid credentials. Please try again.');
+        } catch (error: any) {
+            const detail = error?.response?.data?.detail || '';
+            if (detail === 'TOTP required') {
+                setNeedOtp(true);
+                setMessage('Enter your 2FA code to continue.');
+            } else if (detail === 'Invalid TOTP code') {
+                setNeedOtp(true);
+                setMessage('Invalid 2FA code. Please try again.');
+            } else {
+                setMessage('Invalid credentials. Please try again.');
+            }
             console.error(error);
         }
     };
@@ -116,6 +128,20 @@ const Login: React.FC = () => {
                             required
                         />
                     </div>
+                    {needOtp && (
+                        <div className="form-group">
+                            <label className="form-label">2FA Code</label>
+                            <input
+                                type="text"
+                                value={otp}
+                                onChange={(e) => setOtp(e.target.value)}
+                                className="form-input"
+                                placeholder="123456"
+                                inputMode="numeric"
+                                autoComplete="one-time-code"
+                            />
+                        </div>
+                    )}
                     <button type="submit" className="form-button">
                         Sign In
                     </button>
