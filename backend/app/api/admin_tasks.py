@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Header, HTTPException, Depends
+from fastapi import APIRouter, Header, HTTPException, Depends, Request
 import os
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -6,26 +6,30 @@ from app.db.database import engine, get_db
 from app.api.api import get_current_user
 from app.models.user import User as UserModel
 from app.core.security import encrypt_secret
+from app.core.audit import log_admin_action, enforce_admin_ip_allowlist
 import base64
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 @router.post("/migrations/google-auth")
-def run_google_auth_migration(current_user = Depends(get_current_user)):
+def run_google_auth_migration(request: Request, current_user = Depends(get_current_user)):
+    enforce_admin_ip_allowlist(request)
     if getattr(current_user, "role", None) not in ["Admin", "SuperAdmin"]:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     from app.db.migrations.add_google_auth_fields import upgrade
     try:
         upgrade()
+        log_admin_action(request, current_user, "migrations.google-auth", {})
         return {"ok": True, "message": "Migration applied"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Migration failed: {e}")
 
 
 @router.post("/migrations/advisor-fields")
-def run_advisor_fields_migration(current_user = Depends(get_current_user)):
+def run_advisor_fields_migration(request: Request, current_user = Depends(get_current_user)):
+    enforce_admin_ip_allowlist(request)
     if getattr(current_user, "role", None) not in ["Admin", "SuperAdmin"]:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
@@ -35,13 +39,15 @@ def run_advisor_fields_migration(current_user = Depends(get_current_user)):
             conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR UNIQUE"))
             conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS advisor_id INTEGER REFERENCES users(id)"))
             conn.commit()
+        log_admin_action(request, current_user, "migrations.advisor-fields", {})
         return {"ok": True, "message": "Advisor fields ensured (username, advisor_id)"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Migration failed: {e}")
 
 
 @router.post("/migrations/entity-extensions")
-def run_entity_extensions_migration(current_user = Depends(get_current_user)):
+def run_entity_extensions_migration(request: Request, current_user = Depends(get_current_user)):
+    enforce_admin_ip_allowlist(request)
     if getattr(current_user, "role", None) not in ["Admin", "SuperAdmin"]:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
@@ -52,13 +58,15 @@ def run_entity_extensions_migration(current_user = Depends(get_current_user)):
             conn.execute(text("ALTER TABLE entities ADD COLUMN IF NOT EXISTS contact_phone VARCHAR"))
             conn.execute(text("ALTER TABLE entities ADD COLUMN IF NOT EXISTS external_id VARCHAR"))
             conn.commit()
+        log_admin_action(request, current_user, "migrations.entity-extensions", {})
         return {"ok": True, "message": "Entity extension columns ensured"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Migration failed: {e}")
 
 
 @router.post("/migrations/crm-advisor-link")
-def run_crm_advisor_link_migration(current_user = Depends(get_current_user)):
+def run_crm_advisor_link_migration(request: Request, current_user = Depends(get_current_user)):
+    enforce_admin_ip_allowlist(request)
     if getattr(current_user, "role", None) not in ["Admin", "SuperAdmin"]:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
@@ -66,13 +74,15 @@ def run_crm_advisor_link_migration(current_user = Depends(get_current_user)):
         with engine.connect() as conn:
             conn.execute(text("ALTER TABLE matters ADD COLUMN IF NOT EXISTS advisor_id INTEGER REFERENCES users(id)"))
             conn.commit()
+        log_admin_action(request, current_user, "migrations.crm-advisor-link", {})
         return {"ok": True, "message": "Matters.advisor_id ensured"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Migration failed: {e}")
 
 
 @router.post("/migrations/backfill-google-token-encryption")
-def backfill_google_token_encryption(current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+def backfill_google_token_encryption(request: Request, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+    enforce_admin_ip_allowlist(request)
     """Encrypt existing plaintext google_refresh_token values into *_enc/iv and null the plaintext.
 
     Idempotent: skips rows already populated.
@@ -114,11 +124,13 @@ def backfill_google_token_encryption(current_user = Depends(get_current_user), d
             raise
 
     db.commit()
+    log_admin_action(request, current_user, "migrations.backfill-google-token-encryption", {"processed": processed, "skipped": skipped})
     return {"ok": True, "processed": processed, "skipped": skipped}
 
 
 @router.post("/migrations/drop-plaintext-google-refresh-token")
-def drop_plaintext_google_refresh_token(current_user = Depends(get_current_user)):
+def drop_plaintext_google_refresh_token(request: Request, current_user = Depends(get_current_user)):
+    enforce_admin_ip_allowlist(request)
     """Drop the plaintext google_refresh_token column after verifying backfill."""
     if getattr(current_user, "role", None) not in ["Admin", "SuperAdmin"]:
         raise HTTPException(status_code=401, detail="Unauthorized")
@@ -127,6 +139,7 @@ def drop_plaintext_google_refresh_token(current_user = Depends(get_current_user)
         with engine.connect() as conn:
             conn.execute(text("ALTER TABLE users DROP COLUMN IF EXISTS google_refresh_token"))
             conn.commit()
+        log_admin_action(request, current_user, "migrations.drop-plaintext-google-refresh-token", {})
         return {"ok": True, "message": "Dropped plaintext google_refresh_token column"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to drop column: {e}")
