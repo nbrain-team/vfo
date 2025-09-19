@@ -27,3 +27,9 @@ class Settings(BaseSettings):
         env_file = ".env"
 
 settings = Settings() 
+if os.getenv("RENDER", "").lower() in {"true", "1", "yes"} or os.getenv("ENVIRONMENT") == "production":
+    # Fail fast on missing critical secrets in prod environments
+    if not settings.SECRET_KEY or settings.SECRET_KEY == "your-secret-key-here":
+        raise RuntimeError("SECRET_KEY must be set to a strong value in production")
+    if not settings.DATABASE_URL:
+        raise RuntimeError("DATABASE_URL must be set in production")

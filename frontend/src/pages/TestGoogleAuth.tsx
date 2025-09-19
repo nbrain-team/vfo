@@ -5,7 +5,7 @@ const TestGoogleAuth: React.FC = () => {
     
     useEffect(() => {
         // Check environment variables
-        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '30007618988-jbj6cjee87sf3c9geshtr0uifs4la8n0.apps.googleusercontent.com';
+        const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
         const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
         
         setStatus({
@@ -39,7 +39,7 @@ const TestGoogleAuth: React.FC = () => {
             
             <h2>Steps to Fix Google Authentication</h2>
             <ol>
-                <li>Ensure Google Client ID is correct: {status.clientId?.substring(0, 20)}...</li>
+                <li>Ensure Google Client ID is correct.</li>
                 <li>Check that the OAuth consent screen is configured in Google Cloud Console</li>
                 <li>Verify authorized JavaScript origins include:
                     <ul>

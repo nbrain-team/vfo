@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+import os
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.db_init import init_db
 from app.api.api import router as api_router
@@ -13,18 +14,20 @@ from app.api.superadmin import router as superadmin_router
 app = FastAPI(title="LIFTed VFO API", version="1.0.0")
 
 # Configure CORS
+allowed_origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:5174",
+]
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    allowed_origins.append(frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "https://agentiq-vfo-frontend.onrender.com",
-        "https://liftedvfo-frontend.onrender.com",
-        "https://app.liftedvfo.io",
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 

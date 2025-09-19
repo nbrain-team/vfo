@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getSiteConfig } from '../adminData';
+import SafeHtml from '../components/modules/SafeHtml';
 
 interface BlogPost {
     id: string;
@@ -53,10 +54,9 @@ const PublicBlog: React.FC = () => {
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>
                         {new Date(post.createdAt).toLocaleDateString()}
                     </p>
-                    <div 
-                        style={{ lineHeight: '1.8', fontSize: '18px' }}
-                        dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br/>') }}
-                    />
+                    <div style={{ lineHeight: '1.8', fontSize: '18px' }}>
+                        <SafeHtml html={post.content.replace(/\n/g, '<br/>')} />
+                    </div>
                 </article>
             </div>
         );

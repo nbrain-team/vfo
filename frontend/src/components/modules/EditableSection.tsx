@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import SafeHtml from './SafeHtml';
 
 interface EditableSectionProps {
     title?: string;
@@ -94,7 +95,7 @@ const EditableSection: React.FC<EditableSectionProps> = ({ title, content, onSav
             )}
             {title && <h3>{title}</h3>}
             {isHtml && typeof content === 'string' ? (
-                <div dangerouslySetInnerHTML={{ __html: content }} />
+                <SafeHtml html={content} />
             ) : (
                 <div>{content}</div>
             )}

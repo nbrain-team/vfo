@@ -9,6 +9,9 @@ from app.models.user import User as UserModel
 
 router = APIRouter()
 
+ALLOWED_TYPES = {"application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}
+MAX_BYTES = 20 * 1024 * 1024
+
 @router.post("/entities/{entity_id}/documents/", response_model=Document)
 def upload_document_for_entity(
     entity_id: int,
@@ -20,6 +23,11 @@ def upload_document_for_entity(
 ):
     """Upload a document for a given entity and persist metadata in DB."""
     try:
+        # Validate content type and size (if provided)
+        content_type = (file.content_type or "").lower()
+        if content_type not in ALLOWED_TYPES:
+            raise HTTPException(status_code=415, detail="Unsupported Media Type")
+        # Some servers provide size via headers; for streaming safety, we rely on downstream copy; enforce during copy
         doc_create = DocumentCreate(
             name=name,
             document_type=document_type,

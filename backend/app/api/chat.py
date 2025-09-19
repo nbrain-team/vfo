@@ -73,6 +73,9 @@ async def chat_with_documents(
         logger.error(f"Error in chat endpoint: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+ALLOWED_TYPES = {"application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}
+MAX_BYTES = 20 * 1024 * 1024
+
 @router.post("/upload-and-index")
 async def upload_and_index_document(
     file: UploadFile = File(...),
@@ -85,8 +88,15 @@ async def upload_and_index_document(
     Upload a document and index it in the vector database.
     """
     try:
-        # Read file content
+        # Validate content type
+        content_type = (file.content_type or "").lower()
+        if content_type not in ALLOWED_TYPES:
+            raise HTTPException(status_code=415, detail="Unsupported Media Type")
+
+        # Read file content with size guard (for current processing design)
         file_content = await file.read()
+        if len(file_content) > MAX_BYTES:
+            raise HTTPException(status_code=413, detail="File too large")
         file_name = file.filename
         file_type = file_name.split('.')[-1] if '.' in file_name else 'txt'
         
