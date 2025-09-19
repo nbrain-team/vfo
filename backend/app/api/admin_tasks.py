@@ -1,8 +1,12 @@
 from fastapi import APIRouter, Header, HTTPException, Depends
 import os
 from sqlalchemy import text
-from app.db.database import engine
+from sqlalchemy.orm import Session
+from app.db.database import engine, get_db
 from app.api.api import get_current_user
+from app.models.user import User as UserModel
+from app.core.security import encrypt_secret
+import base64
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -65,3 +69,49 @@ def run_crm_advisor_link_migration(current_user = Depends(get_current_user)):
         return {"ok": True, "message": "Matters.advisor_id ensured"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Migration failed: {e}")
+
+
+@router.post("/migrations/backfill-google-token-encryption")
+def backfill_google_token_encryption(current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Encrypt existing plaintext google_refresh_token values into *_enc/iv and null the plaintext.
+
+    Idempotent: skips rows already populated.
+    Requires APP_DEK to be set to a strong 32-byte value in the environment.
+    """
+    if getattr(current_user, "role", None) not in ["Admin", "SuperAdmin"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    app_dek = os.getenv("APP_DEK")
+    if not app_dek or len(app_dek) < 32:
+        raise HTTPException(status_code=500, detail="APP_DEK not configured or too short (>=32 bytes required)")
+
+    users = (
+        db.query(UserModel)
+        .filter(UserModel.google_refresh_token.isnot(None))
+        .all()
+    )
+
+    processed = 0
+    skipped = 0
+    for u in users:
+        try:
+            if getattr(u, "google_refresh_token_enc", None):
+                skipped += 1
+                continue
+            raw = u.google_refresh_token
+            if not raw:
+                skipped += 1
+                continue
+            ciphertext, iv = encrypt_secret(raw)
+            u.google_refresh_token_enc = base64.b64encode(ciphertext).decode("utf-8")
+            u.google_refresh_token_iv = base64.b64encode(iv).decode("utf-8")
+            # Null out plaintext
+            u.google_refresh_token = None
+            db.add(u)
+            processed += 1
+        except Exception:
+            db.rollback()
+            raise
+
+    db.commit()
+    return {"ok": True, "processed": processed, "skipped": skipped}
