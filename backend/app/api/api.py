@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
@@ -15,7 +15,7 @@ from typing import List
 
 
 router = APIRouter()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token", auto_error=False)
 
 # Simple in-memory rate limiting state (per-process best effort)
 from collections import defaultdict, deque
@@ -35,14 +35,19 @@ def _allow_attempt(key: str, bucket: defaultdict, limit: int = 10, window_second
     return True
 
 # Dependency
-def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+def get_current_user(request: Request, db: Session = Depends(get_db), token: str | None = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
+        # Prefer HttpOnly cookie-based session over Authorization header
+        cookie_token = request.cookies.get("session")
+        effective_token = token or cookie_token
+        if not effective_token:
+            raise credentials_exception
+        payload = jwt.decode(effective_token, settings.SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
         if email is None:
             raise credentials_exception
@@ -54,7 +59,7 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
     return user
 
 @router.post("/token")
-def login_for_access_token(request: Request, db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
+def login_for_access_token(response: Response, request: Request, db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
     # Brute force protection: 10 wrong attempts per 15 minutes per IP and per username
     client_ip = request.client.host if request.client else "unknown"
     username = form_data.username or "unknown"
@@ -77,14 +82,26 @@ def login_for_access_token(request: Request, db: Session = Depends(get_db), form
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
-    # Include user's name and role in the response
+    # Set HttpOnly secure session cookie
+    response.set_cookie(
+        key="session",
+        value=access_token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+    )
+    # Respond without access token to avoid client storage
     return {
-        "access_token": access_token, 
-        "token_type": "bearer",
         "user_name": user.name if hasattr(user, 'name') and user.name else user.email.split('@')[0],
         "role": user.role if hasattr(user, 'role') else "Client",
         "user_id": user.id
     }
+
+@router.post("/logout")
+def logout(response: Response):
+    response.delete_cookie("session")
+    return {"ok": True}
 
 @router.get("/users/me", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_user)):

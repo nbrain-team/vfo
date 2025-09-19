@@ -42,6 +42,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
     const role = (localStorage.getItem('role') || 'Admin') as 'SuperAdmin'|'Admin'|'Staff'|'Client';
 
+    const logout = async () => {
+        try {
+            await api.post('/logout');
+        } catch {}
+        localStorage.removeItem('user_name');
+        localStorage.removeItem('role');
+        localStorage.removeItem('user_email');
+        window.location.href = '/login';
+    };
+
     return (
         <div className="main-layout">
             <div className={`sidebar ${isExpanded ? 'expanded' : ''}`}>

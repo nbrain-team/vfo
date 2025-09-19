@@ -57,6 +57,18 @@ def upgrade():
             conn.commit()
         except Exception:
             pass
+
+        # Encrypted fields scaffolding
+        try:
+            conn.execute(text("ALTER TABLE users ADD COLUMN google_refresh_token_enc TEXT"))
+            conn.commit()
+        except Exception:
+            pass
+        try:
+            conn.execute(text("ALTER TABLE users ADD COLUMN google_refresh_token_iv TEXT"))
+            conn.commit()
+        except Exception:
+            pass
             
         # Make hashed_password nullable for Google-only users
         try:

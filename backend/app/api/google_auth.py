@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Response
 from sqlalchemy.orm import Session
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -21,7 +21,7 @@ print(f"Google Client ID configured: {bool(GOOGLE_CLIENT_ID)}")
 print(f"Google Client ID: {GOOGLE_CLIENT_ID[:20]}..." if GOOGLE_CLIENT_ID else "Google Client ID: None")
 
 @router.post("/google")
-async def google_auth(credential_data: dict, db: Session = Depends(get_db)):
+async def google_auth(credential_data: dict, db: Session = Depends(get_db), response: Response = None):
     """Authenticate user with Google OAuth2"""
     try:
         # Verify the Google token
@@ -80,27 +80,27 @@ async def google_auth(credential_data: dict, db: Session = Depends(get_db)):
                 user.name = name
             db.commit()
         
-        # Create access token
+        # Create access token and set HttpOnly cookie
         access_token = create_access_token(
             data={"sub": user.email, "user_id": user.id}
         )
+        if response is not None:
+            response.set_cookie(
+                key="session",
+                value=access_token,
+                httponly=True,
+                secure=True,
+                samesite="lax",
+                max_age=60 * 60 * 8,
+            )
         
-        # Check if user has calendar tokens
-        response_data = {
-            "access_token": access_token,
-            "token_type": "bearer",
+        # Respond without access token or provider tokens
+        return {
             "user_name": user.name,
             "email": user.email,
             "role": user.role or "Client",
             "picture_url": user.picture_url
         }
-        
-        # Include Google tokens if available (for calendar access)
-        if user.google_access_token:
-            response_data["google_access_token"] = user.google_access_token
-            response_data["google_refresh_token"] = user.google_refresh_token
-        
-        return response_data
         
     except HTTPException:
         raise

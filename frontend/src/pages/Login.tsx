@@ -22,11 +22,10 @@ const Login: React.FC = () => {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 }
             });
-            localStorage.setItem('access_token', response.data.access_token);
             // Store user name from response, fallback to email prefix
             const userName = response.data.user_name || email.split('@')[0];
             localStorage.setItem('user_name', userName);
-            // Store role from response
+            // Store role from response (session cookie holds auth)
             const role = response.data.role || 'Client';
             localStorage.setItem('role', role);
             localStorage.setItem('user_id', response.data.user_id);
@@ -46,8 +45,7 @@ const Login: React.FC = () => {
                 credential: credentialResponse.credential
             });
             
-            // Store the tokens and user info
-            localStorage.setItem('access_token', response.data.access_token);
+            // Store the user info (session cookie holds auth)
             localStorage.setItem('user_name', response.data.user_name);
             localStorage.setItem('user_email', response.data.email);
             localStorage.setItem('role', response.data.role || 'Client');
@@ -159,7 +157,6 @@ const Login: React.FC = () => {
                         type="button"
                         className="button-outline"
                         onClick={() => {
-                            localStorage.setItem('access_token', 'mock_access_token');
                             localStorage.setItem('user_name', 'wyoming-client');
                             localStorage.setItem('role', 'Client');
                             navigate('/agent');

@@ -4,19 +4,9 @@ import axios from 'axios';
 const base = import.meta.env.VITE_API_BASE_URL || '';
 const apiClient = axios.create({
     baseURL: `${base}/api`,
+    withCredentials: true,
 });
 
-apiClient.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('access_token');
-        if (token) {
-            config.headers['Authorization'] = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
-);
+// No Authorization header; rely on HttpOnly session cookie
 
 export default apiClient; 

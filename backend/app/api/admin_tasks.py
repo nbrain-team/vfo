@@ -1,17 +1,15 @@
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Depends
 import os
 from sqlalchemy import text
 from app.db.database import engine
+from app.api.api import get_current_user
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 @router.post("/migrations/google-auth")
-def run_google_auth_migration(x_admin_token: str | None = Header(default=None)):
-    expected = os.getenv("ADMIN_TASKS_TOKEN", "")
-    if not expected:
-        raise HTTPException(status_code=500, detail="ADMIN_TASKS_TOKEN not configured")
-    if not x_admin_token or x_admin_token != expected:
+def run_google_auth_migration(current_user = Depends(get_current_user)):
+    if getattr(current_user, "role", None) not in ["Admin", "SuperAdmin"]:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     from app.db.migrations.add_google_auth_fields import upgrade
@@ -23,11 +21,8 @@ def run_google_auth_migration(x_admin_token: str | None = Header(default=None)):
 
 
 @router.post("/migrations/advisor-fields")
-def run_advisor_fields_migration(x_admin_token: str | None = Header(default=None)):
-    expected = os.getenv("ADMIN_TASKS_TOKEN", "")
-    if not expected:
-        raise HTTPException(status_code=500, detail="ADMIN_TASKS_TOKEN not configured")
-    if not x_admin_token or x_admin_token != expected:
+def run_advisor_fields_migration(current_user = Depends(get_current_user)):
+    if getattr(current_user, "role", None) not in ["Admin", "SuperAdmin"]:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     try:
@@ -42,11 +37,8 @@ def run_advisor_fields_migration(x_admin_token: str | None = Header(default=None
 
 
 @router.post("/migrations/entity-extensions")
-def run_entity_extensions_migration(x_admin_token: str | None = Header(default=None)):
-    expected = os.getenv("ADMIN_TASKS_TOKEN", "")
-    if not expected:
-        raise HTTPException(status_code=500, detail="ADMIN_TASKS_TOKEN not configured")
-    if not x_admin_token or x_admin_token != expected:
+def run_entity_extensions_migration(current_user = Depends(get_current_user)):
+    if getattr(current_user, "role", None) not in ["Admin", "SuperAdmin"]:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     try:
@@ -62,11 +54,8 @@ def run_entity_extensions_migration(x_admin_token: str | None = Header(default=N
 
 
 @router.post("/migrations/crm-advisor-link")
-def run_crm_advisor_link_migration(x_admin_token: str | None = Header(default=None)):
-    expected = os.getenv("ADMIN_TASKS_TOKEN", "")
-    if not expected:
-        raise HTTPException(status_code=500, detail="ADMIN_TASKS_TOKEN not configured")
-    if not x_admin_token or x_admin_token != expected:
+def run_crm_advisor_link_migration(current_user = Depends(get_current_user)):
+    if getattr(current_user, "role", None) not in ["Admin", "SuperAdmin"]:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     try:
