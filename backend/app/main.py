@@ -10,10 +10,22 @@ from app.api.google_auth import router as google_auth_router
 from app.api.test_config import router as test_config_router
 from app.api.admin_tasks import router as admin_tasks_router
 from app.api.superadmin import router as superadmin_router
+from starlette.middleware.cors import CORSMiddleware as _
+from starlette.middleware.base import BaseHTTPMiddleware
+import uuid
+import sentry_sdk
+from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+from sqlalchemy import text
 from starlette.middleware.base import BaseHTTPMiddleware
 import uuid
 
 app = FastAPI(title="LIFTed VFO API", version="1.0.0")
+
+# Optional Sentry integration
+SENTRY_DSN = os.getenv("SENTRY_DSN")
+if SENTRY_DSN:
+    sentry_sdk.init(dsn=SENTRY_DSN, traces_sample_rate=0.05)
+    app.add_middleware(SentryAsgiMiddleware)
 
 # Configure CORS
 allowed_origins = [
@@ -43,6 +55,20 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(RequestIDMiddleware)
 
+# Security headers (basic hardening; CSP report-only suggested at edge)
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        # HSTS for HTTPS-only environments
+        if request.url.scheme == "https":
+            response.headers.setdefault("Strict-Transport-Security", "max-age=15552000; includeSubDomains")
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
+
 @app.on_event("startup")
 def on_startup():
     init_db()
@@ -66,5 +92,11 @@ def healthz():
 
 @app.get("/readyz")
 def readyz():
-    # Could add simple DB connectivity check here in the future
-    return {"status": "ready"}
+    # DB ping for readiness
+    try:
+        from app.db.database import engine
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        return {"status": "ready"}
+    except Exception:
+        return {"status": "degraded"}
