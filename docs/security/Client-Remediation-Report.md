@@ -14,15 +14,15 @@ This report addresses the findings and acceptance criteria outlined in “Lifted
 ### Priority 0
 
 #### 0.1 Replace browser tokens with secure cookie sessions
-- Status: {{STATUS_0_1}}
-- What we changed: {{WHAT_0_1}}
+- Status: In Progress
+- What we changed: Switched auth to HttpOnly cookie sessions; frontend uses withCredentials; removed Authorization header usage. Logged-in endpoints require cookie. Logout clears cookie.
 - Evidence: evidence/A1-browser-tokens.md
 - Validation: {{VALIDATION_0_1}}
 - Notes/Follow-up: {{NOTES_0_1}}
 
 #### 0.2 Encrypt provider refresh tokens at rest
-- Status: {{STATUS_0_2}}
-- What we changed: {{WHAT_0_2}}
+- Status: In Progress
+- What we changed: Added encrypted columns and admin backfill/drop endpoints. Awaiting APP_DEK and staging backfill run, then drop plaintext.
 - Evidence: evidence/A2-token-encryption.md
 - Validation: {{VALIDATION_0_2}}
 - Notes/Follow-up: {{NOTES_0_2}}
@@ -74,8 +74,8 @@ This report addresses the findings and acceptance criteria outlined in “Lifted
 ### Priority 1
 
 #### 1.1 Brute force protection and admin 2FA
-- Status: {{STATUS_1_1}}
-- Changes: {{WHAT_1_1}}
+- Status: In Progress
+- Changes: Added rate limiting on /api/token and TOTP enforcement when enabled; SuperAdmin enrollment endpoint; frontend OTP flow
 - Evidence: evidence/P1-1.1-bruteforce-2fa.md
 - Validation: {{VALIDATION_1_1}}
 - Notes: {{NOTES_1_1}}
@@ -95,8 +95,8 @@ This report addresses the findings and acceptance criteria outlined in “Lifted
 - Notes: {{NOTES_1_3}}
 
 #### 1.4 Security headers and CSP at the edge
-- Status: {{STATUS_1_4}}
-- Changes: {{WHAT_1_4}}
+- Status: Partial
+- Changes: Added app-level security headers; edge CSP report-only ready with Render steps
 - Evidence: evidence/P1-1.4-csp.md
 - Validation: {{VALIDATION_1_4}}
 - Notes: {{NOTES_1_4}}
