@@ -12,3 +12,12 @@ Target remediation:
 - Backfill and null plaintext columns
 - Drop plaintext columns after verification
 
+Runbook:
+1) Ensure `APP_DEK` (>=32 bytes) in Render backend env.
+2) Login as Admin/SuperAdmin; run backfill:
+   - POST `/api/admin/migrations/backfill-google-token-encryption`
+   - Verify response `{ processed, skipped }`
+3) Inspect DB: plaintext NULL; enc/iv populated.
+4) Drop plaintext column:
+   - POST `/api/admin/migrations/drop-plaintext-google-refresh-token`
+

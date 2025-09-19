@@ -115,3 +115,18 @@ def backfill_google_token_encryption(current_user = Depends(get_current_user), d
 
     db.commit()
     return {"ok": True, "processed": processed, "skipped": skipped}
+
+
+@router.post("/migrations/drop-plaintext-google-refresh-token")
+def drop_plaintext_google_refresh_token(current_user = Depends(get_current_user)):
+    """Drop the plaintext google_refresh_token column after verifying backfill."""
+    if getattr(current_user, "role", None) not in ["Admin", "SuperAdmin"]:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("ALTER TABLE users DROP COLUMN IF EXISTS google_refresh_token"))
+            conn.commit()
+        return {"ok": True, "message": "Dropped plaintext google_refresh_token column"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to drop column: {e}")
