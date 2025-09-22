@@ -3,6 +3,7 @@ import logging
 import os
 import uuid
 from fastapi import Request, HTTPException
+from typing import Optional
 from ipaddress import ip_network, ip_address
 
 logger = logging.getLogger("audit")
@@ -19,7 +20,7 @@ def _mask_value(value: str) -> str:
         return value[:2] + "***" + value[-2:]
     return "***"
 
-def log_admin_action(request: Request, user, action: str, detail: dict | None = None) -> None:
+def log_admin_action(request: Request, user, action: str, detail: Optional[dict] = None) -> None:
     try:
         request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
         detail = detail or {}

@@ -12,7 +12,7 @@ from datetime import timedelta, datetime
 from app.models.user import User as UserModel
 from app.models.crm import Contact as ContactModel, Matter as MatterModel
 from app.models.intake import Intake as IntakeModel
-from typing import List
+from typing import List, Optional
 
 
 router = APIRouter()
@@ -36,7 +36,7 @@ def _allow_attempt(key: str, bucket: defaultdict, limit: int = 10, window_second
     return True
 
 # Dependency
-def get_current_user(request: Request, db: Session = Depends(get_db), token: str | None = Depends(oauth2_scheme)):
+def get_current_user(request: Request, db: Session = Depends(get_db), token: Optional[str] = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -65,7 +65,7 @@ def login_for_access_token(
     request: Request,
     db: Session = Depends(get_db),
     form_data: OAuth2PasswordRequestForm = Depends(),
-    otp: str | None = Form(default=None),
+    otp: Optional[str] = Form(default=None),
 ):
     # Brute force protection: 10 wrong attempts per 15 minutes per IP and per username
     client_ip = request.client.host if request.client else "unknown"
@@ -284,7 +284,7 @@ def create_intake(payload: IntakeCreate, db: Session = Depends(get_db), current_
     return db_obj
 
 @router.get("/intakes/", response_model=List[Intake])
-def list_intakes(matter_id: int | None = None, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+def list_intakes(matter_id: Optional[int] = None, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     from app.models.intake import Intake as IntakeModel
     q = db.query(IntakeModel)
     if matter_id:
@@ -304,7 +304,7 @@ def upsert_field_mapping(mapping: FieldMapping, db: Session = Depends(get_db), c
     db.refresh(db_obj)
     return db_obj
 
-@router.get("/field-mappings", response_model=FieldMapping | None)
+@router.get("/field-mappings", response_model=Optional[FieldMapping])
 def get_field_mapping(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     from app.models.intake import FieldMapping as FieldMappingModel
     return db.query(FieldMappingModel).first()
@@ -313,7 +313,7 @@ def get_field_mapping(db: Session = Depends(get_db), current_user: UserModel = D
 @router.get("/pipeline/stats")
 def get_pipeline_stats(
     period: str = "month",
-    advisor_id: int | None = None,
+    advisor_id: Optional[int] = None,
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user)
 ):
@@ -334,7 +334,7 @@ def get_pipeline_stats(
         start_date = datetime(2000, 1, 1)  # inception
     
     # Determine effective advisor scope
-    effective_advisor_id: int | None = None
+    effective_advisor_id: Optional[int] = None
     try:
         if getattr(current_user, "role", None) == "Advisor":
             effective_advisor_id = current_user.id
@@ -436,8 +436,8 @@ def public_lead_submit(payload: PublicLead, db: Session = Depends(get_db)):
 # --- Client appointment request ---
 @router.post("/clients/request-appointment")
 def client_request_appointment(
-    desired_time: str | None = None,
-    notes: str | None = None,
+    desired_time: Optional[str] = None,
+    notes: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user)
 ):
