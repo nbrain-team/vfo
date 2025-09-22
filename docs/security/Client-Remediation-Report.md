@@ -97,8 +97,8 @@ This report addresses the findings and acceptance criteria outlined in “Lifted
 - Notes: {{NOTES_1_2}}
 
 #### 1.3 Schema migrations via Alembic
-- Status: Not Started
-- Changes: Planned: Introduce Alembic versioned migrations and remove startup DDL.
+- Status: In Progress
+- Changes: Alembic scaffolding added; runtime DDL gated in prod; migrations run on start via render.yaml. Next: generate baseline from prod schema and use versioned migrations for future changes.
 - Evidence: evidence/P1-1.3-alembic.md
 - Validation: {{VALIDATION_1_3}}
 - Notes: {{NOTES_1_3}}

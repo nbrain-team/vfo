@@ -5,3 +5,5 @@ echo "[deploy] Running Alembic migrations..."
 alembic upgrade head
 echo "[deploy] Migrations complete."
 
+
+

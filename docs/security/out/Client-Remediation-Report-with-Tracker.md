@@ -97,8 +97,8 @@ This report addresses the findings and acceptance criteria outlined in “Lifted
 - Notes: {{NOTES_1_2}}
 
 #### 1.3 Schema migrations via Alembic
-- Status: Not Started
-- Changes: Planned: Introduce Alembic versioned migrations and remove startup DDL.
+- Status: In Progress
+- Changes: Alembic scaffolding added; runtime DDL gated in prod; migrations run on start via render.yaml. Next: generate baseline from prod schema and use versioned migrations for future changes.
 - Evidence: evidence/P1-1.3-alembic.md
 - Validation: {{VALIDATION_1_3}}
 - Notes: {{NOTES_1_3}}
@@ -171,7 +171,7 @@ This report addresses the findings and acceptance criteria outlined in “Lifted
 | A8 | P1 | Remove hardcoded Google Client ID fallback | Require VITE_GOOGLE_CLIENT_ID; fail build if missing; no literals in repo | No literal client IDs; build fails without env | frontend/src/providers/GoogleAuthProvider.tsx; frontend/src/pages/TestGoogleAuth.tsx | Completed |  |  | evidence/A8-google-client-id.md |  |
 | 1.1 | P1 | Brute force protection and admin 2FA | Rate limit /token per user/IP; enable WebAuthn/TOTP for admin | 10 wrong attempts/15m block; admin can enroll 2FA | backend/app/api/api.py; backend/app/api/superadmin.py; frontend admin UI | In Progress |  |  | evidence/P1-1.1-bruteforce-2fa.md |  |
 | 1.2 | P1 | RAG and AI safety guardrails | Pin system prompt; tool allowlist; source citations; tests against prompt injection | Exfiltration test fails; answers cite sources | backend/app/services/rag_chat.py; tests | Not started |  |  | evidence/P1-1.2-rag-guardrails.md |  |
-| 1.3 | P1 | Schema migrations via Alembic | Introduce Alembic; remove startup DDL; versioned scripts | alembic/versions populated; app starts without DDL | backend/app/db/migrations (new alembic); backend/app/db/db_init.py | Not started |  |  | evidence/P1-1.3-alembic.md |  |
+| 1.3 | P1 | Schema migrations via Alembic | Introduce Alembic; remove startup DDL; versioned scripts | alembic/versions populated; app starts without DDL | backend/alembic/*; backend/app/db/db_init.py | In Progress |  |  | evidence/P1-1.3-alembic.md |  |
 | 1.4 | P1 | Security headers and CSP at edge | Serve via proxy with CSP,HSTS,XCTO,Referrer-Policy; start report-only; enforce | Report-only zero violations; strict CSP enabled | Render/NGINX/edge config; backend/app/main.py headers added; frontend/public/index.html if meta used | Partial |  |  | evidence/P1-1.4-csp.md | App-level headers added; edge CSP pending |
 | 1.5 | P1 | Observability health and error reporting | /healthz /readyz; structured JSON logs with request IDs; Sentry | Probes <50ms; errors captured with IDs; redactions applied | backend/app/main.py; logging config; Sentry setup | Completed |  |  | evidence/P1-1.5-observability.md |  |
 | 2.1 | P2 | PII masking and selective encryption | Identify sensitive fields; mask in logs/admin; encrypt targeted columns | Sensitive fields masked; policy/lint checks present | backend logging; admin UIs; schemas | In Progress |  |  | evidence/P2-2.1-pii-masking.md |  |
